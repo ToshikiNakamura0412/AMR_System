@@ -50,7 +50,7 @@ private:
     // ----- 引数あり関数 -----
     // 各種コールバック関数
     void local_goal_callback(const geometry_msgs::PointStamped::ConstPtr& msg);
-    void ob_poses_callback(const geometry_msgs::PoseArray::ConstPtr& msg);
+    void obs_poses_callback(const geometry_msgs::PoseArray::ConstPtr& msg);
 
     // その他の関数
     void   roomba_control(const double velocity, const double yawrate);                                         // Roombaの制御入力
@@ -91,8 +91,8 @@ private:
     double yawrate_reso_;       // 旋回速度解像度 [rad/s]
     double dt_;                 // 微小時間 [s]
     double predict_time_;       // 軌跡予測時間 [s]
-    double predict_time1_;       // 軌跡予測時間 [s]
-    double predict_time2_;       // 軌跡予測時間 [s]
+    double predict_time1_;      // 軌跡予測時間 [s]
+    double predict_time2_;      // 軌跡予測時間 [s]
     double roomba_radius_;      // Roombaのサイズ(半径) [m]
     double radius_margin_;      // 半径の余白 [m]（計算用）
     double radius_margin1_;     // 半径の余白 [m]（平常時）
@@ -102,7 +102,7 @@ private:
 
     // msgの受け取り判定用
     bool flag_local_goal_ = false;
-    bool flag_ob_poses_   = false;
+    bool flag_obs_poses_  = false;
 
     // mode記録用
     std::vector<double> mode_log_;
@@ -127,7 +127,7 @@ private:
 
     // Subscriber
     ros::Subscriber sub_local_goal_;
-    ros::Subscriber sub_ob_poses_;
+    ros::Subscriber sub_obs_poses_;
 
     // Publisher
     ros::Publisher pub_cmd_speed_;
@@ -136,7 +136,7 @@ private:
 
     // pose関連
     geometry_msgs::PointStamped local_goal_; // local path用の目標位置
-    geometry_msgs::PoseArray    ob_poses_;   // 障害物のポーズの配列
+    geometry_msgs::PoseArray    obs_poses_;  // 障害物のポーズの配列
 
     // tf
     tf2_ros::Buffer tf_buffer_;

@@ -41,7 +41,7 @@ DWA::DWA():private_nh_("~")
 
     // Subscriber
     sub_local_goal_ = nh_.subscribe("/local_goal", 1, &DWA::local_goal_callback, this);
-    sub_ob_poses_   = nh_.subscribe("/local_map/obstacle", 1, &DWA::ob_poses_callback, this);
+    sub_obs_poses_   = nh_.subscribe("/local_map/obstacle", 1, &DWA::obs_poses_callback, this);
 
     // Publisher
     pub_cmd_speed_    = nh_.advertise<roomba_500driver_meiji::RoombaCtrl>("/roomba/control", 1);
@@ -67,11 +67,11 @@ void DWA::local_goal_callback(const geometry_msgs::PointStamped::ConstPtr& msg)
     tf2::doTransform(*msg, local_goal_, transform);
 }
 
-// ob_posesのコールバック関数
-void DWA::ob_poses_callback(const geometry_msgs::PoseArray::ConstPtr& msg)
+// obs_posesのコールバック関数
+void DWA::obs_poses_callback(const geometry_msgs::PoseArray::ConstPtr& msg)
 {
-    ob_poses_ = *msg;
-    flag_ob_poses_ = true;
+    obs_poses_ = *msg;
+    flag_obs_poses_ = true;
 }
 
 // 唯一main文で実行する関数
@@ -100,7 +100,7 @@ void DWA::process()
 // ゴールに着くまでTrueを返す
 bool DWA::can_move()
 {
-    if(!(flag_local_goal_ && flag_ob_poses_)) return false; // msg受信済みか
+    if(!(flag_local_goal_ && flag_obs_poses_)) return false; // msg受信済みか
 
     const double dx = local_goal_.point.x;
     const double dy = local_goal_.point.y;
@@ -207,7 +207,7 @@ void DWA::change_mode()
 
     if(mode_avg < 1.5) // 平常時
     {
-        mode_          = 1;
+        mode_           = 1;
         max_vel_        = max_vel1_;
         max_yawrate_    = max_yawrate1_;
         radius_margin_  = radius_margin1_;
@@ -218,7 +218,7 @@ void DWA::change_mode()
     }
     else // 減速時
     {
-        mode_          = 2;
+        mode_           = 2;
         max_vel_        = max_vel2_;
         max_yawrate_    = max_yawrate2_;
         radius_margin_  = radius_margin2_;
@@ -326,11 +326,11 @@ double DWA::calc_dist_eval(const std::vector<State>& traj)
     // pathの点と障害物のすべての組み合わせを探索
     for(const auto& state : traj)
     {
-        for(const auto& ob_pose : ob_poses_.poses)
+        for(const auto& obs_pose : obs_poses_.poses)
         {
             // pathのうちの１点と障害物の距離を計算
-            const double dx   = ob_pose.position.x - state.x;
-            const double dy   = ob_pose.position.y - state.y;
+            const double dx   = obs_pose.position.x - state.x;
+            const double dy   = obs_pose.position.y - state.y;
             const double dist = hypot(dx, dy);
 
             // 壁に衝突したパスを評価
