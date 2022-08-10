@@ -1,4 +1,4 @@
-#include "obstacle_detector/obstacle_detector.h"
+#include "obstacle_scanner/obstacle_scanner.h"
 
 // コンストラクタ
 LocalMapCreator::LocalMapCreator():private_nh_("~")
@@ -43,7 +43,28 @@ void LocalMapCreator::laser_callback(const sensor_msgs::LaserScan::ConstPtr& msg
 }
 
 // 障害物検知
-void LocalMapCreator::scan_ob
+void LocalMapCreator::scan_obstacle()
+{
+    std::cout << "scan obstacle" << std::endl;
+
+    obs_poses_.clear();
+
+    for(int i=0; i<laser_.ranges.size(); i+=laser_step_)
+    {
+        double dist  = laser_.ranges[i];
+        double angle = i * laser_.angle_increment + laser_.angle_min;
+
+        if(is_ignore_angle(angle)) continue;
+
+        geometry_msgs::Pose obs_pose; // 障害物のポーズ
+        obs_pose.position.x = dist*cos(angle);
+        obs_pose.position.y = dist*sin(angle);
+
+        obs_poses_.push_back(obs_pose);
+    }
+
+    std::cout << "  [scan obstacle] OK" << std::endl;
+}
 
 // マップの初期化(全グリッドを空きにする)
 void LocalMapCreator::init_map()
@@ -51,9 +72,11 @@ void LocalMapCreator::init_map()
     std::cout << "\tinitialize map" << std::endl;
 
     local_map_.data.clear();
+    
     int size = local_map_.info.width * local_map_.info.height;
     for(int i=0; i<size; i++)
         local_map_.data.push_back(0); //「空き」にする
+
     std::cout << "\t  [initialize map] OK " << std::endl;
 }
 
@@ -63,56 +86,63 @@ void LocalMapCreator::update_map()
     std::cout << "\n======== Update Map =========" << std::endl;
 
     init_map(); // マップの初期化
-    // std::vector<std::vector<PrecastDB>> precast = precasting(); // プレキャスティング
-    precasting(); // プレキャスティング
 
-    for(int i=0; i<laser_.ranges.size(); i+=laser_step_)
+    for(const auto& obs_pose : obs_poses_)
     {
-        // std::cout << "i: " << i << std::endl;
-        try
-        {
-            double dist = laser_.ranges[i];
-            double angle = i * laser_.angle_increment + laser_.angle_min;
-            if(is_ignore_angle(angle)) continue;
-            angle = optimize_angle(angle);
-            int angle_id = int(floor(angle/yaw_reso_));
 
-            // std::cout << "\n\tangle_id: " << angle_id << std::endl;
-            std::vector<PrecastDB> &gridlist = precast_.at(angle_id);
-            // std::cout << "\tafter precast -> gridlist" << std::endl;
-
-            double x = dist*cos(angle);
-            double y = dist*sin(angle);
-            int grid_index = xy_to_grid_index(x, y);
-
-            for(const auto& grid : gridlist)
-            {
-                if(grid.dist > dist)
-                {
-                    // std::cout << "\n\tgrid.grid_index: " << grid.grid_index << std::endl;
-                    local_map_.data[grid.grid_index] = -1; //「未知」にする
-                    // std::cout << "\t-1 -> data " << std::endl;
-                }
-            }
-            local_map_.data[grid_index] = 100; //「占有」にする
-            // std::cout << "\t100 -> data " << std::endl;
-        }
-        catch(std::bad_alloc)
-        {
-            ROS_WARN_STREAM("failed to create a array.");
-            exit(0);
-        }
-        catch(std::out_of_range)
-        {
-            ROS_WARN_STREAM("failed to access a array.");
-            exit(1);
-        }
-        catch(...)
-        {
-            ROS_WARN_STREAM("others");
-            exit(-1);
-        }
     }
+
+
+    // // std::vector<std::vector<PrecastDB>> precast = precasting(); // プレキャスティング
+    // precasting(); // プレキャスティング
+
+    // for(int i=0; i<laser_.ranges.size(); i+=laser_step_)
+    // {
+    //     // std::cout << "i: " << i << std::endl;
+    //     try
+    //     {
+    //         double dist = laser_.ranges[i];
+    //         double angle = i * laser_.angle_increment + laser_.angle_min;
+    //         if(is_ignore_angle(angle)) continue;
+    //         angle = optimize_angle(angle);
+    //         int angle_id = int(floor(angle/yaw_reso_));
+
+    //         // std::cout << "\n\tangle_id: " << angle_id << std::endl;
+    //         std::vector<PrecastDB> &gridlist = precast_.at(angle_id);
+    //         // std::cout << "\tafter precast -> gridlist" << std::endl;
+
+    //         double x = dist*cos(angle);
+    //         double y = dist*sin(angle);
+    //         int grid_index = xy_to_grid_index(x, y);
+
+    //         for(const auto& grid : gridlist)
+    //         {
+    //             if(grid.dist > dist)
+    //             {
+    //                 // std::cout << "\n\tgrid.grid_index: " << grid.grid_index << std::endl;
+    //                 local_map_.data[grid.grid_index] = -1; //「未知」にする
+    //                 // std::cout << "\t-1 -> data " << std::endl;
+    //             }
+    //         }
+    //         local_map_.data[grid_index] = 100; //「占有」にする
+    //         // std::cout << "\t100 -> data " << std::endl;
+    //     }
+    //     catch(std::bad_alloc)
+    //     {
+    //         ROS_WARN_STREAM("failed to create a array.");
+    //         exit(0);
+    //     }
+    //     catch(std::out_of_range)
+    //     {
+    //         ROS_WARN_STREAM("failed to access a array.");
+    //         exit(1);
+    //     }
+    //     catch(...)
+    //     {
+    //         ROS_WARN_STREAM("others");
+    //         exit(-1);
+    //     }
+    // }
     std::cout << "------ Update Map -> OK -------\n" << std::endl;
 }
 

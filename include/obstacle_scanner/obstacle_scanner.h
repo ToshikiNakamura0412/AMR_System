@@ -1,9 +1,5 @@
-/*
-Ray casting 2D grid map
-*/
-
-#ifndef OBSTACLE_DETECTOR_H
-#define OBSTACLE_DETECTOR_H
+#ifndef OBSTACLE_SCANNER_H
+#define OBSTACLE_SCANNER_H
 
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>

@@ -139,7 +139,7 @@ include
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/second_challenge_toshiki_node.cpp)
-add_executable(obstacle_detector2  src/obstacle_detector_main.cpp  src/obstacle_detector.cpp)
+add_executable(obstacle_scanner2  src/obstacle_scanner_main.cpp  src/obstacle_scanner.cpp)
 add_executable(local_path_planner2 src/local_path_planner_main.cpp src/local_path_planner.cpp)
 
 ## Rename C++ executable without prefix
@@ -151,12 +151,12 @@ add_executable(local_path_planner2 src/local_path_planner_main.cpp src/local_pat
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(obstacle_detector2  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(obstacle_scanner2  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(local_path_planner2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
-target_link_libraries(obstacle_detector2  ${catkin_LIBRARIES})
+target_link_libraries(obstacle_scanner2  ${catkin_LIBRARIES})
 target_link_libraries(local_path_planner2 ${catkin_LIBRARIES})
 
 #############
