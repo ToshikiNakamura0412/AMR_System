@@ -1,6 +1,6 @@
 # パスを可視化するかの設定用
-# is_visible: true
-is_visible: false
+is_visible: true
+# is_visible: false
 
 # 制御周波数
 hz: 10 # [Hz]

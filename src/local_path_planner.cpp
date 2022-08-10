@@ -40,8 +40,8 @@ DWA::DWA():private_nh_("~")
     private_nh_.getParam("weight_vel", weight_vel_);
 
     // Subscriber
-    sub_local_goal_ = nh_.subscribe("/local_goal2", 1, &DWA::local_goal_callback, this);
-    sub_obs_poses_   = nh_.subscribe("/local_map2/obstacle", 1, &DWA::obs_poses_callback, this);
+    sub_local_goal_ = nh_.subscribe("/local_goal", 1, &DWA::local_goal_callback, this);
+    sub_obs_poses_   = nh_.subscribe("/local_map/obstacle", 1, &DWA::obs_poses_callback, this);
 
     // Publisher
     pub_cmd_speed_    = nh_.advertise<roomba_500driver_meiji::RoombaCtrl>("/roomba2/control", 1);
@@ -374,4 +374,5 @@ void DWA::visualize_traj(const std::vector<State>& traj, const ros::Publisher& p
     }
 
     pub_local_path.publish(local_path);
+    std::cout << "publish!!" << std::endl;
 }
