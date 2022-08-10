@@ -66,7 +66,7 @@ void LocalMapCreator::scan_obstacle()
     std::cout << "  [scan obstacle] OK" << std::endl;
 }
 
-// マップの初期化(全グリッドを空きにする)
+// マップの初期化(全グリッドを未知にする)
 void LocalMapCreator::init_map()
 {
     std::cout << "\tinitialize map" << std::endl;
@@ -75,7 +75,7 @@ void LocalMapCreator::init_map()
     
     int size = local_map_.info.width * local_map_.info.height;
     for(int i=0; i<size; i++)
-        local_map_.data.push_back(0); //「空き」にする
+        local_map_.data.push_back(-1); //「未知」にする
 
     std::cout << "\t  [initialize map] OK " << std::endl;
 }
@@ -89,7 +89,19 @@ void LocalMapCreator::update_map()
 
     for(const auto& obs_pose : obs_poses_)
     {
+        double obs_x     = obs_pose.position.x;
+        double obs_y     = obs_pose.position.y;
+        double obs_dist  = hypot(obs_y, obs_x);
+        double obs_angle = atan2(obs_y, obs_x);
 
+        for(double dist=0.0; dist<obs_dist; dist+=map_reso_)
+        {
+            int grid_index = get_grid_index(dist, obs_angle);
+            local_map_.data[grid_index] = 0; //「空き」にする
+        }
+
+        int grid_index = xy_to_grid_index(obs_x, obs_y);
+        local_map_.data[grid_index] = 100; //「占有」にする
     }
 
 
@@ -234,7 +246,16 @@ double LocalMapCreator::optimize_angle(double angle)
     return angle;
 }
 
-// グリッドのインデックスを返す
+// 距離と角度からグリッドのインデックスを返す
+int LocalMapCreator::get_grid_index(double dist, double angle)
+{
+    double x = dist * cos(angle);
+    double y = dist * sin(angle);
+
+    return xy_to_grid_index(x, y);
+}
+
+// 座標からグリッドのインデックスを返す
 int LocalMapCreator::xy_to_grid_index(double x, double y)
 {
     int index_x = int(round((x - local_map_.info.origin.position.x) / local_map_.info.resolution));

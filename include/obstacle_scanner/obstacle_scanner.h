@@ -32,6 +32,7 @@ private:
 
     // その他の関数
     double optimize_angle(double angle);      // 適切な角度(-M_PI ~ M_PI)を返す
+    int get_grid_index(double dist, double angle) // グリッドのインデックスを返す
     int xy_to_grid_index(double x, double y); // グリッドのインデックスを返す
     bool is_ignore_angle(double angle);       // 柱の除去
 
