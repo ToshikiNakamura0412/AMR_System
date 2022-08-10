@@ -40,13 +40,13 @@ DWA::DWA():private_nh_("~")
     private_nh_.getParam("weight_vel", weight_vel_);
 
     // Subscriber
-    sub_local_goal_ = nh_.subscribe("/local_goal", 1, &DWA::local_goal_callback, this);
-    sub_obs_poses_   = nh_.subscribe("/local_map/obstacle", 1, &DWA::obs_poses_callback, this);
+    sub_local_goal_ = nh_.subscribe("/local_goal2", 1, &DWA::local_goal_callback, this);
+    sub_obs_poses_   = nh_.subscribe("/local_map2/obstacle", 1, &DWA::obs_poses_callback, this);
 
     // Publisher
-    pub_cmd_speed_    = nh_.advertise<roomba_500driver_meiji::RoombaCtrl>("/roomba/control", 1);
-    pub_predict_path_ = nh_.advertise<nav_msgs::Path>("/predict_local_paths", 1);
-    pub_optimal_path_ = nh_.advertise<nav_msgs::Path>("/optimal_local_path", 1);
+    pub_cmd_speed_    = nh_.advertise<roomba_500driver_meiji::RoombaCtrl>("/roomba2/control", 1);
+    pub_predict_path_ = nh_.advertise<nav_msgs::Path>("/predict_local_paths2", 1);
+    pub_optimal_path_ = nh_.advertise<nav_msgs::Path>("/optimal_local_path2", 1);
 }
 
 // local_goalのコールバック関数

@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <launch>
     <!-- yaml file path -->
-    <arg name="local_path_planner_settings" default="$(find chibi22_b)/config/param/local_path_planner.yaml"/>
-    
+    <arg name="local_path_planner_settings" default="$(find second_challenge_toshiki)/config/param/local_path_planner.yaml"/>
+
     <!-- node launch -->
-    <node pkg="second_challenge_toshiki" type="local_path_planner" name="local_path_planner">
+    <node pkg="second_challenge_toshiki" type="local_path_planner2" name="local_path_planner2">
         <rosparam command="load" file="$(arg local_path_planner_settings)"/>
     </node>
 </launch>

@@ -1,8 +1,10 @@
 <?xml version="1.0"?>
 <launch>
+    <!-- yaml file path  -->
+    <arg name="obstacle_detector_settings" default="$(find second_challenge_toshiki)/config/param/obstacle_detector.yaml"/>
+
     <!-- node launch -->
-    <node pkg="second_challenge_toshiki" type="obstacle_detector" name="obstacle_detector">
-        <param name="map_size" value="4.0"/>
-        <param name="map_reso" value="0.25"/>
+    <node pkg="second_challenge_toshiki" type="obstacle_detector2" name="obstacle_detector2" output="screen">
+        <rosparam command="load" file="$(arg obstacle_detector_settings)"/>
     </node>
 </launch>
