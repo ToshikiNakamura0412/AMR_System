@@ -24,7 +24,10 @@ private:
     // ----- 変数 -----
     int hz_;         // ループ周波数 [Hz]
     int laser_step_; // 何本ずつレーザを見るか
+    std::vector<double> ignore_angle_range_list_; // 柱に関する角度範囲の配列 [rad]
 
+    // msg受け取りフラッグ
+    bool flag_laser_= false;
 
     // ----- その他のオブジェクト -----
     // NodeHandle

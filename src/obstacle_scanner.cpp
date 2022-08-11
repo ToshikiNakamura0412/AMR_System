@@ -6,6 +6,7 @@ ObstacleScanner::ObstacleScanner():private_nh_("~")
     // パラメータの取得
     private_nh_.getParam("hz", hz_);
     private_nh_.getParam("laser_step", laser_step_);
+    private_nh_.getParam("ignore_angle_range_list", ignore_angle_range_list_);
 
     // frame idの設定
     obs_poses_.header.frame_id = "base_link";
@@ -21,6 +22,21 @@ ObstacleScanner::ObstacleScanner():private_nh_("~")
 void ObstacleScanner::laser_callback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
     laser_ = *msg;
+    flag_laser_ = true;
+}
+
+// 唯一メイン関数で実行する関数
+void ObstacleScanner::process()
+{
+    ros::Rate loop_rate(hz_); // 制御周波数の設定
+
+    while(ros::ok())
+    {
+        if(flag_laser_)
+            scan_obstacle(); // 障害物検知
+        ros::spinOnce();     // コールバック関数の実行
+        loop_rate.sleep();   // 周期が終わるまで待つ
+    }
 }
 
 // 障害物検知
@@ -56,23 +72,10 @@ bool ObstacleScanner::is_ignore_angle(double angle)
 {
     angle = abs(angle);
 
-    if((angle > M_PI*1.5/16.0) && (angle < M_PI*5.0/16.0))
+    if(ignore_angle_range_list_[0] < angle && angle < ignore_angle_range_list_[1])
         return true;
-    else if(angle > M_PI*10.0/16.0)
+    else if(ignore_angle_range_list_[2] < angle)
         return true;
     else
         return false;
-}
-
-// 唯一メイン関数で実行する関数
-void ObstacleScanner::process()
-{
-    ros::Rate loop_rate(hz_); // 制御周波数の設定
-
-    while(ros::ok())
-    {
-        scan_obstacle();   // 障害物検知
-        ros::spinOnce();   // コールバック関数の実行
-        loop_rate.sleep(); // 周期が終わるまで待つ
-    }
 }
