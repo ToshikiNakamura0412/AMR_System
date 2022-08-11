@@ -4,7 +4,7 @@
     <arg name="obstacle_scanner_settings" default="$(find second_challenge_toshiki)/config/param/obstacle_scanner.yaml"/>
 
     <!-- node launch -->
-    <node pkg="second_challenge_toshiki" type="obstacle_scanner2" name="obstacle_scanner2" output="screen">
+    <node pkg="second_challenge_toshiki" type="obstacle_scanner2" name="obstacle_scanner2">
         <rosparam command="load" file="$(arg obstacle_scanner_settings)"/>
     </node>
 </launch>

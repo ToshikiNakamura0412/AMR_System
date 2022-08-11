@@ -1,5 +1,2 @@
-is_visible: true # マップの可視化フラッグ
-hz: 20           # ループ周期 [Hz]
-laser_step: 20   # 何本ずつレーザを見るか
-map_size: 4.0    # マップの一辺の長さ [m]
-map_reso: 0.05   # マップの解像度 [m/cell]
+hz: 10         # ループ周期 [Hz]
+laser_step: 20 # 何本ずつレーザを見るか
