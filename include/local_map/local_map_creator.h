@@ -20,9 +20,12 @@ private:
     void obs_callback(const geometry_msgs::PoseArray::ConstPtr& msg);
 
     // その他の関数
-    bool in_map(const double dist, const double angle);         // マップ内の場合、trueを返す
-    int  get_grid_index(const double dist, const double angle); // グリッドのインデックスを返す
-    int  xy_to_grid_index(const double x, const double y);      // グリッドのインデックスを返す
+    bool   in_map(const double dist, const double angle);           // マップ内か判断
+    bool   is_ignore_grid_index(const int index);                   // 柱の除去(index ver.)
+    bool   is_ignore_angle(double angle);                           // 柱の除去(angle ver.)
+    int    get_grid_index(const double dist, const double angle);   // グリッドのインデックスを返す
+    int    xy_to_grid_index(const double x, const double y);        // グリッドのインデックスを返す
+    void   grid_index_to_xy(const int index, double& x, double& y); // グリッドのインデックスから座標を返す
 
 
     // ----- 関数（引数なし）-----

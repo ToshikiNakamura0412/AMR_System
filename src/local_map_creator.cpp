@@ -33,21 +33,22 @@ void LocalMapCreator::obs_callback(const geometry_msgs::PoseArray::ConstPtr& msg
     obs_poses_ = *msg;
 }
 
-// マップの初期化(全グリッドを空きにする)
-void LocalMapCreator::init_map()
+// 唯一メイン関数で実行する関数
+void LocalMapCreator::process()
 {
-    local_map_.data.clear();
+    ros::Rate loop_rate(hz_); // 制御周波数の設定
 
-    const int size = local_map_.info.width * local_map_.info.height;
-    for(int i=0; i<size; i++)
-        local_map_.data.push_back(0); //「空き」にする
+    while(ros::ok())
+    {
+        update_map();      // マップの更新
+        ros::spinOnce();   // コールバック関数の実行
+        loop_rate.sleep(); // 周期が終わるまで待つ
+    }
 }
 
 // マップの更新
 void LocalMapCreator::update_map()
 {
-    std::cout << "======== Update Map =========" << std::endl;
-
     init_map(); // マップの初期化
 
     for(const auto& obs_pose : obs_poses_.poses)
@@ -70,10 +71,22 @@ void LocalMapCreator::update_map()
         }
     }
 
-    std::cout << "\t[update map] OK" << std::endl;
-    std::cout << "\t-->> Before Publish(map)" << std::endl;
     pub_local_map_.publish(local_map_);
-    std::cout << "\t<<< Publish: map >>>\n\n" << std::endl;
+}
+
+// マップの初期化
+void LocalMapCreator::init_map()
+{
+    local_map_.data.clear();
+
+    const int size = local_map_.info.width * local_map_.info.height;
+    for(int i=0; i<size; i++)
+    {
+        if(is_ignore_grid_index(i))
+            local_map_.data.push_back(-1); //「未知」にする
+        else
+            local_map_.data.push_back(0);  //「空き」にする
+    }
 }
 
 // マップ内の場合、trueを返す
@@ -108,15 +121,35 @@ int LocalMapCreator::xy_to_grid_index(const double x, const double y)
     return index_x + (index_y * local_map_.info.width);
 }
 
-// 唯一メイン関数で実行する関数
-void LocalMapCreator::process()
+// 柱の場合、trueを返す(index ver.)
+bool LocalMapCreator::is_ignore_grid_index(const int grid_index)
 {
-    ros::Rate loop_rate(hz_); // 制御周波数の設定
+    double x, y;
+    grid_index_to_xy(grid_index, x, y);
+    const double angle = atan2(y, x);
 
-    while(ros::ok())
-    {
-        update_map();      // マップの更新
-        ros::spinOnce();   // コールバック関数の実行
-        loop_rate.sleep(); // 周期が終わるまで待つ
-    }
+    return is_ignore_angle(angle);
+}
+
+// グリッドのインデックスから座標を返す
+void LocalMapCreator::grid_index_to_xy(const int index, double& x, double &y)
+{
+    const int index_x = index % local_map_.info.width;
+    const int index_y = index / local_map_.info.width;
+
+    x = index_x * local_map_.info.resolution + local_map_.info.origin.position.x;
+    y = index_y * local_map_.info.resolution + local_map_.info.origin.position.y;
+}
+
+// 柱の場合、trueを返す(angle ver.)
+bool LocalMapCreator::is_ignore_angle(double angle)
+{
+    angle = abs(angle);
+
+    if((angle > M_PI*1.5/16.0) && (angle < M_PI*5.0/16.0))
+        return true;
+    else if(angle > M_PI*10.0/16.0)
+        return true;
+    else
+        return false;
 }
