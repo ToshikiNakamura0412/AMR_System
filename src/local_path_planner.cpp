@@ -41,7 +41,7 @@ DWA::DWA():private_nh_("~")
 
     // Subscriber
     sub_local_goal_ = nh_.subscribe("/local_goal", 1, &DWA::local_goal_callback, this);
-    sub_obs_poses_   = nh_.subscribe("/local_map/obstacle", 1, &DWA::obs_poses_callback, this);
+    sub_obs_poses_  = nh_.subscribe("/local_map/obstacle", 1, &DWA::obs_poses_callback, this);
 
     // Publisher
     pub_cmd_speed_    = nh_.advertise<roomba_500driver_meiji::RoombaCtrl>("/roomba2/control", 1);

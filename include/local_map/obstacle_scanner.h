@@ -29,6 +29,7 @@ private:
     // msg受け取りフラッグ
     bool flag_laser_= false;
 
+
     // ----- その他のオブジェクト -----
     // NodeHandle
     ros::NodeHandle nh_;

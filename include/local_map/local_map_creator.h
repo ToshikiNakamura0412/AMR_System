@@ -38,6 +38,7 @@ private:
     // msg受け取りフラッグ
     bool flag_obs_poses_ = false;
 
+
     // ----- その他のオブジェクト -----
     // NodeHandle
     ros::NodeHandle nh_;
