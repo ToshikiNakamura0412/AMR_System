@@ -9,7 +9,7 @@
 
     <!-- node launch -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_settings)"/>
-    <node pkg="second_challenge_toshiki" type="obstacle_scanner2" name="obstacle_scanner2">
+    <node pkg="second_challenge_toshiki" type="obstacle_scanner2" name="obstacle_scanner2" output="screen">
         <rosparam command="load" file="$(arg obstacle_scanner_settings)"/>
     </node>
     <node pkg="second_challenge_toshiki" type="local_map_creator2" name="local_map_creator2" output="screen">
