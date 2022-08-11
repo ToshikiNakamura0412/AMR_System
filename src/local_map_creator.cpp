@@ -63,8 +63,11 @@ void LocalMapCreator::update_map()
             local_map_.data[grid_index] = -1; //「未知」にする
         }
 
-        const int grid_index = xy_to_grid_index(obs_x, obs_y);
-        local_map_.data[grid_index] = 100; //「占有」にする
+        if(in_map(obs_dist, obs_angle))
+        {
+            const int grid_index = xy_to_grid_index(obs_x, obs_y);
+            local_map_.data[grid_index] = 100; //「占有」にする
+        }
     }
 
     std::cout << "\t[update map] OK" << std::endl;
