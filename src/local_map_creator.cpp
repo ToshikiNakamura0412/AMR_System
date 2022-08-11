@@ -38,7 +38,7 @@ void LocalMapCreator::init_map()
 {
     local_map_.data.clear();
 
-    int size = local_map_.info.width * local_map_.info.height;
+    const int size = local_map_.info.width * local_map_.info.height;
     for(int i=0; i<size; i++)
         local_map_.data.push_back(0); //「空き」にする
 }
@@ -52,18 +52,18 @@ void LocalMapCreator::update_map()
 
     for(const auto& obs_pose : obs_poses_.poses)
     {
-        double obs_x     = obs_pose.position.x;
-        double obs_y     = obs_pose.position.y;
-        double obs_dist  = hypot(obs_y, obs_x);
-        double obs_angle = atan2(obs_y, obs_x);
+        const double obs_x     = obs_pose.position.x;
+        const double obs_y     = obs_pose.position.y;
+        const double obs_dist  = hypot(obs_y, obs_x);
+        const double obs_angle = atan2(obs_y, obs_x);
 
         for(double dist_from_start=obs_dist; in_map(dist_from_start, obs_angle); dist_from_start+=map_reso_)
         {
-            int grid_index = get_grid_index(dist_from_start, obs_angle);
+            const int grid_index = get_grid_index(dist_from_start, obs_angle);
             local_map_.data[grid_index] = -1; //「未知」にする
         }
 
-        int grid_index = xy_to_grid_index(obs_x, obs_y);
+        const int grid_index = xy_to_grid_index(obs_x, obs_y);
         local_map_.data[grid_index] = 100; //「占有」にする
     }
 
@@ -74,12 +74,12 @@ void LocalMapCreator::update_map()
 }
 
 // マップ内の場合、trueを返す
-bool LocalMapCreator::in_map(double dist, double angle)
+bool LocalMapCreator::in_map(const double dist, const double angle)
 {
-    double x = dist * cos(angle);
-    double y = dist * sin(angle);
-    int index_x = int(round((x - local_map_.info.origin.position.x) / local_map_.info.resolution));
-    int index_y = int(round((y - local_map_.info.origin.position.y) / local_map_.info.resolution));
+    const double x = dist * cos(angle);
+    const double y = dist * sin(angle);
+    const int index_x = int(round((x - local_map_.info.origin.position.x) / local_map_.info.resolution));
+    const int index_y = int(round((y - local_map_.info.origin.position.y) / local_map_.info.resolution));
 
     if(index_x<local_map_.info.width && index_y<local_map_.info.height)
         return true;
@@ -88,19 +88,19 @@ bool LocalMapCreator::in_map(double dist, double angle)
 }
 
 // 距離と角度からグリッドのインデックスを返す
-int LocalMapCreator::get_grid_index(double dist, double angle)
+int LocalMapCreator::get_grid_index(const double dist, const double angle)
 {
-    double x = dist * cos(angle);
-    double y = dist * sin(angle);
+    const double x = dist * cos(angle);
+    const double y = dist * sin(angle);
 
     return xy_to_grid_index(x, y);
 }
 
 // 座標からグリッドのインデックスを返す
-int LocalMapCreator::xy_to_grid_index(double x, double y)
+int LocalMapCreator::xy_to_grid_index(const double x, const double y)
 {
-    int index_x = int(round((x - local_map_.info.origin.position.x) / local_map_.info.resolution));
-    int index_y = int(round((y - local_map_.info.origin.position.y) / local_map_.info.resolution));
+    const int index_x = int(round((x - local_map_.info.origin.position.x) / local_map_.info.resolution));
+    const int index_y = int(round((y - local_map_.info.origin.position.y) / local_map_.info.resolution));
 
     return index_x + (index_y * local_map_.info.width);
 }

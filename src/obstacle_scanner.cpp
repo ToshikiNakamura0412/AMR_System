@@ -33,8 +33,8 @@ void ObstacleScanner::scan_obstacle()
     for(int i=0; i<laser_.ranges.size(); i+=laser_step_)
     {
         // レーザ値の距離と角度の算出
-        double dist  = laser_.ranges[i];
-        double angle = i * laser_.angle_increment + laser_.angle_min;
+        const double dist  = laser_.ranges[i];
+        const double angle = i * laser_.angle_increment + laser_.angle_min;
 
         // 柱と被るレーザ値のスキップ
         if(is_ignore_angle(angle)) continue;
