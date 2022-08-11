@@ -9,7 +9,7 @@ LocalMapCreator::LocalMapCreator():private_nh_("~")
     private_nh_.getParam("map_reso", map_reso_);
 
     // Subscriber
-    sub_obs_ = nh_.subscribe("/local_map2/obstacle", 1, &LocalMapCreator::obs_callback, this);
+    sub_obs_poses_ = nh_.subscribe("/local_map2/obstacle", 1, &LocalMapCreator::obs_poses_callback, this);
 
     // Publisher
     pub_local_map_ = nh_.advertise<nav_msgs::OccupancyGrid>("/local_map2", 1);
@@ -27,10 +27,11 @@ LocalMapCreator::LocalMapCreator():private_nh_("~")
     local_map_.data.reserve(local_map_.info.width * local_map_.info.height);
 }
 
-// laserのコールバック関数
-void LocalMapCreator::obs_callback(const geometry_msgs::PoseArray::ConstPtr& msg)
+// obs_posesのコールバック関数
+void LocalMapCreator::obs_poses_callback(const geometry_msgs::PoseArray::ConstPtr& msg)
 {
     obs_poses_ = *msg;
+    flag_obs_poses_ = true;
 }
 
 // 唯一メイン関数で実行する関数
@@ -40,7 +41,8 @@ void LocalMapCreator::process()
 
     while(ros::ok())
     {
-        update_map();      // マップの更新
+        if(flag_obs_poses_)
+            update_map();  // マップの更新
         ros::spinOnce();   // コールバック関数の実行
         loop_rate.sleep(); // 周期が終わるまで待つ
     }
@@ -58,10 +60,10 @@ void LocalMapCreator::update_map()
         const double obs_dist  = hypot(obs_y, obs_x);
         const double obs_angle = atan2(obs_y, obs_x);
 
-        for(double dist_from_start=obs_dist; in_map(dist_from_start, obs_angle); dist_from_start+=map_reso_)
+        for(double dist_from_start=0.0; (dist_from_start<obs_dist && in_map(dist_from_start, obs_angle)); dist_from_start+=map_reso_)
         {
             const int grid_index = get_grid_index(dist_from_start, obs_angle);
-            local_map_.data[grid_index] = -1; //「未知」にする
+            local_map_.data[grid_index] = 0; //「空き」にする
         }
 
         if(in_map(obs_dist, obs_angle))
@@ -74,7 +76,7 @@ void LocalMapCreator::update_map()
     pub_local_map_.publish(local_map_);
 }
 
-// マップの初期化
+// マップの初期化(すべて「未知」にする)
 void LocalMapCreator::init_map()
 {
     local_map_.data.clear();
@@ -82,10 +84,7 @@ void LocalMapCreator::init_map()
     const int size = local_map_.info.width * local_map_.info.height;
     for(int i=0; i<size; i++)
     {
-        if(is_ignore_grid_index(i))
-            local_map_.data.push_back(-1); //「未知」にする
-        else
-            local_map_.data.push_back(0);  //「空き」にする
+        local_map_.data.push_back(-1); //「未知」にする
     }
 }
 
@@ -119,37 +118,4 @@ int LocalMapCreator::xy_to_grid_index(const double x, const double y)
     const int index_y = int(round((y - local_map_.info.origin.position.y) / local_map_.info.resolution));
 
     return index_x + (index_y * local_map_.info.width);
-}
-
-// 柱の場合、trueを返す(index ver.)
-bool LocalMapCreator::is_ignore_grid_index(const int grid_index)
-{
-    double x, y;
-    grid_index_to_xy(grid_index, x, y);
-    const double angle = atan2(y, x);
-
-    return is_ignore_angle(angle);
-}
-
-// グリッドのインデックスから座標を返す
-void LocalMapCreator::grid_index_to_xy(const int index, double& x, double &y)
-{
-    const int index_x = index % local_map_.info.width;
-    const int index_y = index / local_map_.info.width;
-
-    x = index_x * local_map_.info.resolution + local_map_.info.origin.position.x;
-    y = index_y * local_map_.info.resolution + local_map_.info.origin.position.y;
-}
-
-// 柱の場合、trueを返す(angle ver.)
-bool LocalMapCreator::is_ignore_angle(double angle)
-{
-    angle = abs(angle);
-
-    if((angle > M_PI*1.5/16.0) && (angle < M_PI*5.0/16.0))
-        return true;
-    else if(angle > M_PI*10.0/16.0)
-        return true;
-    else
-        return false;
 }
