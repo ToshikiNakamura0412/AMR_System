@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <!-- config file path  -->
-    <arg name="rviz_settings" default="$(find second_challenge_toshiki)/config/rviz/chibi22_b.rviz"/>
+    <arg name="rviz_settings" default="$(find second_challenge_toshiki)/config/rviz/local_map_creator.rviz"/>
 
     <!-- yaml file path  -->
     <arg name="obstacle_scanner_settings" default="$(find second_challenge_toshiki)/config/param/obstacle_scanner.yaml"/>
