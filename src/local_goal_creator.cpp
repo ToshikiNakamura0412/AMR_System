@@ -5,10 +5,12 @@ LocalGoalCreator::LocalGoalCreator():private_nh_("~")
 {
     // パラメータの取得
     private_nh_.getParam("hz", hz_);
-    private_nh_.getParam("local_goal_dist", local_goal_dist_);
+    private_nh_.getParam("index_step", index_step_);
+    private_nh_.getParam("goal_index", goal_index_);
+    private_nh_.getParam("target_dist_to_goal", target_dist_to_goal_);
 
     // frame idの設定
-    local_goal_.header.frame_id = "map"
+    local_goal_.header.frame_id = "map";
 
     // Subscriber
     sub_estimated_pose_ = nh_.subscribe("/estimated_pose", 1, &LocalGoalCreator::estimated_pose_callback, this);
@@ -19,7 +21,7 @@ LocalGoalCreator::LocalGoalCreator():private_nh_("~")
 }
 
 // estimated_poseのコールバック関数
-void estimated_pose_callback(const geometry_msgs::PoseStamped::ConstPtr& msg)
+void LocalGoalCreator::estimated_pose_callback(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
     estimated_pose_ = *msg;
     flag_estimated_pose_ = true;
@@ -49,6 +51,31 @@ void LocalGoalCreator::process()
 // ゴールの更新
 void LocalGoalCreator::update_goal()
 {
+    double dist_to_goal = get_dist_to_goal(); // ゴールまでの距離を取得
 
+    while(dist_to_goal < target_dist_to_goal_)
+    {
+        goal_index_ += index_step_;        // ゴール位置をステップ数だけ先に進める
+        dist_to_goal = get_dist_to_goal(); // ゴールまでの距離を取得
+
+        if(goal_index_ >= global_path_.poses.size())
+        {
+            goal_index_ = global_path_.poses.size()-1; // グローバルゴールで固定
+            break;
+        }
+    }
+
+    // ゴール位置を取得し，パブリッシュ
+    local_goal_.point.x = global_path_.poses[goal_index_].pose.position.x;
+    local_goal_.point.y = global_path_.poses[goal_index_].pose.position.y;
     pub_local_goal_.publish(local_goal_);
+}
+
+// 現在位置-ゴール間の距離の取得
+double LocalGoalCreator::get_dist_to_goal()
+{
+    const double dx = global_path_.poses[goal_index_].pose.position.x - estimated_pose_.pose.position.x;
+    const double dy = global_path_.poses[goal_index_].pose.position.x - estimated_pose_.pose.position.y;
+
+    return hypot(dx, dy);
 }

@@ -20,11 +20,14 @@ private:
     void estimated_pose_callback(const geometry_msgs::PoseStamped::ConstPtr& msg); // コールバック関数(estimated_pose)
     void global_path_callback(const nav_msgs::Path::ConstPtr& msg); // コールバック関数(global_path)
     void update_goal(); // ゴールの更新
+    double get_dist_to_goal(); // 現在位置-ゴール間の距離の取得
 
 
     // ----- 変数 -----
-    int    hz_; // ループ周波数 [Hz]
-    double local_goal_dist_; // 現在位置-ゴール間の距離 [m]
+    int    hz_;                  // ループ周波数 [Hz]
+    int    index_step_;          // １回で更新するインデックス数
+    int    goal_index_;          // グローバルパス内におけるローカルゴールのインデックス
+    double target_dist_to_goal_; // 現在位置-ゴール間の距離 [m]
 
     // msg受け取りフラッグ
     bool flag_estimated_pose_ = false;
