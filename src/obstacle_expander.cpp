@@ -1,4 +1,4 @@
-#include "global_path/obstacle_expander.h"
+#include "global_path_planner/obstacle_expander.h"
 
 // コンストラクタ
 ObstacleExpander::ObstacleExpander():private_nh_("~")
@@ -8,7 +8,7 @@ ObstacleExpander::ObstacleExpander():private_nh_("~")
     private_nh_.getParam("target_margin", target_margin_);
 
     // frame idの設定
-    new_map_.header.frame_id = "map";
+    updated_map_.header.frame_id = "map";
 
     // Subscriber
     sub_original_map_ = nh_.subscribe("/map", 1, &ObstacleExpander::map_callback, this);
@@ -21,11 +21,6 @@ ObstacleExpander::ObstacleExpander():private_nh_("~")
 void ObstacleExpander::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 {
     original_map_ = *msg;
-    std::cout << "Map reso: " << original_map_.info.resolution << std::endl;
-    std::cout << "Map width: " << original_map_.info.width << std::endl;
-    std::cout << "Map height: " << original_map_.info.height << std::endl;
-    std::cout << "Map origin.x: " << original_map_.info.origin.position.x << std::endl;
-    std::cout << "Map origin.y: " << original_map_.info.origin.position.y << std::endl;
     flag_map_ = true;
 }
 
@@ -49,5 +44,5 @@ void ObstacleExpander::expand_obstacle()
     updated_map_ = original_map_;
 
 
-    pub_updated_map_.publish(new_map_);
+    pub_updated_map_.publish(updated_map_);
 }
