@@ -55,8 +55,8 @@ void LocalGoalCreator::update_goal()
 
     while(dist_to_goal < target_dist_to_goal_)
     {
-        goal_index_ += index_step_;        // ゴール位置をステップ数だけ先に進める
-        dist_to_goal = get_dist_to_goal(); // ゴールまでの距離を取得
+        goal_index_  += index_step_;        // ゴール位置をステップ数だけ先に進める
+        dist_to_goal  = get_dist_to_goal(); // ゴールまでの距離を取得
 
         if(goal_index_ >= global_path_.poses.size())
         {
@@ -75,7 +75,7 @@ void LocalGoalCreator::update_goal()
 double LocalGoalCreator::get_dist_to_goal()
 {
     const double dx = global_path_.poses[goal_index_].pose.position.x - estimated_pose_.pose.position.x;
-    const double dy = global_path_.poses[goal_index_].pose.position.x - estimated_pose_.pose.position.y;
+    const double dy = global_path_.poses[goal_index_].pose.position.y - estimated_pose_.pose.position.y;
 
     return hypot(dx, dy);
 }

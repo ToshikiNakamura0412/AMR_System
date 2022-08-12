@@ -35,7 +35,7 @@ private:
     double map_size_; // マップの一辺の長さ [m]
     double map_reso_; // マップの解像度 [m/cell]
 
-    // msg受け取りフラッグ
+    // msg受け取りフラグ
     bool flag_obs_poses_ = false;
 
 
