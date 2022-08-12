@@ -100,7 +100,7 @@ private:
     double goal_tolerance_;     // 目標地点の許容誤差 [m]
     double search_range_;       // 評価関数distで探索する範囲 [m]
 
-    // msgの受け取り判定用
+    // msgの受け取りフラグ
     bool flag_local_goal_ = false;
     bool flag_obs_poses_  = false;
 
