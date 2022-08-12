@@ -17,9 +17,9 @@ public:
 private:
     // ----- 関数 ------
     // コールバック関数
-    void estimated_pose_callback(const geometry_msgs::PoseStamped::ConstPtr& msg); // コールバック関数(estimated_pose)
-    void global_path_callback(const nav_msgs::Path::ConstPtr& msg); // コールバック関数(global_path)
-    void update_goal(); // ゴールの更新
+    void   estimated_pose_callback(const geometry_msgs::PoseStamped::ConstPtr& msg); // コールバック関数(estimated_pose)
+    void   global_path_callback(const nav_msgs::Path::ConstPtr& msg);                // コールバック関数(global_path)
+    void   update_goal();      // ゴールの更新
     double get_dist_to_goal(); // 現在位置-ゴール間の距離の取得
 
 
