@@ -1,3 +1,7 @@
+/*
+Ray casting 2D grid map
+*/
+
 #include "local_map/local_map_creator.h"
 
 // コンストラクタ

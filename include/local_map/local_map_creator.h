@@ -1,3 +1,7 @@
+/*
+Ray casting 2D grid map
+*/
+
 #ifndef LOCAL_MAP_CREATOR_H
 #define LOCAL_MAP_CREATOR_H
 
