@@ -1,7 +1,7 @@
 /*
 二つの膨張方法を実装
-    mode1: 上下左右に膨張
-    mode2: 円形状に膨張
+    mode1: 上下左右に膨張(実行時間: 2.2s)
+    mode2: 円形状に膨張  (実行時間: 0.3s)
 */
 
 #ifndef OBSTACLE_EXPANDER_H
