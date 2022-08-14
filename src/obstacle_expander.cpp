@@ -35,11 +35,16 @@ void ObstacleExpander::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg
 void ObstacleExpander::process()
 {
     ros::Rate loop_rate(hz_); // 制御周波数の設定
+    int time_flag = 0;
 
     while(ros::ok())
     {
         if(flag_map_)
+        {
+            clock_t start_time = clock();
             expand_obstacle(); // 障害物の膨張
+            if(!time_flag++) std::cout << "実行時間: " << (clock()-start_time)/1e6 << std::endl;
+        }
         ros::spinOnce();       // コールバック関数の実行
         loop_rate.sleep();     // 周期が終わるまで待つ
     }
