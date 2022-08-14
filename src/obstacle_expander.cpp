@@ -14,9 +14,6 @@ ObstacleExpander::ObstacleExpander():private_nh_("~")
     private_nh_.getParam("mode", mode_);
     private_nh_.getParam("target_margin", target_margin_);
 
-    // frame idの設定
-    updated_map_.header.frame_id = "map";
-
     // Subscriber
     sub_raw_map_ = nh_.subscribe("/map", 1, &ObstacleExpander::map_callback, this);
 
