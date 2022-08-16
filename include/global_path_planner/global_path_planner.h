@@ -39,15 +39,17 @@ private:
     std::vector<Motion> get_motion_param(const int dx, const int dy, const double cost);
     int calc_grid_index(const int index_x, const int index_y);
     bool is_same_node(const Node n1, const Node n2);
-    void get_child_node_list(const Node parent_node, std::vector<Node>& child_node_list);
+    void get_child_nodes(const Node parent_node, std::vector<Node>& child_nodes);
     Node move(Node node, const Motion motion);
+    void add_nodes_to_open_list(const std::vector<Node>& child_nodes);
+    Node select_parent_node(const Node goal_node);
 
     // ----- 変数 -----
     int hz_; // ループ周波数 [Hz]
-    std::vector<Motion> motion_list_;
+    std::vector<Motion> motion_set_;
     std::vector<Node> way_point_; // スタートとゴールを含む
     std::vector<Node> open_list_; // Openリスト
-    std::vector<Node> close_list_; // Closeリスト
+    std::vector<Node> closed_list_; // Closeリスト
 
     // msg受け取りフラグ
     bool flag_map_ = false;
