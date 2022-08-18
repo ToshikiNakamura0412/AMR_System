@@ -2,7 +2,7 @@
 #define GLOBAL_PATH_PLANNER_H
 
 #include <ros/ros.h>
-#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <nav_msgs/Path.h>
 #include <nav_msgs/OccupancyGrid.h>
 
@@ -10,9 +10,11 @@
 // ===== 構造体 =====
 struct Node
 {
-    int    index_x; // [cell]
-    int    index_y; // [cell]
-    double cost;
+    int    index_x = 0;         // [cell]
+    int    index_y = 0;         // [cell]
+    int    parent_index_x = -1; // [cell]
+    int    parent_index_y = -1; // [cell]
+    double cost = 0.0;          // f値
 };
 
 struct Motion
@@ -31,29 +33,44 @@ public:
     void process();
 
 private:
-    // ----- 関数 ------
-    void map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg); // コールバック関数
-    void planning(); // グローバルパスの生成
-    double calc_heuristic(const Node n1, const Node n2); // ヒューリスティック値の計算
-    void get_motion_list();
-    std::vector<Motion> get_motion_param(const int dx, const int dy, const double cost);
-    int calc_grid_index(const int index_x, const int index_y);
-    bool is_same_node(const Node n1, const Node n2);
-    void get_child_nodes(const Node parent_node, std::vector<Node>& child_nodes);
-    Node move(Node node, const Motion motion);
-    void add_nodes_to_open_list(const std::vector<Node>& child_nodes);
-    Node select_parent_node(const Node goal_node);
+    // ----- 関数（引数あり） ------
+    // コールバック関数
+    void map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg);
+
+    // その他の関数
+    void   update_set(const Node current_node);                                              // Open・Closeリストを更新
+    void   create_path(Node current_node);                                                   // waypoint間のパスを作成
+    void   creat_motion_model(std::vector<Motion>& motion_set);                              // 動作モデルを作成
+    void   creat_neighbor_nodes(const Node current_node, std::vector<Node>& neighbor_nodes); // すべての隣接ノードを作成
+    void   transfer_node(const Node node, std::vector<Node>& set1, std::vector<Node>& set2); // set1からset2にノードを移動
+    bool   is_obs(const Node node);                                                          // 障害物か判断
+    bool   is_goal(const Node node);                                                         // ゴールか判断
+    bool   is_same_node(const Node n1, const Node n2);                                       // 同じノードか判断
+    bool   is_parent(const int closed_node_index, const Node node);                          // 親ノードか判断
+    int    search_node_from_set(const Node target_node, std::vector<Node>& set);             // 特定のリストに含まれるか検索
+    double heuristic(const Node node);                                                       // ヒューリスティック関数
+    Node   get_way_point(const int phase);                                                   // 経由点の取得
+    Node   get_neighbor_node(const Node current_node, const Motion motion);                  // 隣接ノードを取得
+    Motion get_motion(const int dx, const int dy, const double cost);                        // 動作を作成
+    std::tuple<int, int> search_node(const Node target_node);                                // リストに含まれるか調べる
+    geometry_msgs::PoseStamped calc_pose(const Node node);                                   // ノードからポーズを計算
+
+
+    // ----- 関数（引数あり） ------
+    void planning();            // グローバルパスの生成
+    Node select_current_node(); // Openリスト内で最もコストの小さいノードを取得
+
 
     // ----- 変数 -----
-    int hz_; // ループ周波数 [Hz]
-    std::vector<Motion> motion_set_;
-    std::vector<Node> way_point_; // スタートとゴールを含む
-    std::vector<Node> open_list_; // Openリスト
-    std::vector<Node> closed_list_; // Closeリスト
+    int hz_;                           // ループ周波数 [Hz]
+    Node goal_node_;                   // ゴールノード
+    std::vector<Node> open_set_;       // Openリスト
+    std::vector<Node> closed_set_;     // Closeリスト
+    std::vector<double> way_points_x_; // スタートとゴールを含む
+    std::vector<double> way_points_y_; // スタートとゴールを含む
 
     // msg受け取りフラグ
     bool flag_map_ = false;
-    bool is_goal_ = false;
 
 
     // ----- その他のオブジェクト -----
@@ -68,8 +85,8 @@ private:
     ros::Publisher pub_global_path_;
 
     // 各種オブジェクト
-    nav_msgs::OccupancyGrid map_;         // obstacle_expanderノードから受け取るマップ
-    nav_msgs::Path          global_path_; // グローバルパス
+    nav_msgs::OccupancyGrid map_; // obstacle_expanderノードから受け取るマップ
+    nav_msgs::Path global_path_;  // グローバルパス
 };
 
 #endif

@@ -5,7 +5,8 @@ AStarPlanner::AStarPlanner():private_nh_("~")
 {
     // パラメータの取得
     private_nh_.getParam("hz", hz_);
-    private_nh_.getParam("way_point", way_point_);
+    private_nh_.getParam("way_points_x", way_points_x_);
+    private_nh_.getParam("way_points_y", way_points_y_);
 
     // frame idの設定
     global_path_.header.frame_id = "map";
@@ -32,39 +33,122 @@ void AStarPlanner::process()
     while(ros::ok())
     {
         if(flag_map_)
-            create_global_path(); // グローバルパスの生成
+            planning();    // グローバルパスの生成
         ros::spinOnce();   // コールバック関数の実行
         loop_rate.sleep(); // 周期が終わるまで待つ
+        std::cout << "Path Size: " << global_path_.poses.size() << std::endl;
     }
 }
 
 // グローバルパスを生成
 void AStarPlanner::planning()
 {
-    get_motion_model()
-
-    int phase_size = way_point_.size()-1;
+    const int phase_size = way_points_x_.size()-1;
     for(int phase=0; phase<phase_size; phase++)
     {
-        Node start_node = way_point_[phase];
-        Node goal_node  = way_point_[phase+1];
-        Node parent_node = start_node; // 親ノード
-        std::vector<Node> child_nodes; // 子ノードのリスト
+        // リストを空にする
+        open_set_.clear();
+        closed_set_.clear();
+
+        // スタートノードとゴールノードを作成
+        Node start_node = get_way_point(phase);
+        goal_node_ = get_way_point(phase+1);
+
+        // スタートノードをOpenリストに追加
+        start_node.cost = heuristic(start_node); // f(s)=h(s)
+        open_set_.push_back(start_node);
         
-        open_list_.push_back(start_node);
         while(1)
         {
-            if(is_same_node(parent_node, goal_node)) break; // ゴールか判断
-            get_child_nodes(parent_node, child_nodes);
-            add_nodes_to_open_list(child_nodes, open_list_);
-            parent_node = select_parent_node(goal_node);
+            // Openリストが空の場合
+            if(open_set_.size() == 0)
+            {
+                ROS_WARN_STREAM("Open set is empty.."); // 探索失敗
+                break;
+            }
+            
+            // Openリスト内で最もコストの小さいノードを現在のノードに指定
+            Node current_node = select_current_node();
+            
+            // 経路の探索
+            if(is_goal(current_node)) // ゴールに到達した場合
+            {
+                std::cout << "Reached point" << phase << std::endl;
+                create_path(current_node);
+                break; // 探索終了
+            }
+            else // それ以外の場合
+            {
+                transfer_node(current_node, open_set_, closed_set_); // 現在のノードをCloseリストに移動
+                update_set(current_node); // 隣接ノードを基にOpenリスト・Closeリストを更新
+            }
         }
-        
-
     }
-
+    pub_global_path_.publish(global_path_);
 }
 
+// 経由点の取得
+Node AStarPlanner::get_way_point(const int phase)
+{
+    Node way_point;
+    way_point.index_x = int(round((way_points_x_[phase] - map_.info.origin.position.x) / map_.info.resolution));
+    way_point.index_y = int(round((way_points_y_[phase] - map_.info.origin.position.y) / map_.info.resolution));
+    
+    if(is_obs(way_point))
+    {
+        ROS_ERROR_STREAM("Way point is inappropriate..");
+        exit(1);
+    }
+
+    return way_point;
+}
+
+// ノードが障害物か判断
+bool AStarPlanner::is_obs(const Node node)
+{
+    const int grid_index = node.index_x + (node.index_y * map_.info.width);
+    return map_.data[grid_index] == 100;
+}
+
+// ヒューリスティック値を計算
+double AStarPlanner::heuristic(const Node node)
+{
+    // ヒューリスティックの重み
+    const double w = 1.0; 
+
+    // 2点間のユークリッド距離
+    const double dx = double(node.index_x - goal_node_.index_x);
+    const double dy = double(node.index_y - goal_node_.index_y);
+    const double dist = hypot(dx, dy); 
+
+    return w * dist;
+}
+
+// Openリスト内で最もコストの小さいノードを取得
+Node AStarPlanner::select_current_node()
+{
+    Node current_node = open_set_[0];
+    double max_cost = open_set_[0].cost;
+
+    for(const auto& open_node : open_set_)
+    {
+        if(max_cost < open_node.cost)
+        {
+            max_cost = open_node.cost;
+            current_node = open_node;
+        }
+    }
+    
+    return current_node;
+}
+
+// ゴールノードの場合、trueを返す
+bool AStarPlanner::is_goal(const Node node)
+{
+    return is_same_node(node, goal_node_);
+}
+
+// 2つが同じノードの場合、trueを返す
 bool AStarPlanner::is_same_node(const Node n1, const Node n2)
 {
     if(n1.index_x == n2.index_x && n1.index_y == n2.index_y)
@@ -73,92 +157,187 @@ bool AStarPlanner::is_same_node(const Node n1, const Node n2)
         return false;
 }
 
-void AStarPlanner::get_child_nodes(const Node parent_node, std::vector<Node>& child_nodes)
+// waypoint間のパスを作成し，グローバルパスに追加
+void AStarPlanner::create_path(Node current_node)
 {
-    child_nodes.clear();
-    int motion_num = motion_set_.size();
+    nav_msgs::Path path;
+    path.poses.push_back(calc_pose(current_node));
 
-    for(int i=0; i<motion_num; i++)
+    while(is_goal(current_node))
     {
-        Node node = move(parent_node, motion_set_[i]);
-        child_nodes.push_back(node);
+        for(int i=0; i<closed_set_.size() ;i++)
+            if(is_parent(i, current_node))
+                current_node = closed_set_[i];
+
+        path.poses.push_back(calc_pose(current_node));
     }
+
+    reverse(path.poses.begin(), path.poses.end());
+    global_path_.poses.insert(global_path_.poses.end(), path.poses.begin(), path.poses.end());
 }
 
-void AStarPlanner::add_nodes_to_open_list(const std::vector<Node>& child_nodes)
+// ノードからポーズを計算
+geometry_msgs::PoseStamped AStarPlanner::calc_pose(const Node node)
 {
-    for(const auto& node : child_nodes)
-    {
-        int grid_index = calc_grid_index(node.index_x, node.index_y);
-        if(map_.data[grid_index] != 100 || is_same_node(node, closed_list_.back()))
-            open_list_.push_back(node);
-    }
+    geometry_msgs::PoseStamped pose_stamped;
+    pose_stamped.pose.position.x = node.index_x * map_.info.resolution + map_.info.origin.position.x;
+    pose_stamped.pose.position.y = node.index_y * map_.info.resolution + map_.info.origin.position.x;
+
+    return pose_stamped;
 }
 
-Node select_parent_node(const Node goal_node)
+// Closeリストの特定のノードが親ノードか判断
+bool AStarPlanner::is_parent(const int closed_node_index, const Node node)
 {
-    Node parent_node = open_list[0];
-    double max_f_value = open_list[0].cost + clac_heuristic(open_list[0], goal_node);
-    for(const auto& node : open_list_)
+    bool is_same_x = closed_set_[closed_node_index].index_x == node.parent_index_x;
+    bool is_same_y = closed_set_[closed_node_index].index_y == node.parent_index_y;
+
+    return  is_same_x && is_same_y;
+}
+
+// set1からset2にノードを移動
+void AStarPlanner::transfer_node(const Node node, std::vector<Node>& set1, std::vector<Node>& set2)
+{
+    const int set1_node_index = search_node_from_set(node, set1); // リスト1からノードを探す
+    set1.erase(set1.begin() + set1_node_index); // リスト1からノードを削除
+    set2.push_back(node); // リスト2にノードを追加
+}
+
+// 指定したリストに含まれるか検索
+int AStarPlanner::search_node_from_set(const Node target_node, std::vector<Node>& set)
+{
+    for(int i=0; i<set.size(); i++)
+        if(is_same_node(target_node, set[i]))
+            return i; // インデックスを返す
+
+    return -1; // 含まれない場合
+}
+
+// 隣接ノードを基にOpenリスト・Closeリストを更新
+void AStarPlanner::update_set(const Node current_node)
+{
+    // 隣接ノードを宣言
+    std::vector<Node> neighbor_nodes;
+
+    // 現在のノードを基に隣接ノードを作成
+    creat_neighbor_nodes(current_node, neighbor_nodes);
+
+    // Openリスト・Closeリストを更新
+    for(const auto& neighbor_node : neighbor_nodes)
     {
-        double f_value = node.cost + clac_heuristic(node, goal_node);
-        if(max_f_value < f_value)
+        // 障害物の場合
+        if(is_obs(neighbor_node))
+            continue;
+
+        // リストに同一ノードが含まれるか調べる
+        int flag;
+        int node_index; // 同一ノードのインデックス
+        std::tie(flag, node_index) = search_node(neighbor_node); // ノードを探す
+
+        if(flag == -1) // OpenリストにもCloseリストにもない場合
         {
-            max_f_value = f_value;
-            parent_node = node;
+            open_set_.push_back(neighbor_node);
+        }
+        else if(flag == 1) // Openリストにある場合
+        {
+            if(neighbor_node.cost < open_set_[node_index].cost)
+            {
+                open_set_[node_index].cost = neighbor_node.cost;
+                open_set_[node_index].parent_index_x = neighbor_node.parent_index_x;
+                open_set_[node_index].parent_index_y = neighbor_node.parent_index_y;
+            }
+        }
+        else if(flag == 2) // Closeリストにある場合
+        {
+            if(neighbor_node.cost < closed_set_[node_index].cost)
+            {
+                closed_set_.erase(closed_set_.begin() + node_index);
+                open_set_.push_back(neighbor_node);
+            }
         }
     }
-    
-    return parent_node;
 }
 
-Node AStarPlanner::move(Node node, const Motion motion)
+// 現在のノードを基に隣接ノードを作成
+void AStarPlanner::creat_neighbor_nodes(const Node current_node, std::vector<Node>& neighbor_nodes)
 {
-    node.index_x += motion.dx;
-    node.index_y += motion.dy;
-    node.cost    += motion.cost;
+    // 動作モデルの作成
+    std::vector<Motion> motion_set;
+    creat_motion_model(motion_set);
+    const int motion_num = motion_set.size();
 
-    return node;
+    // 隣接ノードを作成
+    for(int i=0; i<motion_num; i++)
+    {
+        Node neighbor_node = get_neighbor_node(current_node, motion_set[i]); // 隣接ノードを取得
+        neighbor_nodes.push_back(neighbor_node);
+    }
 }
 
-// ヒューリスティック値の計算
-double AStarPlanner::calc_heuristic(const Node n1, const Node n2)
+// 動作モデルを作成
+void AStarPlanner::creat_motion_model(std::vector<Motion>& motion_set)
 {
-    // ヒューリスティックの重み
-    const double w = 1.0; 
+    motion_set.push_back(get_motion( 1,  0, 1)); // 前
+    motion_set.push_back(get_motion( 0,  1, 1)); // 左
+    motion_set.push_back(get_motion(-1,  0, 1)); // 後ろ
+    motion_set.push_back(get_motion( 0, -1, 1)); // 右
 
-    // 2点間のユークリッド距離
-    const double dx = double(n1.index_x - n2.index_x);
-    const double dy = double(n1.index_y - n2.index_y);
-    const double dist = hypot(dx, dy); 
-
-    return w*dist;
+    motion_set.push_back(get_motion(-1,-1, sqrt(2))); // 右後ろ
+    motion_set.push_back(get_motion(-1, 1, sqrt(2))); // 左後ろ
+    motion_set.push_back(get_motion( 1,-1, sqrt(2))); // 右前
+    motion_set.push_back(get_motion( 1, 1, sqrt(2))); // 左前
 }
 
-int AStarPlanner::calc_grid_index(const int index_x, const int index_y)
+// 動作を作成
+Motion AStarPlanner::get_motion(const int dx, const int dy, const double cost)
 {
-    return index_x + (index_y * map_.info.width);
-}
+    // 隣接したグリッドに移動しない場合
+    if(1 < abs(dx) || 1 < abs(dy))
+    {
+        ROS_ERROR_STREAM("Motion is inappropriate..");
+        exit(2);
+    }
 
-void AStarPlanner::get_motion_list()
-{
-    motion_set_.push_back(get_motion_param( 1,  0, 1)); // 前
-    motion_set_.push_back(get_motion_param( 0,  1, 1)); // 左
-    motion_set_.push_back(get_motion_param(-1,  0, 1)); // 後ろ
-    motion_set_.push_back(get_motion_param( 0, -1, 1)); // 右
-
-    motion_set_.push_back(get_motion_param(-1,-1, sqrt(2))); // 右後ろ
-    motion_set_.push_back(get_motion_param(-1, 1, sqrt(2))); // 左後ろ
-    motion_set_.push_back(get_motion_param( 1,-1, sqrt(2))); // 右前
-    motion_set_.push_back(get_motion_param( 1, 1, sqrt(2))); // 左前
-}
-
-std::vector<Motion> AStarPlanner::get_motion(const int dx, const int dy, const double cost)
-{
     Motion motion;
     motion.dx   = dx;
     motion.dy   = dy;
     motion.cost = cost;
 
     return motion;
+}
+
+// 隣接ノードを取得
+Node AStarPlanner::get_neighbor_node(const Node current_node, const Motion motion)
+{
+    Node neighbor_node;
+
+    // 移動
+    neighbor_node.index_x = current_node.index_x + motion.dx;
+    neighbor_node.index_y = current_node.index_y + motion.dy;
+
+    // f値を記録
+    neighbor_node.cost = (current_node.cost - heuristic(current_node)) + heuristic(neighbor_node) + motion.cost;
+
+    // 親ノードを記録
+    neighbor_node.parent_index_x = current_node.parent_index_x;
+    neighbor_node.parent_index_y = current_node.parent_index_y;
+
+    return neighbor_node;
+}
+
+// OpenリストまたはCloseリストに含まれるか調べる
+std::tuple<int, int> AStarPlanner::search_node(const Node target_node)
+{
+    // Openリストに含まれるか検索
+    const int open_node_index = search_node_from_set(target_node, open_set_);
+    if(open_node_index != -1)
+        return std::make_tuple(1, open_node_index);
+
+    // Closeリストに含まれるか検索
+    const int closed_node_index = search_node_from_set(target_node, closed_set_);
+    if(closed_node_index != -1)
+        return std::make_tuple(2, closed_node_index);
+
+    // OpenリストにもCloseリストにもない場合
+    return std::make_tuple(-1, -1);
 }
