@@ -139,12 +139,12 @@ include
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/second_challenge_toshiki_node.cpp)
-add_executable(global_path_planner src/global_path_planner_main.cpp src/global_path_planner.cpp)
-add_executable(local_goal_creator2 src/local_goal_creator_main.cpp src/local_goal_creator.cpp)
-add_executable(local_map_creator2 src/local_map_creator_main.cpp src/local_map_creator.cpp)
-add_executable(local_path_planner2 src/local_path_planner_main.cpp src/local_path_planner.cpp)
-add_executable(obstacle_expander  src/obstacle_expander_main.cpp  src/obstacle_expander.cpp)
-add_executable(obstacle_scanner2  src/obstacle_scanner_main.cpp  src/obstacle_scanner.cpp)
+add_executable(global_path_planner src/global_path_planner_node.cpp src/global_path_planner.cpp)
+add_executable(local_goal_creator2 src/local_goal_creator_node.cpp src/local_goal_creator.cpp)
+add_executable(local_map_creator2 src/local_map_creator_node.cpp src/local_map_creator.cpp)
+add_executable(local_path_planner2 src/local_path_planner_node.cpp src/local_path_planner.cpp)
+add_executable(obstacle_expander  src/obstacle_expander_node.cpp  src/obstacle_expander.cpp)
+add_executable(obstacle_scanner2  src/obstacle_scanner_node.cpp  src/obstacle_scanner.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
