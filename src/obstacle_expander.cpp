@@ -19,6 +19,7 @@ void ObstacleExpander::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg
 {
     raw_map_  = *msg;
     flag_map_ = true;
+    ros::Duration(1).sleep();
 }
 
 // 唯一メイン関数で実行する関数
@@ -50,6 +51,8 @@ void ObstacleExpander::expand_obstacle()
 
     pub_updated_map_.publish(updated_map_);
     show_exe_time(); // 実行時間を表示
+    ros::Duration(0.3).sleep();
+    exit(0);
 }
 
 // 周囲のグリッドの色を変更（円形状に膨張）

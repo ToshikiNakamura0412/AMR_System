@@ -30,6 +30,7 @@ void AStarPlanner::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 {
     map_      = *msg;
     flag_map_ = true;
+    ros::Duration(0.5).sleep();
 }
 
 // 唯一メイン関数で実行する関数
@@ -72,7 +73,7 @@ void AStarPlanner::planning()
             if(open_set_.size() == 0)
             {
                 ROS_WARN_STREAM("Open set is empty.."); // 探索失敗
-                exit(2);
+                exit(4);
             }
 
             // Openリスト内で最もコストの小さいノードを現在のノードに指定
@@ -94,6 +95,7 @@ void AStarPlanner::planning()
     }
     pub_global_path_.publish(global_path_);
     show_exe_time(); // 実行時間を表示
+    exit(0);
 }
 
 // 経由点の取得
@@ -106,7 +108,7 @@ Node AStarPlanner::get_way_point(const int phase)
     if(is_obs(way_point))
     {
         ROS_ERROR_STREAM("The way point is inappropriate..");
-        exit(1);
+        exit(3);
     }
 
     return way_point;
@@ -192,7 +194,7 @@ void AStarPlanner::create_path(Node current_node)
             if(i == closed_set_.size()-1)
             {
                 ROS_ERROR_STREAM("The parent node is not found..");
-                exit(4);
+                exit(6);
             }
         }
     }
@@ -227,7 +229,7 @@ void AStarPlanner::transfer_node(const Node node, std::vector<Node>& set1, std::
     if(set1_node_index == -1)
     {
         ROS_ERROR_STREAM("The same node is not found..");
-        exit(4);
+        exit(6);
     }
 
     set1.erase(set1.begin() + set1_node_index); // リスト1からノードを削除
@@ -326,7 +328,7 @@ Motion AStarPlanner::get_motion(const int dx, const int dy, const double cost)
     if(1 < abs(dx) || 1 < abs(dy))
     {
         ROS_ERROR_STREAM("The motion is inappropriate..");
-        exit(3);
+        exit(5);
     }
 
     Motion motion;

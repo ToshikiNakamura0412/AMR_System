@@ -42,7 +42,7 @@ private:
     std::vector<int> rect_grid_index_list_;
 
     // msg受け取りフラッグ
-    bool flag_map_= false;
+    bool flag_map_ = false;
 
     // 実行時間表示用
     ros::Time begin_;
