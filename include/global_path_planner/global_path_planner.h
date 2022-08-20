@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/PointStamped.h>
 #include <nav_msgs/Path.h>
 #include <nav_msgs/OccupancyGrid.h>
 
@@ -43,7 +44,10 @@ private:
     void   creat_motion_model(std::vector<Motion>& motion_set);                              // 動作モデルを作成
     void   creat_neighbor_nodes(const Node current_node, std::vector<Node>& neighbor_nodes); // すべての隣接ノードを作成
     void   transfer_node(const Node node, std::vector<Node>& set1, std::vector<Node>& set2); // set1からset2にノードを移動
+    void   show_node_point(const Node node, const double sleep_time);                        // ノードを表示(デバッグ用)
+    void   show_path(nav_msgs::Path& current_path);                                          // パスを表示(デバッグ用)
     bool   is_obs(const Node node);                                                          // 障害物か判断
+    bool   is_start(const Node node);                                                        // スタートか判断
     bool   is_goal(const Node node);                                                         // ゴールか判断
     bool   is_same_node(const Node n1, const Node n2);                                       // 同じノードか判断
     bool   is_parent(const int closed_node_index, const Node node);                          // 親ノードか判断
@@ -63,6 +67,7 @@ private:
 
     // ----- 変数 -----
     int hz_;                           // ループ周波数 [Hz]
+    Node start_node_;                  // スタートノード
     Node goal_node_;                   // ゴールノード
     std::vector<Node> open_set_;       // Openリスト
     std::vector<Node> closed_set_;     // Closeリスト
