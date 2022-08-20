@@ -62,7 +62,7 @@ void ObstacleExpander::change_surrounding_grid_color(const int occupied_grid_ind
     for(int i=0; i<size; i++)
     {
         const int    index = rect_grid_index_list_[i];
-        const double dist  = get_dist_cell(occupied_grid_index, index);
+        const double dist  = calc_dist_cell(occupied_grid_index, index);
         if(dist <= target_margin_cell) // マージン内のセルの場合
             updated_map_.data[index] = 100;
     }
@@ -73,13 +73,13 @@ void ObstacleExpander::search_rect_grid_index_list(const int center_grid_index)
 {
     rect_grid_index_list_.clear();
 
-    const int upper_left_grid_index    = get_upper_left_grid_index(center_grid_index);
-    const int upper_left_grid_index_x  = get_grid_index_x(upper_left_grid_index);
-    const int upper_left_grid_index_y  = get_grid_index_y(upper_left_grid_index);
+    const int upper_left_grid_index    = find_upper_left_grid_index(center_grid_index);
+    const int upper_left_grid_index_x  = calc_grid_index_x(upper_left_grid_index);
+    const int upper_left_grid_index_y  = calc_grid_index_y(upper_left_grid_index);
 
-    const int lower_right_grid_index   = get_lower_right_grid_index(center_grid_index);
-    const int lower_right_grid_index_x = get_grid_index_x(lower_right_grid_index);
-    const int lower_right_grid_index_y = get_grid_index_y(lower_right_grid_index);
+    const int lower_right_grid_index   = find_lower_right_grid_index(center_grid_index);
+    const int lower_right_grid_index_x = calc_grid_index_x(lower_right_grid_index);
+    const int lower_right_grid_index_y = calc_grid_index_y(lower_right_grid_index);
 
     const int width  = lower_right_grid_index_x - upper_left_grid_index_x + 1;
     const int height = lower_right_grid_index_y - upper_left_grid_index_y + 1;
@@ -97,7 +97,7 @@ void ObstacleExpander::search_rect_grid_index_list(const int center_grid_index)
 }
 
 // rect_grid_index_listの左上のインデックスを検索
-int ObstacleExpander::get_upper_left_grid_index(const int center_grid_index)
+int ObstacleExpander::find_upper_left_grid_index(const int center_grid_index)
 {
     int index = center_grid_index;
     const int target_margin_cell = int(round(target_margin_/updated_map_.info.resolution)); // 車両マージン [cell]
@@ -114,7 +114,7 @@ int ObstacleExpander::get_upper_left_grid_index(const int center_grid_index)
     }
 
     // 左方向に検索位置を移動
-    const int min_index = get_mix_grid_index_in_same_line(index);
+    const int min_index = calc_mix_grid_index_in_same_line(index);
     for(int i=0; i<target_margin_cell; i++)
     {
         index--;
@@ -129,7 +129,7 @@ int ObstacleExpander::get_upper_left_grid_index(const int center_grid_index)
 }
 
 // 占有グリッドを含む行のインデックスの最小値の算出
-bool ObstacleExpander::get_mix_grid_index_in_same_line(const int index)
+bool ObstacleExpander::calc_mix_grid_index_in_same_line(const int index)
 {
     int min_index = 0;
     int max_index = updated_map_.info.width-1;
@@ -143,19 +143,19 @@ bool ObstacleExpander::get_mix_grid_index_in_same_line(const int index)
 }
 
 // グリッドのインデックスからxのインデックスを計算
-int ObstacleExpander::get_grid_index_x(const int index)
+int ObstacleExpander::calc_grid_index_x(const int index)
 {
     return index % updated_map_.info.width;
 }
 
 // グリッドのインデックスからyのインデックスを計算
-int ObstacleExpander::get_grid_index_y(const int index)
+int ObstacleExpander::calc_grid_index_y(const int index)
 {
     return index / updated_map_.info.width;
 }
 
 // rect_grid_index_listの右下のインデックスを検索
-int ObstacleExpander::get_lower_right_grid_index(const int center_grid_index)
+int ObstacleExpander::find_lower_right_grid_index(const int center_grid_index)
 {
     int index = center_grid_index;
     const int target_margin_cell = int(round(target_margin_/updated_map_.info.resolution)); // 車両マージン [cell]
@@ -172,7 +172,7 @@ int ObstacleExpander::get_lower_right_grid_index(const int center_grid_index)
     }
 
     // 右方向に検索位置を移動
-    const int man_index = get_max_grid_index_in_same_line(index);
+    const int man_index = calc_max_grid_index_in_same_line(index);
     for(int i=0; i<target_margin_cell; i++)
     {
         index++;
@@ -187,7 +187,7 @@ int ObstacleExpander::get_lower_right_grid_index(const int center_grid_index)
 }
 
 // 占有グリッドを含む行のインデックスの最大値の算出
-bool ObstacleExpander::get_max_grid_index_in_same_line(const int index)
+bool ObstacleExpander::calc_max_grid_index_in_same_line(const int index)
 {
     int min_index = 0;
     int max_index = updated_map_.info.width-1;
@@ -201,12 +201,12 @@ bool ObstacleExpander::get_max_grid_index_in_same_line(const int index)
 }
 
 // グリッド同士の距離[cell]を計算
-double ObstacleExpander::get_dist_cell(const int index1, const int index2)
+double ObstacleExpander::calc_dist_cell(const int index1, const int index2)
 {
-    const int index1_x = get_grid_index_x(index1);
-    const int index1_y = get_grid_index_y(index1);
-    const int index2_x = get_grid_index_x(index2);
-    const int index2_y = get_grid_index_y(index2);
+    const int index1_x = calc_grid_index_x(index1);
+    const int index1_y = calc_grid_index_y(index1);
+    const int index2_x = calc_grid_index_x(index2);
+    const int index2_y = calc_grid_index_y(index2);
 
     const double dx = double(index1_x - index2_x);
     const double dy = double(index1_y - index2_y);

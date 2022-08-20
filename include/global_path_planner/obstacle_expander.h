@@ -20,13 +20,13 @@ private:
     // その他の関数
     void   change_surrounding_grid_color(const int occupied_grid_index); // 周囲のグリッドの色の変更(円形状に膨張)
     void   search_rect_grid_index_list(const int center_grid_index);     // 探索対象のグリッドのインデックスを追加
-    bool   get_max_grid_index_in_same_line(const int index);             // 行のインデックスの最大値の算出
-    bool   get_mix_grid_index_in_same_line(const int index);             // 行のインデックスの最小値の算出
-    int    get_upper_left_grid_index(const int center_grid_index);       // rect_grid_index_listの左上のインデックスを検索
-    int    get_lower_right_grid_index(const int center_grid_index);      // rect_grid_index_listの右下のインデックスを検索
-    int    get_grid_index_x(const int index);                            // グリッドのインデックスからxのインデックスを計算
-    int    get_grid_index_y(const int index);                            // グリッドのインデックスからyのインデックスを計算
-    double get_dist_cell(const int index1, const int index2);            // グリッド同士の距離[cell]を計算
+    bool   calc_max_grid_index_in_same_line(const int index);            // 行のインデックスの最大値の算出
+    bool   calc_mix_grid_index_in_same_line(const int index);            // 行のインデックスの最小値の算出
+    int    find_upper_left_grid_index(const int center_grid_index);       // rect_grid_index_listの左上のインデックスを検索
+    int    find_lower_right_grid_index(const int center_grid_index);      // rect_grid_index_listの右下のインデックスを検索
+    int    calc_grid_index_x(const int index);                           // グリッドのインデックスからxのインデックスを計算
+    int    calc_grid_index_y(const int index);                           // グリッドのインデックスからyのインデックスを計算
+    double calc_dist_cell(const int index1, const int index2);           // グリッド同士の距離[cell]を計算
 
 
     // ----- 関数（引数なし）------
