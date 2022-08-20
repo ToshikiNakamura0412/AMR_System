@@ -34,7 +34,7 @@ public:
     void process();
 
 private:
-    // ----- 関数（引数あり） ------
+    // ----- 関数（引数あり）------
     // コールバック関数
     void map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg);
 
@@ -60,7 +60,7 @@ private:
     geometry_msgs::PoseStamped calc_pose(const Node node);                                   // ノードからポーズを計算
 
 
-    // ----- 関数（引数あり） ------
+    // ----- 関数（引数なし）------
     void planning();            // グローバルパスの生成
     void show_exe_time();       // 実行時間を表示（スタート時間beginを予め設定する）
     Node select_current_node(); // Openリスト内で最もコストの小さいノードを取得
