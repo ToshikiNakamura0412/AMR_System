@@ -45,7 +45,7 @@ private:
     void   creat_neighbor_nodes(const Node current_node, std::vector<Node>& neighbor_nodes); // すべての隣接ノードを作成
     void   transfer_node(const Node node, std::vector<Node>& set1, std::vector<Node>& set2); // set1からset2にノードを移動
     void   show_node_point(const Node node, const double sleep_time);                        // ノードを表示(デバッグ用)
-    void   show_path(nav_msgs::Path& current_path);                                          // パスを表示(デバッグ用)
+    void   show_path(nav_msgs::Path& current_path, const double sleep_time);                 // パスを表示(デバッグ用)
     bool   is_obs(const Node node);                                                          // 障害物か判断
     bool   is_start(const Node node);                                                        // スタートか判断
     bool   is_goal(const Node node);                                                         // ゴールか判断
@@ -88,7 +88,8 @@ private:
 
     // Publisher
     ros::Publisher pub_global_path_;
-    ros::Publisher pub_node_point_; // デバッグ用
+    ros::Publisher pub_current_path_; // デバッグ用
+    ros::Publisher pub_node_point_;   // デバッグ用
 
     // 各種オブジェクト
     nav_msgs::OccupancyGrid map_; // obstacle_expanderノードから受け取るマップ

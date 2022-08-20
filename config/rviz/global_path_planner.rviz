@@ -82,7 +82,7 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Alpha: 1
-      Buffer Length: 2
+      Buffer Length: 3
       Class: rviz/Path
       Color: 25; 255; 0
       Enabled: true
@@ -98,11 +98,35 @@ Visualization Manager:
         Z: 0
       Pose Color: 255; 85; 255
       Pose Style: None
-      Queue Size: 10
+      Queue Size: 20
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
       Topic: /global_path
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Buffer Length: 2
+      Class: rviz/Path
+      Color: 252; 175; 62
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
+      Name: Current Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Queue Size: 20
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic: /current_path
       Unreliable: false
       Value: true
   Enabled: true
@@ -133,7 +157,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 33.799835205078125
+      Distance: 34.04792022705078
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -141,9 +165,9 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 6.216707706451416
-        Y: 3.6954166889190674
-        Z: -12.617875099182129
+        X: 12.42773723602295
+        Y: 3.3393845558166504
+        Z: -12.618168830871582
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false

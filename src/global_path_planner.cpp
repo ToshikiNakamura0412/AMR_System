@@ -14,10 +14,11 @@ AStarPlanner::AStarPlanner():private_nh_("~")
 
     // Subscriber
     sub_map_ = nh_.subscribe("/map/updated_map", 1, &AStarPlanner::map_callback, this);
-    pub_node_point_ = nh_.advertise<geometry_msgs::PointStamped>("/current_node", 1);
 
     // Publisher
-    pub_global_path_ = nh_.advertise<nav_msgs::Path>("/global_path", 1);
+    pub_global_path_  = nh_.advertise<nav_msgs::Path>("/global_path", 1);
+    pub_current_path_ = nh_.advertise<nav_msgs::Path>("/current_path", 1);
+    pub_node_point_   = nh_.advertise<geometry_msgs::PointStamped>("/current_node", 1);
 }
 
 // mapのコールバック関数
@@ -25,7 +26,6 @@ void AStarPlanner::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 {
     map_ = *msg;
     flag_map_ = true;
-    // std::cout << "Map Size: " <<map_.data.size() << std::endl;
 }
 
 // 唯一メイン関数で実行する関数
@@ -38,7 +38,7 @@ void AStarPlanner::process()
         if(flag_map_)
         {
             planning();    // グローバルパスの生成
-            std::cout << "Path Size: " << global_path_.poses.size() << std::endl;
+            std::cout << "Global path size: " << global_path_.poses.size() << std::endl;
             break;
         }
         ros::spinOnce();   // コールバック関数の実行
@@ -65,22 +65,22 @@ void AStarPlanner::planning()
         start_node_.cost = heuristic(start_node_); // f(s)=h(s)
         open_set_.push_back(start_node_);
 
-        while(1)
+        while(ros::ok())
         {
             // Openリストが空の場合
             if(open_set_.size() == 0)
             {
                 ROS_WARN_STREAM("Open set is empty.."); // 探索失敗
-                break;
+                exit(2);
             }
 
             // Openリスト内で最もコストの小さいノードを現在のノードに指定
             Node current_node = select_current_node();
+            show_node_point(current_node, 0.003);
 
             // 経路の探索
             if(is_goal(current_node)) // ゴールに到達した場合
             {
-                // std::cout << "Reached point" << phase << std::endl;
                 create_path(current_node);
                 break; // 探索終了
             }
@@ -97,14 +97,13 @@ void AStarPlanner::planning()
 // 経由点の取得
 Node AStarPlanner::get_way_point(const int phase)
 {
-    // std::cout << "[get way point]" << std::endl;
     Node way_point;
     way_point.index_x = int(round((way_points_x_[phase] - map_.info.origin.position.x) / map_.info.resolution));
     way_point.index_y = int(round((way_points_y_[phase] - map_.info.origin.position.y) / map_.info.resolution));
 
     if(is_obs(way_point))
     {
-        ROS_ERROR_STREAM("Way point is inappropriate..");
+        ROS_ERROR_STREAM("The way point is inappropriate..");
         exit(1);
     }
 
@@ -114,20 +113,13 @@ Node AStarPlanner::get_way_point(const int phase)
 // ノードが障害物か判断
 bool AStarPlanner::is_obs(const Node node)
 {
-    // std::cout << "[is obs]" << std::endl;
     const int grid_index = node.index_x + (node.index_y * map_.info.width);
-    // std::cout << "before access a map!!" << std::endl;
-    //
-   show_node_point(node, 0.01);
-    //
-    // std::cout << "Grid Index: " << grid_index << std::endl;
     return map_.data[grid_index] == 100;
 }
 
 // ヒューリスティック値を計算
 double AStarPlanner::heuristic(const Node node)
 {
-    // std::cout << "[heuristic]" << std::endl;
     // ヒューリスティックの重み
     const double w = 1.0;
 
@@ -142,7 +134,6 @@ double AStarPlanner::heuristic(const Node node)
 // Openリスト内で最もコストの小さいノードを取得
 Node AStarPlanner::select_current_node()
 {
-    // std::cout << "[select current node]" << std::endl;
     Node current_node = open_set_[0];
     double min_cost = open_set_[0].cost;
 
@@ -182,21 +173,31 @@ bool AStarPlanner::is_same_node(const Node n1, const Node n2)
 // waypoint間のパスを作成し，グローバルパスに追加
 void AStarPlanner::create_path(Node current_node)
 {
-    // std::cout << "[create path]" << std::endl;
     nav_msgs::Path partial_path;
     partial_path.poses.push_back(calc_pose(current_node));
 
-    while(is_start(current_node))
+    std::cout << "Closed set size: " << closed_set_.size() << std::endl;
+    while(!is_start(current_node))
     {
         for(int i=0; i<closed_set_.size() ;i++)
+        {
             if(is_parent(i, current_node))
+            {
                 current_node = closed_set_[i];
-
-        partial_path.poses.push_back(calc_pose(current_node));
+                show_node_point(current_node, 0.001);
+                partial_path.poses.push_back(calc_pose(current_node));
+                break;
+            }
+            if(i == closed_set_.size()-1)
+            {
+                ROS_ERROR_STREAM("The parent node is not found..");
+                exit(4);
+            }
+        }
     }
 
     reverse(partial_path.poses.begin(), partial_path.poses.end());
-    show_path(partial_path);
+    show_path(partial_path, 0.05);
     global_path_.poses.insert(global_path_.poses.end(), partial_path.poses.begin(), partial_path.poses.end());
 }
 
@@ -205,7 +206,7 @@ geometry_msgs::PoseStamped AStarPlanner::calc_pose(const Node node)
 {
     geometry_msgs::PoseStamped pose_stamped;
     pose_stamped.pose.position.x = node.index_x * map_.info.resolution + map_.info.origin.position.x;
-    pose_stamped.pose.position.y = node.index_y * map_.info.resolution + map_.info.origin.position.x;
+    pose_stamped.pose.position.y = node.index_y * map_.info.resolution + map_.info.origin.position.y;
 
     return pose_stamped;
 }
@@ -215,15 +216,19 @@ bool AStarPlanner::is_parent(const int closed_node_index, const Node node)
 {
     bool is_same_x = closed_set_[closed_node_index].index_x == node.parent_index_x;
     bool is_same_y = closed_set_[closed_node_index].index_y == node.parent_index_y;
-
     return  is_same_x && is_same_y;
 }
 
 // set1からset2にノードを移動
 void AStarPlanner::transfer_node(const Node node, std::vector<Node>& set1, std::vector<Node>& set2)
 {
-    // std::cout << "[transfer node]" << std::endl;
     const int set1_node_index = search_node_from_set(node, set1); // リスト1からノードを探す
+    if(set1_node_index == -1)
+    {
+        ROS_ERROR_STREAM("The same node is not found..");
+        exit(4);
+    }
+
     set1.erase(set1.begin() + set1_node_index); // リスト1からノードを削除
     set2.push_back(node); // リスト2にノードを追加
 }
@@ -241,7 +246,6 @@ int AStarPlanner::search_node_from_set(const Node target_node, std::vector<Node>
 // 隣接ノードを基にOpenリスト・Closeリストを更新
 void AStarPlanner::update_set(const Node current_node)
 {
-    // std::cout << "[update set]" << std::endl;
     // 隣接ノードを宣言
     std::vector<Node> neighbor_nodes;
 
@@ -287,7 +291,6 @@ void AStarPlanner::update_set(const Node current_node)
 // 現在のノードを基に隣接ノードを作成
 void AStarPlanner::creat_neighbor_nodes(const Node current_node, std::vector<Node>& neighbor_nodes)
 {
-    // std::cout << "[creat neighbor nodes]" << std::endl;
     // 動作モデルの作成
     std::vector<Motion> motion_set;
     creat_motion_model(motion_set);
@@ -298,7 +301,6 @@ void AStarPlanner::creat_neighbor_nodes(const Node current_node, std::vector<Nod
     {
         Node neighbor_node = get_neighbor_node(current_node, motion_set[i]); // 隣接ノードを取得
         neighbor_nodes.push_back(neighbor_node);
-        // std::cout << "push_back!!" << std::endl;
     }
 }
 
@@ -322,8 +324,8 @@ Motion AStarPlanner::get_motion(const int dx, const int dy, const double cost)
     // 隣接したグリッドに移動しない場合
     if(1 < abs(dx) || 1 < abs(dy))
     {
-        ROS_ERROR_STREAM("Motion is inappropriate..");
-        exit(2);
+        ROS_ERROR_STREAM("The motion is inappropriate..");
+        exit(3);
     }
 
     Motion motion;
@@ -337,7 +339,6 @@ Motion AStarPlanner::get_motion(const int dx, const int dy, const double cost)
 // 隣接ノードを取得
 Node AStarPlanner::get_neighbor_node(const Node current_node, const Motion motion)
 {
-    // std::cout << "[get neighbor node]" << std::endl;
     Node neighbor_node;
 
     // 移動
@@ -348,8 +349,8 @@ Node AStarPlanner::get_neighbor_node(const Node current_node, const Motion motio
     neighbor_node.cost = (current_node.cost - heuristic(current_node)) + heuristic(neighbor_node) + motion.cost;
 
     // 親ノードを記録
-    neighbor_node.parent_index_x = current_node.parent_index_x;
-    neighbor_node.parent_index_y = current_node.parent_index_y;
+    neighbor_node.parent_index_x = current_node.index_x;
+    neighbor_node.parent_index_y = current_node.index_y;
 
     return neighbor_node;
 }
@@ -376,15 +377,14 @@ void  AStarPlanner::show_node_point(const Node node, const double sleep_time)
 {
     current_node_.point.x = node.index_x * map_.info.resolution + map_.info.origin.position.x;
     current_node_.point.y = node.index_y * map_.info.resolution + map_.info.origin.position.y;
-    pub_node_point_.publish(current_node);
+    pub_node_point_.publish(current_node_);
     ros::Duration(sleep_time).sleep();
 }
 
 // [デバッグ用] パスをRvizに表示
-void  AStarPlanner::show_path(nav_msgs::Path& current_path)
+void  AStarPlanner::show_path(nav_msgs::Path& current_path, const double sleep_time)
 {
     current_path.header.frame_id = "map";
-    ros::Publisher pub_current_path;
-    pub_current_path = nh_.advertise<nav_msgs::Path>("/current_path", 1);
-    pub_current_path.publish(current_path);
+    pub_current_path_.publish(current_path);
+    ros::Duration(sleep_time).sleep();
 }
