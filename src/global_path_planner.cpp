@@ -5,13 +5,16 @@ AStarPlanner::AStarPlanner():private_nh_("~")
 {
     // パラメータの取得
     private_nh_.getParam("hz", hz_);
-    private_nh_.getParam("is_flag", is_flag_);
+    private_nh_.getParam("is_visible", is_visible_);
     private_nh_.getParam("way_points_x", way_points_x_);
     private_nh_.getParam("way_points_y", way_points_y_);
 
+    // --- 基本設定 ---
     // frame idの設定
     global_path_.header.frame_id  = "map";
     current_node_.header.frame_id = "map";
+    // dataサイズの確保
+    global_path_.poses.reserve(2000);
 
     // Subscriber
     sub_map_ = nh_.subscribe("/map/updated_map", 1, &AStarPlanner::map_callback, this);
@@ -37,11 +40,7 @@ void AStarPlanner::process()
     while(ros::ok())
     {
         if(flag_map_)
-        {
             planning();    // グローバルパスの生成
-            std::cout << "Global path size: " << global_path_.poses.size() << std::endl;
-            break;
-        }
         ros::spinOnce();   // コールバック関数の実行
         loop_rate.sleep(); // 周期が終わるまで待つ
     }
@@ -53,7 +52,6 @@ void AStarPlanner::planning()
     const int phase_size = way_points_x_.size()-1;
     for(int phase=0; phase<phase_size; phase++)
     {
-        std::cout << "Phase: " << phase << std::endl;
         // リストを空にする
         open_set_.clear();
         closed_set_.clear();
@@ -77,7 +75,7 @@ void AStarPlanner::planning()
 
             // Openリスト内で最もコストの小さいノードを現在のノードに指定
             Node current_node = select_current_node();
-            show_node_point(current_node, 0.003);
+            show_node_point(current_node, 0.001);
 
             // 経路の探索
             if(is_goal(current_node)) // ゴールに到達した場合
@@ -177,7 +175,6 @@ void AStarPlanner::create_path(Node current_node)
     nav_msgs::Path partial_path;
     partial_path.poses.push_back(calc_pose(current_node));
 
-    std::cout << "Closed set size: " << closed_set_.size() << std::endl;
     while(!is_start(current_node))
     {
         for(int i=0; i<closed_set_.size() ;i++)

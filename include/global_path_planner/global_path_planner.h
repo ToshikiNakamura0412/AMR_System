@@ -67,7 +67,7 @@ private:
 
     // ----- 変数 -----
     int hz_;                           // ループ周波数 [Hz]
-    bool is_flag_;                      // 可視化フラグ
+    bool is_visible_;                      // 可視化フラグ
     Node start_node_;                  // スタートノード
     Node goal_node_;                   // ゴールノード
     std::vector<Node> open_set_;       // Openリスト
