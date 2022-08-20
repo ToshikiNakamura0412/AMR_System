@@ -62,12 +62,13 @@ private:
 
     // ----- 関数（引数あり） ------
     void planning();            // グローバルパスの生成
+    void show_exe_time();       // 実行時間を表示（スタート時間beginを予め設定する）
     Node select_current_node(); // Openリスト内で最もコストの小さいノードを取得
 
 
     // ----- 変数 -----
     int hz_;                           // ループ周波数 [Hz]
-    bool is_visible_;                      // 可視化フラグ
+    bool is_visible_;                  // 可視化フラグ(パス・ノード)
     Node start_node_;                  // スタートノード
     Node goal_node_;                   // ゴールノード
     std::vector<Node> open_set_;       // Openリスト
@@ -77,6 +78,9 @@ private:
 
     // msg受け取りフラグ
     bool flag_map_ = false;
+
+    // 実行時間表示用
+    ros::Time begin_;
 
 
     // ----- その他のオブジェクト -----

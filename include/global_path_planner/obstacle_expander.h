@@ -32,6 +32,7 @@ private:
     // mode2
     void   change_surrounding_grid_color2(const int occupied_grid_index); // 周囲のグリッドの色の変更(円形状に膨張)
     void   search_rect_grid_index_list(const int center_grid_index);      // 探索対象のグリッドのインデックスを追加
+    void   show_exe_time();                                               // 実行時間を表示（スタート時間beginを予め設定する）
     int    get_upper_left_grid_index(const int center_grid_index);        // rect_grid_index_listの左上のインデックスを検索
     int    get_lower_right_grid_index(const int center_grid_index);       // rect_grid_index_listの右下のインデックスを検索
     int    get_grid_index_x(const int index);                             // グリッドのインデックスからxのインデックスを計算
@@ -49,6 +50,9 @@ private:
 
     // msg受け取りフラッグ
     bool flag_map_= false;
+
+    // 実行時間表示用
+    ros::Time begin_;
 
 
     // ----- その他のオブジェクト -----

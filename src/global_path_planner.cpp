@@ -49,6 +49,7 @@ void AStarPlanner::process()
 // グローバルパスを生成
 void AStarPlanner::planning()
 {
+    begin_ = ros::Time::now().toSec(); // 実行時間のスタートを設定
     const int phase_size = way_points_x_.size()-1;
     for(int phase=0; phase<phase_size; phase++)
     {
@@ -91,6 +92,7 @@ void AStarPlanner::planning()
         }
     }
     pub_global_path_.publish(global_path_);
+    show_exe_time(); // 実行時間を表示
 }
 
 // 経由点の取得
@@ -387,4 +389,10 @@ void  AStarPlanner::show_path(nav_msgs::Path& current_path, const double sleep_t
     current_path.header.frame_id = "map";
     pub_current_path_.publish(current_path);
     ros::Duration(sleep_time).sleep();
+}
+
+// 実行時間を表示（スタート時間beginを予め設定する）
+void AStarPlanner::show_exe_time()
+{
+    ROS_INFO_STREAM("実行時間: " << ros::Time::now().toSec()-begin_);
 }

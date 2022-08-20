@@ -37,11 +37,7 @@ void ObstacleExpander::process()
     while(ros::ok())
     {
         if(flag_map_)
-        {
-            clock_t start_time = clock();
             expand_obstacle(); // 障害物の膨張
-            if(!time_flag++) std::cout << "実行時間: " << (clock()-start_time)/1e6 << std::endl;
-        }
         ros::spinOnce();       // コールバック関数の実行
         loop_rate.sleep();     // 周期が終わるまで待つ
     }
@@ -50,6 +46,7 @@ void ObstacleExpander::process()
 // 障害物を膨張
 void ObstacleExpander::expand_obstacle()
 {
+    begin_ = ros::Time::now().toSec(); // 実行時間のスタートを設定
     updated_map_ = raw_map_;
 
     const int size = raw_map_.data.size();
@@ -65,6 +62,7 @@ void ObstacleExpander::expand_obstacle()
     }
 
     pub_updated_map_.publish(updated_map_);
+    show_exe_time() // 実行時間を表示
 }
 
 
@@ -295,4 +293,10 @@ double ObstacleExpander::get_dist_cell(const int index1, const int index2)
     const double dy = double(index1_y - index2_y);
 
     return hypot(dx, dy);
+}
+
+// 実行時間を表示（スタート時間beginを予め設定する）
+void ObstacleExpander::show_exe_time()
+{
+    ROS_INFO_STREAM("実行時間: " << ros::Time::now().toSec()-begin_);
 }
