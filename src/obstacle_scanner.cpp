@@ -21,7 +21,7 @@ ObstacleScanner::ObstacleScanner():private_nh_("~")
 // laserのコールバック関数
 void ObstacleScanner::laser_callback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
-    laser_ = *msg;
+    laser_      = *msg;
     flag_laser_ = true;
 }
 

@@ -34,7 +34,7 @@ LocalMapCreator::LocalMapCreator():private_nh_("~")
 // obs_posesのコールバック関数
 void LocalMapCreator::obs_poses_callback(const geometry_msgs::PoseArray::ConstPtr& msg)
 {
-    obs_poses_ = *msg;
+    obs_poses_      = *msg;
     flag_obs_poses_ = true;
 }
 

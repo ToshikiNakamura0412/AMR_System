@@ -1,9 +1,8 @@
 # パスを可視化するかの設定用
 is_visible: true
-# is_visible: false
 
-# 制御周波数
-hz: 10 # [Hz]
+# 制御周波数 [Hz]
+hz: 10
 
 # 速度制限
 max_vel1: 0.45            # [m/s]（平常時）
@@ -35,9 +34,9 @@ radius_margin2: 0.04 #（減速時）
 
 # 重み定数 [-]
 weight_heading1: 0.85 #（平常時）
-weight_heading2: 0.2 #（減速時）
-weight_dist1: 1.5   #（平常時）
-weight_dist2: 0.8    #（減速時）
+weight_heading2: 0.2  #（減速時）
+weight_dist1: 1.5     #（平常時）
+weight_dist2: 0.8     #（減速時）
 weight_vel: 0.6
 
 # 許容誤差 [m]

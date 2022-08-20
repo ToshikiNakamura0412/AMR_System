@@ -23,14 +23,14 @@ LocalGoalCreator::LocalGoalCreator():private_nh_("~")
 // estimated_poseのコールバック関数
 void LocalGoalCreator::estimated_pose_callback(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
-    estimated_pose_ = *msg;
+    estimated_pose_      = *msg;
     flag_estimated_pose_ = true;
 }
 
 // global_pathのコールバック関数
 void LocalGoalCreator::global_path_callback(const nav_msgs::Path::ConstPtr& msg)
 {
-    global_path_ = *msg;
+    global_path_      = *msg;
     flag_global_path_ = true;
 }
 

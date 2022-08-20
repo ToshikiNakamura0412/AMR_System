@@ -39,7 +39,8 @@ void ObstacleExpander::process()
 // 障害物を膨張
 void ObstacleExpander::expand_obstacle()
 {
-    begin_ = ros::Time::now().toSec(); // 実行時間のスタートを設定
+    ROS_INFO_STREAM("----- Obstacle Expander will begin ------");
+    begin_ = ros::Time::now(); // 実行時間のスタートを設定
     updated_map_ = raw_map_;
 
     const int size = raw_map_.data.size();
@@ -48,7 +49,7 @@ void ObstacleExpander::expand_obstacle()
             change_surrounding_grid_color(index); // 周囲のグリッドの色の変更
 
     pub_updated_map_.publish(updated_map_);
-    show_exe_time() // 実行時間を表示
+    show_exe_time(); // 実行時間を表示
 }
 
 // 周囲のグリッドの色を変更（円形状に膨張）
@@ -216,5 +217,6 @@ double ObstacleExpander::get_dist_cell(const int index1, const int index2)
 // 実行時間を表示（スタート時間beginを予め設定する）
 void ObstacleExpander::show_exe_time()
 {
-    ROS_INFO_STREAM("実行時間: " << ros::Time::now().toSec()-begin_);
+    ROS_INFO_STREAM("Duration = " << std::fixed << std::setprecision(2)
+                    << ros::Time::now().toSec() - begin_.toSec() << "s");
 }

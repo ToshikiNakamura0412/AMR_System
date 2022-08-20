@@ -28,7 +28,7 @@ AStarPlanner::AStarPlanner():private_nh_("~")
 // mapのコールバック関数
 void AStarPlanner::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 {
-    map_ = *msg;
+    map_      = *msg;
     flag_map_ = true;
 }
 
@@ -49,7 +49,8 @@ void AStarPlanner::process()
 // グローバルパスを生成
 void AStarPlanner::planning()
 {
-    begin_ = ros::Time::now().toSec(); // 実行時間のスタートを設定
+    ROS_INFO_STREAM("----- Global Path Planner will begin ------");
+    begin_ = ros::Time::now(); // 実行時間のスタートを設定
     const int phase_size = way_points_x_.size()-1;
     for(int phase=0; phase<phase_size; phase++)
     {
@@ -394,5 +395,6 @@ void  AStarPlanner::show_path(nav_msgs::Path& current_path, const double sleep_t
 // 実行時間を表示（スタート時間beginを予め設定する）
 void AStarPlanner::show_exe_time()
 {
-    ROS_INFO_STREAM("実行時間: " << ros::Time::now().toSec()-begin_);
+    ROS_INFO_STREAM("Duration = " << std::fixed << std::setprecision(2)
+                    << ros::Time::now().toSec() - begin_.toSec() << "s");
 }

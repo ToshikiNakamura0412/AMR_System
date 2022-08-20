@@ -70,7 +70,7 @@ void DWA::local_goal_callback(const geometry_msgs::PointStamped::ConstPtr& msg)
 // obs_posesのコールバック関数
 void DWA::obs_poses_callback(const geometry_msgs::PoseArray::ConstPtr& msg)
 {
-    obs_poses_ = *msg;
+    obs_poses_      = *msg;
     flag_obs_poses_ = true;
 }
 
