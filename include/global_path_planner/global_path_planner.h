@@ -88,10 +88,12 @@ private:
 
     // Publisher
     ros::Publisher pub_global_path_;
+    ros::Publisher pub_node_point_; // デバッグ用
 
     // 各種オブジェクト
     nav_msgs::OccupancyGrid map_; // obstacle_expanderノードから受け取るマップ
     nav_msgs::Path global_path_;  // グローバルパス
+    geometry_msgs::PointStamped current_node_; // デバッグ用
 };
 
 #endif

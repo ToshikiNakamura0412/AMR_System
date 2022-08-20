@@ -10,9 +10,11 @@ AStarPlanner::AStarPlanner():private_nh_("~")
 
     // frame idの設定
     global_path_.header.frame_id  = "map";
+    current_node_.header.frame_id = "map";
 
     // Subscriber
     sub_map_ = nh_.subscribe("/map/updated_map", 1, &AStarPlanner::map_callback, this);
+    pub_node_point_ = nh_.advertise<geometry_msgs::PointStamped>("/current_node", 1);
 
     // Publisher
     pub_global_path_ = nh_.advertise<nav_msgs::Path>("/global_path", 1);
@@ -116,7 +118,7 @@ bool AStarPlanner::is_obs(const Node node)
     const int grid_index = node.index_x + (node.index_y * map_.info.width);
     // std::cout << "before access a map!!" << std::endl;
     //
-   show_node_point(node, 0.0001);
+   show_node_point(node, 0.01);
     //
     // std::cout << "Grid Index: " << grid_index << std::endl;
     return map_.data[grid_index] == 100;
@@ -372,16 +374,10 @@ std::tuple<int, int> AStarPlanner::search_node(const Node target_node)
 // [デバッグ用] ノードをRvizに表示
 void  AStarPlanner::show_node_point(const Node node, const double sleep_time)
 {
-    geometry_msgs::PointStamped current_node;
-    current_node.header.frame_id = "map";
-    current_node.point.x = node.index_x * map_.info.resolution + map_.info.origin.position.x;
-    current_node.point.y = node.index_y * map_.info.resolution + map_.info.origin.position.y;
-
-    ros::Publisher pub_node_point;
-    pub_node_point = nh_.advertise<geometry_msgs::PointStamped>("/current_node", 1);
-    pub_node_point.publish(current_node);
-
-    // ros::Duration(sleep_time).sleep();
+    current_node_.point.x = node.index_x * map_.info.resolution + map_.info.origin.position.x;
+    current_node_.point.y = node.index_y * map_.info.resolution + map_.info.origin.position.y;
+    pub_node_point_.publish(current_node);
+    ros::Duration(sleep_time).sleep();
 }
 
 // [デバッグ用] パスをRvizに表示
