@@ -5,6 +5,7 @@ AStarPlanner::AStarPlanner():private_nh_("~")
 {
     // パラメータの取得
     private_nh_.getParam("hz", hz_);
+    private_nh_.getParam("is_flag", is_flag_);
     private_nh_.getParam("way_points_x", way_points_x_);
     private_nh_.getParam("way_points_y", way_points_y_);
 
@@ -375,6 +376,7 @@ std::tuple<int, int> AStarPlanner::search_node(const Node target_node)
 // [デバッグ用] ノードをRvizに表示
 void  AStarPlanner::show_node_point(const Node node, const double sleep_time)
 {
+    if(!is_visible_) return;
     current_node_.point.x = node.index_x * map_.info.resolution + map_.info.origin.position.x;
     current_node_.point.y = node.index_y * map_.info.resolution + map_.info.origin.position.y;
     pub_node_point_.publish(current_node_);
@@ -384,6 +386,7 @@ void  AStarPlanner::show_node_point(const Node node, const double sleep_time)
 // [デバッグ用] パスをRvizに表示
 void  AStarPlanner::show_path(nav_msgs::Path& current_path, const double sleep_time)
 {
+    if(!is_visible_) return;
     current_path.header.frame_id = "map";
     pub_current_path_.publish(current_path);
     ros::Duration(sleep_time).sleep();
