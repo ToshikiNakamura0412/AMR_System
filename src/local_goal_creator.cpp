@@ -9,6 +9,9 @@ LocalGoalCreator::LocalGoalCreator():private_nh_("~")
     private_nh_.getParam("goal_index", goal_index_);
     private_nh_.getParam("target_dist_to_goal", target_dist_to_goal_);
 
+    // フラグの初期化
+    flag_global_path_.data = false;
+
     // frame idの設定
     local_goal_.header.frame_id = "map";
 

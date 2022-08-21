@@ -46,7 +46,6 @@ private:
     // フラグ
     bool flag_map_ = false;   // map受信確認用
     std_msgs::Bool flag_pub_; // global_path_plannerノードmsg受信確認用
-    flag_pub_.data = false;
 
     // 実行時間表示用
     ros::Time begin_;

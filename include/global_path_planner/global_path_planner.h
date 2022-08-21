@@ -81,8 +81,6 @@ private:
     // フラグ
     std_msgs::Bool flag_map_; // map受信確認用
     std_msgs::Bool flag_pub_; // local_goal_creatorノードmsg受信確認用
-    flag_map_.data = false;
-    flag_pub_.data = false;
 
     // 実行時間表示用
     ros::Time begin_;
@@ -95,6 +93,7 @@ private:
 
     // Subscriber
     ros::Subscriber sub_map_;
+    ros::Subscriber sub_flag_pub_;
 
     // Publisher
     ros::Publisher pub_global_path_;

@@ -35,7 +35,6 @@ private:
     // フラグ
     bool flag_estimated_pose_ = false; // estimated_pose受信確認用
     std_msgs::Bool flag_global_path_;  // global_path受信確認用
-    flag_global_path_.data = false;
 
 
     // ----- その他のオブジェクト -----

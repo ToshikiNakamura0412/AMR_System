@@ -9,13 +9,12 @@
     <arg name="global_path_planner_settings" default="$(find second_challenge_toshiki)/config/param/global_path_planner.yaml"/>
 
     <!-- node launch -->
-    <!-- msgの受け取りを考慮して起動順を設定 -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_settings)"/>
     <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_settings)" output="screen"/>
-    <node pkg="second_challenge_toshiki" type="global_path_planner" name="global_path_planner" output="screen">
-        <rosparam command="load" file="$(arg global_path_planner_settings)"/>
-    </node>
     <node pkg="second_challenge_toshiki" type="obstacle_expander" name="obstacle_expander" output="screen">
         <rosparam command="load" file="$(arg obstacle_expander_settings)"/>
+    </node>
+    <node pkg="second_challenge_toshiki" type="global_path_planner" name="global_path_planner" output="screen">
+        <rosparam command="load" file="$(arg global_path_planner_settings)"/>
     </node>
 </launch>

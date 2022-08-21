@@ -15,6 +15,9 @@ AStarPlanner::AStarPlanner():private_nh_("~")
     current_node_.header.frame_id = "map";
     // dataサイズの確保
     global_path_.poses.reserve(2000);
+    // フラグの初期化
+    flag_map_.data = false;
+    flag_pub_.data = false;
 
     // Subscriber
     sub_map_      = nh_.subscribe("/map/updated_map", 1, &AStarPlanner::map_callback, this);
@@ -25,6 +28,7 @@ AStarPlanner::AStarPlanner():private_nh_("~")
     pub_current_path_ = nh_.advertise<nav_msgs::Path>("/current_path", 1);
     pub_node_point_   = nh_.advertise<geometry_msgs::PointStamped>("/current_node", 1);
     pub_flag_map_     = nh_.advertise<std_msgs::Bool>("/flag/pub_updated_map", 1);
+
 }
 
 // mapのコールバック関数
