@@ -25,7 +25,7 @@ void ObstacleScanner::laser_callback(const sensor_msgs::LaserScan::ConstPtr& msg
     flag_laser_ = true;
 }
 
-// 唯一メイン関数で実行する関数
+// 唯一，main文で実行する関数
 void ObstacleScanner::process()
 {
     ros::Rate loop_rate(hz_); // 制御周波数の設定

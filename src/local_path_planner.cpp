@@ -74,7 +74,7 @@ void DWAPlanner::obs_poses_callback(const geometry_msgs::PoseArray::ConstPtr& ms
     flag_obs_poses_ = true;
 }
 
-// 唯一main文で実行する関数
+// 唯一，main文で実行する関数
 void DWAPlanner::process()
 {
     ros::Rate loop_rate(hz_); // 制御周波数の設定

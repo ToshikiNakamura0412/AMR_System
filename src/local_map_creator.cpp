@@ -38,7 +38,7 @@ void LocalMapCreator::obs_poses_callback(const geometry_msgs::PoseArray::ConstPt
     flag_obs_poses_ = true;
 }
 
-// 唯一メイン関数で実行する関数
+// 唯一，main文で実行する関数
 void LocalMapCreator::process()
 {
     ros::Rate loop_rate(hz_); // 制御周波数の設定

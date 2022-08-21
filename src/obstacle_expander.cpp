@@ -22,7 +22,7 @@ void ObstacleExpander::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg
     ros::Duration(1).sleep(); // 他のノードの起動を待つ(特にRviz)
 }
 
-// 唯一メイン関数で実行する関数
+// 唯一，main文で実行する関数
 void ObstacleExpander::process()
 {
     ros::Rate loop_rate(hz_); // 制御周波数の設定
