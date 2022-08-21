@@ -4,7 +4,7 @@
 int main(int argc, char* argv[])
 {
     ros::init(argc, argv, "local_path_planner"); // ノードの初期化
-    DWA dwa;
+    DWAPlanner dwa;
     dwa.process();
 
     return 0;

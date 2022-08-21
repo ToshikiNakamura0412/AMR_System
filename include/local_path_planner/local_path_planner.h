@@ -40,10 +40,10 @@ struct DynamicWindow
 
 
 // ===== クラス =====
-class DWA
+class DWAPlanner
 {
 public:
-    DWA(); // デフォルトコンストラクタ
+    DWAPlanner(); // デフォルトコンストラクタ
     void process();
 
 private:
