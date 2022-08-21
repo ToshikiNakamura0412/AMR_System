@@ -48,7 +48,7 @@ public:
 
 private:
     // ----- 引数あり関数 -----
-    // 各種コールバック関数
+    // コールバック関数
     void local_goal_callback(const geometry_msgs::PointStamped::ConstPtr& msg);
     void obs_poses_callback(const geometry_msgs::PoseArray::ConstPtr& msg);
 
