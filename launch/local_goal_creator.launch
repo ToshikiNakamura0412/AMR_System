@@ -4,6 +4,9 @@
     <arg name="rviz_settings" default="$(find second_challenge_toshiki)/config/rviz/local_goal_creator.rviz"/>
 
     <!-- yaml file path  -->
+    <arg name="map_settings" default="$(find second_challenge_toshiki)/map/map.yaml"/>
+    <arg name="obstacle_expander_settings" default="$(find second_challenge_toshiki)/config/param/obstacle_expander.yaml"/>
+    <arg name="global_path_planner_settings" default="$(find second_challenge_toshiki)/config/param/global_path_planner.yaml"/>
     <arg name="local_goal_creator_settings" default="$(find second_challenge_toshiki)/config/param/local_goal_creator.yaml"/>
 
     <!-- node launch -->
