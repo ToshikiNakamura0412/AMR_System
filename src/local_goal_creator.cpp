@@ -9,9 +9,6 @@ LocalGoalCreator::LocalGoalCreator():private_nh_("~")
     private_nh_.getParam("goal_index", goal_index_);
     private_nh_.getParam("target_dist_to_goal", target_dist_to_goal_);
 
-    // フラグの初期化
-    flag_global_path_.data = false;
-
     // frame idの設定
     local_goal_.header.frame_id = "map";
 
@@ -20,8 +17,7 @@ LocalGoalCreator::LocalGoalCreator():private_nh_("~")
     sub_global_path_    = nh_.subscribe("/global_path2", 1, &LocalGoalCreator::global_path_callback, this);
 
     // Publisher
-    pub_local_goal_       = nh_.advertise<geometry_msgs::PointStamped>("/local_goal2", 1);
-    pub_flag_global_path_ = nh_.advertise<std_msgs::Bool>("/flag/pub_global_path", 1);
+    pub_local_goal_ = nh_.advertise<geometry_msgs::PointStamped>("/local_goal2", 1);
 }
 
 // estimated_poseのコールバック関数
@@ -34,9 +30,8 @@ void LocalGoalCreator::estimated_pose_callback(const geometry_msgs::PoseStamped:
 // global_pathのコールバック関数
 void LocalGoalCreator::global_path_callback(const nav_msgs::Path::ConstPtr& msg)
 {
-    global_path_ = *msg;
-    flag_global_path_.data = true;
-    pub_flag_global_path_.publish(flag_global_path_);
+    global_path_      = *msg;
+    flag_global_path_ = true;
 }
 
 // 唯一メイン関数で実行する関数
@@ -46,7 +41,7 @@ void LocalGoalCreator::process()
 
     while(ros::ok())
     {
-        if(flag_estimated_pose_ && flag_global_path_.data)
+        if(flag_estimated_pose_ && flag_global_path_)
             update_goal(); // ゴールの更新
         ros::spinOnce();   // コールバック関数の実行
         loop_rate.sleep(); // 周期が終わるまで待つ

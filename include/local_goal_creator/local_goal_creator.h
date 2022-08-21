@@ -2,7 +2,6 @@
 #define LOCAL_GOAL_CREATOR_H
 
 #include <ros/ros.h>
-#include <std_msgs/Bool.h>
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PointStamped.h>
@@ -32,9 +31,9 @@ private:
     int    goal_index_;          // グローバルパス内におけるローカルゴールのインデックス
     double target_dist_to_goal_; // 現在位置-ゴール間の距離 [m]
 
-    // フラグ
-    bool flag_estimated_pose_ = false; // estimated_pose受信確認用
-    std_msgs::Bool flag_global_path_;  // global_path受信確認用
+    // msg受け取りフラグ
+    bool flag_estimated_pose_ = false;
+    bool flag_global_path_    = false;
 
 
     // ----- その他のオブジェクト -----
@@ -48,7 +47,6 @@ private:
 
     // Publisher
     ros::Publisher pub_local_goal_;
-    ros::Publisher pub_flag_global_path_;
 
     // 各種オブジェクト
     geometry_msgs::PointStamped local_goal_;     // local path用の目標位置

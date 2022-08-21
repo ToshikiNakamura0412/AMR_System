@@ -2,7 +2,6 @@
 #define GLOBAL_PATH_PLANNER_H
 
 #include <ros/ros.h>
-#include <std_msgs/Bool.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PointStamped.h>
 #include <nav_msgs/Path.h>
@@ -38,7 +37,6 @@ private:
     // ----- 関数（引数あり）------
     // コールバック関数
     void map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg);
-    void flag_pub_callback(const std_msgs::Bool::ConstPtr& msg);
 
     // その他の関数
     void   update_set(const Node current_node);                                              // Open・Closeリストを更新
@@ -69,7 +67,7 @@ private:
 
 
     // ----- 変数 -----
-    int hz_;                           // ループ周波数 [Hz]
+    int  hz_;                          // ループ周波数 [Hz]
     bool is_visible_;                  // 可視化フラグ(パス・ノード)
     Node start_node_;                  // スタートノード
     Node goal_node_;                   // ゴールノード
@@ -78,9 +76,8 @@ private:
     std::vector<double> way_points_x_; // スタートとゴールを含む
     std::vector<double> way_points_y_; // スタートとゴールを含む
 
-    // フラグ
-    std_msgs::Bool flag_map_; // map受信確認用
-    std_msgs::Bool flag_pub_; // local_goal_creatorノードmsg受信確認用
+    // msg受け取りフラグ
+    bool flag_map_ = false;
 
     // 実行時間表示用
     ros::Time begin_;
@@ -93,13 +90,11 @@ private:
 
     // Subscriber
     ros::Subscriber sub_map_;
-    ros::Subscriber sub_flag_pub_;
 
     // Publisher
     ros::Publisher pub_global_path_;
     ros::Publisher pub_current_path_; // デバッグ用
     ros::Publisher pub_node_point_;   // デバッグ用
-    ros::Publisher pub_flag_map_;
 
     // 各種オブジェクト
     nav_msgs::OccupancyGrid map_; // obstacle_expanderノードから受け取るマップ

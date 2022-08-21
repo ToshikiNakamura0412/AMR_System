@@ -7,12 +7,8 @@ ObstacleExpander::ObstacleExpander():private_nh_("~")
     private_nh_.getParam("hz", hz_);
     private_nh_.getParam("target_margin", target_margin_);
 
-    // フラグの初期化
-    flag_pub_.data = false;
-
     // Subscriber
     sub_raw_map_  = nh_.subscribe("/map", 1, &ObstacleExpander::map_callback, this);
-    sub_flag_pub_ = nh_.subscribe("/flag/pub_updated_map", 1, &ObstacleExpander::flag_pub_callback, this);
 
     // Publisher
     pub_updated_map_ = nh_.advertise<nav_msgs::OccupancyGrid>("/map/updated_map", 1);
@@ -26,12 +22,6 @@ void ObstacleExpander::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg
     ros::Duration(1).sleep(); // 他のノードの起動を待つ(特にRviz)
 }
 
-// flag_pubのコールバック関数
-void ObstacleExpander::flag_pub_callback(const std_msgs::Bool::ConstPtr& msg)
-{
-    flag_pub_ = *msg; // global_path_plannerノードが受け取った場合，true
-}
-
 // 唯一メイン関数で実行する関数
 void ObstacleExpander::process()
 {
@@ -42,11 +32,8 @@ void ObstacleExpander::process()
     {
         if(flag_map_)
             expand_obstacle(); // 障害物の膨張
-        if(flag_pub_.data)
-            exit(0); // ノードの終了
-
-        ros::spinOnce();   // コールバック関数の実行
-        loop_rate.sleep(); // 周期が終わるまで待つ
+        ros::spinOnce();       // コールバック関数の実行
+        loop_rate.sleep();     // 周期が終わるまで待つ
     }
 }
 
@@ -64,6 +51,7 @@ void ObstacleExpander::expand_obstacle()
 
     pub_updated_map_.publish(updated_map_);
     show_exe_time(); // 実行時間を表示
+    exit(0);
 }
 
 // 周囲のグリッドの色を変更（円形状に膨張）
