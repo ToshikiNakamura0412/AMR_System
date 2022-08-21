@@ -51,7 +51,7 @@ void ObstacleExpander::expand_obstacle()
 
     pub_updated_map_.publish(updated_map_);
     show_exe_time(); // 実行時間を表示
-    exit(0);
+    exit(0); // ノードの終了
 }
 
 // 周囲のグリッドの色を変更（円形状に膨張）

@@ -95,7 +95,7 @@ void AStarPlanner::planning()
     }
     pub_global_path_.publish(global_path_);
     show_exe_time(); // 実行時間を表示
-    exit(0);
+    exit(0); // ノードの終了
 }
 
 // 経由点の取得
