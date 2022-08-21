@@ -30,6 +30,7 @@ void AStarPlanner::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 {
     map_      = *msg;
     flag_map_ = true;
+    ros::Duration(0.5).sleep(); // obstacle_expanderノードの終了を待つ(デバッグの都合)
 }
 
 // 唯一メイン関数で実行する関数
