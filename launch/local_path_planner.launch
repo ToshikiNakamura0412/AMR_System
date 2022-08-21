@@ -4,7 +4,7 @@
     <arg name="local_path_planner_settings" default="$(find second_challenge_toshiki)/config/param/local_path_planner.yaml"/>
 
     <!-- node launch -->
-    <node pkg="second_challenge_toshiki" type="local_path_planner2" name="local_path_planner2" output="screen">
+    <node pkg="second_challenge_toshiki" type="local_path_planner" name="local_path_planner" output="screen">
         <rosparam command="load" file="$(arg local_path_planner_settings)"/>
     </node>
 </launch>

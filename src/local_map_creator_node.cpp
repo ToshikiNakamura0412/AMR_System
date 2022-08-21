@@ -3,7 +3,7 @@
 // ===== メイン関数 =====
 int main(int argc, char* argv[])
 {
-    ros::init(argc, argv, "local_map_creator2"); // ノードの初期化
+    ros::init(argc, argv, "local_map_creator"); // ノードの初期化
     LocalMapCreator local_map_creator;
     local_map_creator.process();
 

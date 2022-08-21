@@ -3,7 +3,7 @@
 // ===== メイン関数 =====
 int main(int argc, char* argv[])
 {
-    ros::init(argc, argv, "obstacle_scanner2"); // ノードの初期化
+    ros::init(argc, argv, "obstacle_scanner"); // ノードの初期化
     ObstacleScanner obstacle_scanner;
     obstacle_scanner.process();
 

@@ -8,7 +8,7 @@
 
     <!-- node launch -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_settings)"/>
-    <node pkg="second_challenge_toshiki" type="local_goal_creator2" name="local_goal_creator2" output="screen">
+    <node pkg="second_challenge_toshiki" type="local_goal_creator" name="local_goal_creator" output="screen">
         <rosparam command="load" file="$(arg local_goal_creator_settings)"/>
     </node>
 </launch>

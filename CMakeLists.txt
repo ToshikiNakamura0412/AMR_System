@@ -140,11 +140,11 @@ include
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/second_challenge_toshiki_node.cpp)
 add_executable(global_path_planner src/global_path_planner_node.cpp src/global_path_planner.cpp)
-add_executable(local_goal_creator2 src/local_goal_creator_node.cpp src/local_goal_creator.cpp)
-add_executable(local_map_creator2 src/local_map_creator_node.cpp src/local_map_creator.cpp)
-add_executable(local_path_planner2 src/local_path_planner_node.cpp src/local_path_planner.cpp)
-add_executable(obstacle_expander  src/obstacle_expander_node.cpp  src/obstacle_expander.cpp)
-add_executable(obstacle_scanner2  src/obstacle_scanner_node.cpp  src/obstacle_scanner.cpp)
+add_executable(local_goal_creator  src/local_goal_creator_node.cpp  src/local_goal_creator.cpp)
+add_executable(local_map_creator   src/local_map_creator_node.cpp   src/local_map_creator.cpp)
+add_executable(local_path_planner  src/local_path_planner_node.cpp  src/local_path_planner.cpp)
+add_executable(obstacle_expander   src/obstacle_expander_node.cpp   src/obstacle_expander.cpp)
+add_executable(obstacle_scanner    src/obstacle_scanner_node.cpp    src/obstacle_scanner.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -156,20 +156,20 @@ add_executable(obstacle_scanner2  src/obstacle_scanner_node.cpp  src/obstacle_sc
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(global_path_planner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(local_goal_creator2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(local_map_creator2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(local_path_planner2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(obstacle_expander  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(obstacle_scanner2  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(local_goal_creator  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(local_map_creator   ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(local_path_planner  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(obstacle_expander   ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(obstacle_scanner    ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
 target_link_libraries(global_path_planner ${catkin_LIBRARIES})
-target_link_libraries(local_goal_creator2 ${catkin_LIBRARIES})
-target_link_libraries(local_map_creator2 ${catkin_LIBRARIES})
-target_link_libraries(local_path_planner2 ${catkin_LIBRARIES})
-target_link_libraries(obstacle_expander  ${catkin_LIBRARIES})
-target_link_libraries(obstacle_scanner2  ${catkin_LIBRARIES})
+target_link_libraries(local_goal_creator  ${catkin_LIBRARIES})
+target_link_libraries(local_map_creator   ${catkin_LIBRARIES})
+target_link_libraries(local_path_planner  ${catkin_LIBRARIES})
+target_link_libraries(obstacle_expander   ${catkin_LIBRARIES})
+target_link_libraries(obstacle_scanner    ${catkin_LIBRARIES})
 
 #############
 ## Install ##
