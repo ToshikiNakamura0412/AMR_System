@@ -2,6 +2,7 @@
 #define OBSTACLE_EXPANDER_H
 
 #include <ros/ros.h>
+#include <std_msgs/Bool.h>
 #include <nav_msgs/OccupancyGrid.h>
 
 
@@ -15,7 +16,8 @@ public:
 private:
     // ----- 関数（引数あり）------
     // コールバック関数
-    void map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg); // コールバック関数
+    void map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg);
+    void flag_pub_callback(const std_msgs::Bool::ConstPtr& msg);
 
     // その他の関数
     void   change_surrounding_grid_color(const int occupied_grid_index); // 周囲のグリッドの色の変更(円形状に膨張)
@@ -41,8 +43,10 @@ private:
     // 占有グリッド周辺のインデックス格納用
     std::vector<int> rect_grid_index_list_;
 
-    // msg受け取りフラッグ
-    bool flag_map_ = false;
+    // フラグ
+    bool flag_map_ = false;   // map受信確認用
+    std_msgs::Bool flag_pub_; // global_path_plannerノードmsg受信確認用
+    flag_pub_.data = false;
 
     // 実行時間表示用
     ros::Time begin_;
@@ -55,6 +59,7 @@ private:
 
     // Subscriber
     ros::Subscriber sub_raw_map_;
+    ros::Subscriber sub_flag_pub_;
 
     // Publisher
     ros::Publisher pub_updated_map_;

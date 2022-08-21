@@ -17,20 +17,28 @@ AStarPlanner::AStarPlanner():private_nh_("~")
     global_path_.poses.reserve(2000);
 
     // Subscriber
-    sub_map_ = nh_.subscribe("/map/updated_map", 1, &AStarPlanner::map_callback, this);
+    sub_map_      = nh_.subscribe("/map/updated_map", 1, &AStarPlanner::map_callback, this);
+    sub_flag_pub_ = nh_.subscribe("/flag/pub_global_path", 1, &AStarPlanner::flag_pub_callback, this);
 
     // Publisher
-    pub_global_path_  = nh_.advertise<nav_msgs::Path>("/global_path", 1);
+    pub_global_path_  = nh_.advertise<nav_msgs::Path>("/global_path2", 1);
     pub_current_path_ = nh_.advertise<nav_msgs::Path>("/current_path", 1);
     pub_node_point_   = nh_.advertise<geometry_msgs::PointStamped>("/current_node", 1);
+    pub_flag_map_     = nh_.advertise<std_msgs::Bool>("/flag/pub_updated_map", 1);
 }
 
 // mapのコールバック関数
 void AStarPlanner::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 {
-    map_      = *msg;
-    flag_map_ = true;
-    ros::Duration(0.5).sleep();
+    map_ = *msg;
+    flag_map_.data = true;
+    pub_flag_map_.publish(flag_map_);
+}
+
+// flag_pubのコールバック関数
+void AStarPlanner::flag_pub_callback(const std_msgs::Bool::ConstPtr& msg)
+{
+    flag_pub_ = *msg; // local_goal_creatorノードが受け取った場合，true
 }
 
 // 唯一メイン関数で実行する関数
@@ -40,8 +48,11 @@ void AStarPlanner::process()
 
     while(ros::ok())
     {
-        if(flag_map_)
-            planning();    // グローバルパスの生成
+        if(flag_map_.data)
+            planning(); // グローバルパスの生成
+        if(flag_pub_.data)
+            exit(0); // ノードの終了
+
         ros::spinOnce();   // コールバック関数の実行
         loop_rate.sleep(); // 周期が終わるまで待つ
     }
@@ -95,7 +106,6 @@ void AStarPlanner::planning()
     }
     pub_global_path_.publish(global_path_);
     show_exe_time(); // 実行時間を表示
-    exit(0);
 }
 
 // 経由点の取得
