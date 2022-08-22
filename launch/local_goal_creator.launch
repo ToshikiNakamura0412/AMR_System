@@ -21,4 +21,5 @@
     <node pkg="second_challenge_toshiki" type="global_path_planner" name="global_path_planner" output="screen">
         <rosparam command="load" file="$(arg global_path_planner_settings)"/>
     </node>
+    <node pkg="rosbag" type="play" name="play" args="$(env HOME)/bag_folder/local_goal_creator.bag"/>
 </launch>

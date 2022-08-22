@@ -15,4 +15,5 @@
     <node pkg="second_challenge_toshiki" type="local_map_creator" name="local_map_creator" output="screen">
         <rosparam command="load" file="$(arg local_map_creator_settings)"/>
     </node>
+    <node pkg="rosbag" type="play" name="play" args="$(env HOME)/bag_folder/obstacle_scanner.bag"/>
 </launch>

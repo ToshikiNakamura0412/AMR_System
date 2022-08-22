@@ -82,7 +82,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: true
       Name: Updated Map
-      Topic: /new_map
+      Topic: /map/updated_map
       Unreliable: false
       Use Timestamp: false
       Value: true
