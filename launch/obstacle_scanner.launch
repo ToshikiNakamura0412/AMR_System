@@ -2,8 +2,6 @@
 <launch>
     <!-- config file path  -->
     <arg name="rviz_settings" default="$(find second_challenge_toshiki)/config/rviz/obstacle_scanner.rviz"/>
-
-    <!-- yaml file path  -->
     <arg name="obstacle_scanner_settings" default="$(find second_challenge_toshiki)/config/param/obstacle_scanner.yaml"/>
 
     <!-- node launch -->

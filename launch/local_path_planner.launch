@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <!-- yaml file path -->
+    <!-- config file path -->
     <arg name="local_path_planner_settings" default="$(find second_challenge_toshiki)/config/param/local_path_planner.yaml"/>
 
     <!-- node launch -->

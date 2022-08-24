@@ -58,7 +58,7 @@ private:
     double particle_num_;                         // パーティクルの個数
     int laser_step_;                              // 何本ずつレーザを見るか
     Particle estimated_particle_;
-    std::vector<Particle> paricles_;              // 柱に関する角度範囲の配列 [rad]
+    std::vector<Particle> particles_;              // 柱に関する角度範囲の配列 [rad]
     std::vector<double> ignore_angle_range_list_; // 柱に関する角度範囲の配列 [rad]
 
     // msg受け取りフラグ

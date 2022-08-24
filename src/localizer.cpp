@@ -80,7 +80,7 @@ void AMCL::initialize()
 }
 
 // 位置推定
-void AMCL::Localize()
+void AMCL::localize()
 {
     // motion_update();
     // measurement_update();
@@ -93,9 +93,9 @@ void AMCL::Localize()
 // 最終的にパブリッシュする位置の決定
 void AMCL::estimate_pose()
 {
-    estimate_pose_.pose.position.x = 0.0;
-    estimate_pose_.pose.position.y = 0.0;
-    estimate_pose_.pose.orientation.z = 0.0;
+    estimated_pose_.pose.position.x = 0.0;
+    estimated_pose_.pose.position.y = 0.0;
+    estimated_pose_.pose.orientation.z = 0.0;
 }
 
 // パーティクルクラウドのパブリッシュ

@@ -2,8 +2,6 @@
 <launch>
     <!-- config file path  -->
     <arg name="rviz_settings" default="$(find second_challenge_toshiki)/config/rviz/localizer.rviz"/>
-
-    <!-- yaml file path  -->
     <arg name="map_settings" default="$(find second_challenge_toshiki)/map/map.yaml"/>
     <arg name="localizer_settings" default="$(find second_challenge_toshiki)/config/param/localizer.yaml"/>
 
@@ -16,4 +14,5 @@
     <node pkg="second_challenge_toshiki" type="localizer" name="localizer" output="screen">
         <rosparam command="load" file="$(arg localizer_settings)"/>
     </node>
+    <node pkg="rosbag" type="play" name="play" args="$(env HOME)/bag_folder/localizer.bag"/>
 </launch>
