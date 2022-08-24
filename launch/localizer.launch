@@ -7,6 +7,9 @@
     <arg name="map_settings" default="$(find second_challenge_toshiki)/map/map.yaml"/>
     <arg name="localizer_settings" default="$(find second_challenge_toshiki)/config/param/localizer.yaml"/>
 
+    <!-- static TF -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_publisher" args="0 0 0 0 0 0 1 /base_link /laser"/>
+
     <!-- node launch -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_settings)"/>
     <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_settings)" output="screen"/>

@@ -5,6 +5,7 @@
 #include <sensor_msgs/LaserScan.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <nav_msgs/Odometry.h>
+#include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseArray.h>
 
@@ -20,10 +21,10 @@ struct Particle
 
 
 // ===== クラス =====
-class Localizer
+class AMCL
 {
 public:
-    Localizer(); // デフォルトコンストラクタ
+    AMCL(); // デフォルトコンストラクタ
     void process();
 
 private:
@@ -34,7 +35,8 @@ private:
     void laser_callback(const sensor_msgs::LaserScan::ConstPtr& msg);
 
     // その他の関数
-    bool Localizer::is_ignore_angle(double angle) // 柱か判断
+    bool   is_ignore_angle(double angle); // 柱か判断
+    double optimize_angle(double angle); // 適切な角度(-M_PI ~ M_PI)を返す
 
 
     // ----- 関数（引数なし）------
@@ -44,12 +46,19 @@ private:
     void measurement_update();
     void resampling();
     void estimate_pose();
+    void publish_particles();
 
 
     // ----- 変数 -----
     int hz_;                                      // ループ周波数 [Hz]
+    double init_x_;                               // 初期位置 [m]
+    double init_y_;                               // 初期位置 [m]
+    double init_yaw_;                             // 初期姿勢 [rad]
+    double init_dev_;                             // 正規分布の標準偏差 [m]
+    double particle_num_;                         // パーティクルの個数
     int laser_step_;                              // 何本ずつレーザを見るか
-    Particle particle;
+    Particle estimated_particle_;
+    std::vector<Particle> paricles_;              // 柱に関する角度範囲の配列 [rad]
     std::vector<double> ignore_angle_range_list_; // 柱に関する角度範囲の配列 [rad]
 
     // msg受け取りフラグ

@@ -4,8 +4,8 @@
 int main(int argc, char* argv[])
 {
     ros::init(argc, argv, "localizer"); // ノードの初期化
-    Localizer localizer;
-    localizer.process();
+    AMCL amcl;
+    amcl.process();
 
     return 0;
 }
