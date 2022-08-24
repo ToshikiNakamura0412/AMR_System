@@ -8,6 +8,10 @@
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseArray.h>
+#include <tf2/utils.h>
+#include <tf2_ros/transform_broadcaster.h>
+// #include <geometry_msgs/TransformStamped.h>
+
 
 
 // ===== 構造体 =====
@@ -36,7 +40,7 @@ private:
 
     // その他の関数
     bool   is_ignore_angle(double angle); // 柱か判断
-    double optimize_angle(double angle); // 適切な角度(-M_PI ~ M_PI)を返す
+    double calc_optimize_angle(double angle); // 適切な角度(-M_PI ~ M_PI)を返す
 
 
     // ----- 関数（引数なし）------
@@ -47,6 +51,7 @@ private:
     void resampling();
     void estimate_pose();
     void publish_particles();
+    void broadcast_odom_state();
 
 
     // ----- 変数 -----

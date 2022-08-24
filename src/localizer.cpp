@@ -60,7 +60,10 @@ void AMCL::process()
     while(ros::ok())
     {
         if(flag_map_ && flag_odom_ && flag_laser_)
-            localize();    // 位置推定
+        {
+            broadcast_odom_state(); // map座標系とodom座標系の関係を報告
+            localize(); // 自己位置推定
+        }
         ros::spinOnce();   // コールバック関数の実行
         loop_rate.sleep(); // 周期が終わるまで待つ
     }
@@ -79,13 +82,67 @@ void AMCL::initialize()
     }
 }
 
-// 位置推定
+// map座標系とodom座標系の関係を報告
+void broadcast_odom_state()
+{
+    // TF Broadcasterの実体化
+    static tf2_ros::TransformBroadcaster odom_state_broadcaster;
+    
+    // map座標系からみたbase_link座標系の位置と姿勢の取得
+    const double map_to_base_yaw = tf2::getYaw(estimated_pose_.pose.orientation);
+    const double map_to_base_x   = estimated_pose_.pose.position.x;
+    const double map_to_base_y   = estimated_pose_.pose.position.y;
+
+    // odom座標系からみたbase_link座標系の位置と姿勢の取得
+    const double odom_to_base_yaw = tf2::getYaw(current_odom_.pose.pose.orientation);
+    const double odom_to_base_x   = current_odom_.pose.pose.position.x;
+    const double odom_to_base_y   = current_odom_.pose.pose.position.y;
+
+    // map座標系からみたodom座標系の位置と姿勢の取得
+    // (回転行列を使った単純な座標変換)
+    const double map_to_odom_yaw = calc_optimize_angle(map_to_base_yaw - odom_to_base_yaw);
+    const double map_to_odom_x   = map_to_base_x - odom_to_base_x * cos(map_to_odom_yaw) + odom_to_base_y * sin(map_to_odom_yaw);
+    const double map_to_odom_y   = map_to_base_y - odom_to_base_x * sin(map_to_odom_yaw) - odom_to_base_y * cos(map_to_odom_yaw);
+    
+    // yawからquaternionを作成
+    tf2::Quaternion map_to_odom_quat;
+    map_to_odom_quat.setRPY(0, 0, map_to_odom_yaw);
+
+    // odom座標系の元となodomの位置姿勢情報格納用変数の作成
+    geometry_msgs::TransformStamped odom_state;
+
+    // 現在の時間の格納
+    odom_state.header.stamp = ros::Time::now();
+
+    // 親フレーム・子フレームの指定
+    odom_state.header.frame_id = map_.header.frame_id;
+    odom_state.child_frame_id  = current_odom_.header.frame_id;
+
+    // map座標系からみたodom座標系の原点位置と方向の格納
+    odom_state.transform.translation.x = map_to_odom_x;
+    odom_state.transform.translation.y = map_to_odom_y;
+    odom_state.transform.rotation      = map_to_odom_quat;
+
+    // tf情報をbroadcast(座標系の設定)
+    odom_state_broadcaster.sendTransform(odom_state);
+}
+
+// 適切な角度(-M_PI ~ M_PI)を返す
+double AMCL::calc_optimize_angle(double angle)
+{
+    if(M_PI  < angle) angle -= 2.0*M_PI;
+    if(angle < -M_PI) angle += 2.0*M_PI;
+
+    return angle;
+}
+
+// 自己位置推定
 void AMCL::localize()
 {
     // motion_update();
     // measurement_update();
     // resampling();
-    estimate_pose();
+    // estimate_pose();
     pub_estimated_pose_.publish(estimated_pose_);
     publish_particles();
 }
@@ -93,9 +150,6 @@ void AMCL::localize()
 // 最終的にパブリッシュする位置の決定
 void AMCL::estimate_pose()
 {
-    estimated_pose_.pose.position.x = 0.0;
-    estimated_pose_.pose.position.y = 0.0;
-    estimated_pose_.pose.orientation.z = 0.0;
 }
 
 // パーティクルクラウドのパブリッシュ
@@ -126,13 +180,4 @@ bool AMCL::is_ignore_angle(double angle)
         return true;
     else
         return false;
-}
-
-// 適切な角度(-M_PI ~ M_PI)を返す
-double AMCL::optimize_angle(double angle)
-{
-    if(M_PI  < angle) angle -= 2.0*M_PI;
-    if(angle < -M_PI) angle += 2.0*M_PI;
-
-    return angle;
 }
