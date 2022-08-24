@@ -83,11 +83,11 @@ void AMCL::initialize()
 }
 
 // map座標系とodom座標系の関係を報告
-void broadcast_odom_state()
+void AMCL::broadcast_odom_state()
 {
     // TF Broadcasterの実体化
     static tf2_ros::TransformBroadcaster odom_state_broadcaster;
-    
+
     // map座標系からみたbase_link座標系の位置と姿勢の取得
     const double map_to_base_yaw = tf2::getYaw(estimated_pose_.pose.orientation);
     const double map_to_base_x   = estimated_pose_.pose.position.x;
@@ -103,7 +103,7 @@ void broadcast_odom_state()
     const double map_to_odom_yaw = calc_optimize_angle(map_to_base_yaw - odom_to_base_yaw);
     const double map_to_odom_x   = map_to_base_x - odom_to_base_x * cos(map_to_odom_yaw) + odom_to_base_y * sin(map_to_odom_yaw);
     const double map_to_odom_y   = map_to_base_y - odom_to_base_x * sin(map_to_odom_yaw) - odom_to_base_y * cos(map_to_odom_yaw);
-    
+
     // yawからquaternionを作成
     tf2::Quaternion map_to_odom_quat;
     map_to_odom_quat.setRPY(0, 0, map_to_odom_yaw);
@@ -121,7 +121,10 @@ void broadcast_odom_state()
     // map座標系からみたodom座標系の原点位置と方向の格納
     odom_state.transform.translation.x = map_to_odom_x;
     odom_state.transform.translation.y = map_to_odom_y;
-    odom_state.transform.rotation      = map_to_odom_quat;
+    odom_state.transform.rotation.x    = map_to_odom_quat.x();
+    odom_state.transform.rotation.y    = map_to_odom_quat.y();
+    odom_state.transform.rotation.z    = map_to_odom_quat.z();
+    odom_state.transform.rotation.w    = map_to_odom_quat.w();
 
     // tf情報をbroadcast(座標系の設定)
     odom_state_broadcaster.sendTransform(odom_state);
