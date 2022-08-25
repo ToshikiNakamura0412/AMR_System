@@ -1,9 +1,10 @@
 #include "localizer/localizer.h"
 
+// ----- AMCL -----
 // コンストラクタ
 AMCL::AMCL():private_nh_("~")
 {
-    // パラメータの取得
+    // パラメータの取得(AMCL)
     private_nh_.getParam("hz", hz_);
     private_nh_.getParam("init_x", init_x_);
     private_nh_.getParam("init_y", init_y_);
@@ -11,6 +12,11 @@ AMCL::AMCL():private_nh_("~")
     private_nh_.getParam("particle_num_", particle_num_);
     private_nh_.getParam("laser_step", laser_step_);
     private_nh_.getParam("ignore_angle_range_list", ignore_angle_range_list_);
+    // パラメータの取得(OdomModel)
+    private_nh_.getParam("ff", ff_);
+    private_nh_.getParam("fr", fr_);
+    private_nh_.getParam("rf", rf_);
+    private_nh_.getParam("rr", rr_);
 
     // --- 基本設定 ---
     // frame idの設定
@@ -18,6 +24,8 @@ AMCL::AMCL():private_nh_("~")
     particle_cloud_.header.frame_id = "map";
     // メモリの確保
     particle_cloud_.poses.reserve(particle_num_);
+    // odomのモデルの初期化
+    odom_model_ = OdomModel(ff_, fr_, rf_, rr_);
 
     // Subscriber
     sub_map_   = nh_.subscribe("/map", 1, &AMCL::map_callback, this);
@@ -100,7 +108,7 @@ void AMCL::broadcast_odom_state()
 
     // map座標系からみたodom座標系の位置と姿勢の取得
     // (回転行列を使った単純な座標変換)
-    const double map_to_odom_yaw = calc_optimize_angle(map_to_base_yaw - odom_to_base_yaw);
+    const double map_to_odom_yaw = normalize_angle(map_to_base_yaw - odom_to_base_yaw);
     const double map_to_odom_x   = map_to_base_x - odom_to_base_x * cos(map_to_odom_yaw) + odom_to_base_y * sin(map_to_odom_yaw);
     const double map_to_odom_y   = map_to_base_y - odom_to_base_x * sin(map_to_odom_yaw) - odom_to_base_y * cos(map_to_odom_yaw);
 
@@ -131,10 +139,10 @@ void AMCL::broadcast_odom_state()
 }
 
 // 適切な角度(-M_PI ~ M_PI)を返す
-double AMCL::calc_optimize_angle(double angle)
+double AMCL::normalize_angle(double angle)
 {
-    if(M_PI  < angle) angle -= 2.0*M_PI;
-    if(angle < -M_PI) angle += 2.0*M_PI;
+    while(M_PI  < angle) angle -= 2.0*M_PI;
+    while(angle < -M_PI) angle += 2.0*M_PI;
 
     return angle;
 }
@@ -142,12 +150,47 @@ double AMCL::calc_optimize_angle(double angle)
 // 自己位置推定
 void AMCL::localize()
 {
-    // motion_update();
+    motion_update();
     // measurement_update();
     // resampling();
     // estimate_pose();
     pub_estimated_pose_.publish(estimated_pose_);
     publish_particles();
+}
+
+// 動作更新
+void AMCL::motion_update()
+{
+    // quaternionからyawを算出
+    const double current_yaw  = tf2::getYaw(current_odom_.pose.pose.orientation);
+    const double previous_yaw = tf2::getYaw(previous_odom_.pose.pose.orientation);
+
+    // 微小移動量を算出
+    const double dx   = current_odom_.pose.pose.position.x - previous_odom_.pose.pose.position.x;
+    const double dy   = current_odom_.pose.pose.position.y - previous_odom_.pose.pose.position.y;
+    const double dyaw = normalize_angle(current_yaw - previous_yaw);
+
+    // 1制御周期前のロボットから見た現在位置の距離と方位を算出
+    const double lengh     = hypot(dx, dy);
+    const double direction = normalize_angle(atan2(dy, dx) - previous_yaw);
+
+    // 全パーティルクの移動
+    for(auto& particle : particles_)
+        move_particle(particle, lengh, direction, dyaw);
+}
+
+// パーティクルの移動
+void AMCL::move_particle(Particle& p, double lengh, double direction, double rotation)
+{
+    // ノイズを加える
+    lengh     += odom_model_.get_fw_noise();
+    direction += odom_model_.get_rot_noise();
+    rotation  += odom_model_.get_rot_noise();
+
+    // 移動
+    p.x   += lengh * cos(normalize_angle(direction + p.yaw));
+    p.y   += lengh * sin(normalize_angle(direction + p.yaw));
+    p.yaw  = normalize_angle(p.yaw + rotation);
 }
 
 // 最終的にパブリッシュする位置の決定
@@ -159,6 +202,7 @@ void AMCL::estimate_pose()
 void AMCL::publish_particles()
 {
     particle_cloud_.poses.clear();
+    /* --- パーティクルの数が変わる場合，ここでresize() --- */
     geometry_msgs::Pose pose;
 
     for(const auto& particle : particles_)
@@ -183,4 +227,51 @@ bool AMCL::is_ignore_angle(double angle)
         return true;
     else
         return false;
+}
+
+// ----- OdomModel -----
+// デフォルトコンストラクタ
+OdomModel::OdomModel()
+    : std_norm_dist_(0.0, 1.0), fw_dev_(0.0), rot_dev_(0.0), engine_(seed_gen_()){}
+// コンストラクタ
+OdomModel::OdomModel(double ff, double fr, double rf, double rr)
+    : std_norm_dist_(0.0, 1.0), fw_dev_(0.0), rot_dev_(0.0), engine_(seed_gen_())
+{
+    fw_var_per_fw_   = pow(ff ,2.0);
+    fw_var_per_rot_  = pow(fr ,2.0);
+    rot_var_per_fw_  = pow(rf ,2.0);
+    rot_var_per_rot_ = pow(rr ,2.0);
+}
+
+// 並進，回転に関する標準偏差の設定
+void OdomModel::set_dev(const double lengh, const double angle)
+{
+    fw_dev_  = sqrt(fabs(lengh)*fw_var_per_fw_  + fabs(angle)*fw_var_per_rot_);
+    rot_dev_ = sqrt(fabs(lengh)*rot_var_per_fw_ + fabs(angle)*rot_var_per_rot_);
+}
+
+// 直進に関するノイズの取得
+double OdomModel::get_fw_noise()
+{
+    return std_norm_dist_(engine_) * fw_dev_;
+}
+
+// 回転に関するノイズの取得
+double OdomModel::get_rot_noise()
+{
+    return std_norm_dist_(engine_) * rot_dev_;
+}
+
+// 代入演算子
+OdomModel& OdomModel::operator =(const OdomModel& t)
+{
+    fw_var_per_fw_   = t.fw_var_per_fw_;
+    fw_var_per_rot_  = t.fw_var_per_rot_;
+    rot_var_per_fw_  = t.rot_var_per_fw_;
+    rot_var_per_rot_ = t.rot_var_per_rot_;
+
+    fw_dev_  = t.fw_dev_;
+    rot_dev_ = t.rot_dev_;
+
+    return *this;
 }
