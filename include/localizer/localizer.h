@@ -36,7 +36,8 @@ public:
     // rf: 直進1[m]で生じる向きのばらつきの標準偏差
     // rr: 回転1[rad]で生じる向きのばらつきの標準偏差
 
-    void   set_dev(const double lengh, const double angle); // 標準偏差の設定
+    void   show_info();
+    void   set_dev(const double length, const double angle); // 標準偏差の設定
     double get_fw_noise();  // 直進に関するノイズの取得
     double get_rot_noise(); // 回転に関するノイズの取得
 
@@ -71,7 +72,7 @@ private:
     void laser_callback(const sensor_msgs::LaserScan::ConstPtr& msg);
 
     // その他の関数
-    void   move_particle(Particle& p, double lengh, double direction, double rotation);
+    void   move_particle(Particle& p, double length, double direction, double rotation);
     bool   is_ignore_angle(double angle); // 柱か判断
     double normalize_angle(double angle); // 適切な角度(-M_PI ~ M_PI)を返す
 
@@ -88,16 +89,16 @@ private:
 
 
     // ----- 変数 -----
-    int hz_;                                      // ループ周波数 [Hz]
+    int    hz_;                                   // ループ周波数 [Hz]
+    int    laser_step_;                           // 何本ずつレーザを見るか
     double init_x_;                               // 初期位置 [m]
     double init_y_;                               // 初期位置 [m]
     double init_yaw_;                             // 初期姿勢 [rad]
     double init_dev_;                             // 正規分布の標準偏差 [m]
     double particle_num_;                         // パーティクルの個数
-    int laser_step_;                              // 何本ずつレーザを見るか
     OdomModel odom_model_;
-    Particle estimated_particle_;
-    std::vector<Particle> particles_;              // 柱に関する角度範囲の配列 [rad]
+    Particle  estimated_particle_;
+    std::vector<Particle> particles_;
     std::vector<double> ignore_angle_range_list_; // 柱に関する角度範囲の配列 [rad]
 
     // msg受け取りフラグ
@@ -128,10 +129,10 @@ private:
 
     // 各種オブジェクト
     geometry_msgs::PoseStamped estimated_pose_; // 推定位置
-    geometry_msgs::PoseArray   particle_cloud_;
+    geometry_msgs::PoseArray   particle_cloud_; // パーティクルクラウド
     nav_msgs::OccupancyGrid    map_;            // map_serverから受け取るマップ
-    nav_msgs::Odometry         current_odom_;
-    nav_msgs::Odometry         previous_odom_;
+    nav_msgs::Odometry         current_odom_;   // 現在のodometry
+    nav_msgs::Odometry         previous_odom_;  // 1制御周期前のodometry
     sensor_msgs::LaserScan     laser_;          // レーザ値
 };
 

@@ -26,6 +26,7 @@ AMCL::AMCL():private_nh_("~")
     particle_cloud_.poses.reserve(particle_num_);
     // odomのモデルの初期化
     odom_model_ = OdomModel(ff_, fr_, rf_, rr_);
+    odom_model_.show_info();
 
     // Subscriber
     sub_map_   = nh_.subscribe("/map", 1, &AMCL::map_callback, this);
@@ -171,16 +172,16 @@ void AMCL::motion_update()
     const double dyaw = normalize_angle(current_yaw - previous_yaw);
 
     // 1制御周期前のロボットから見た現在位置の距離と方位を算出
-    const double lengh     = hypot(dx, dy);
+    const double length    = hypot(dx, dy);
     const double direction = normalize_angle(atan2(dy, dx) - previous_yaw);
 
     // 全パーティルクの移動
     for(auto& particle : particles_)
-        move_particle(particle, lengh, direction, dyaw);
+        move_particle(particle, length, direction, dyaw);
 }
 
 // パーティクルの移動
-void AMCL::move_particle(Particle& p, double lengh, double direction, double rotation)
+void AMCL::move_particle(Particle& p, double length, double direction, double rotation)
 {
     // ノイズを加える
     lengh     += odom_model_.get_fw_noise();
@@ -229,6 +230,7 @@ bool AMCL::is_ignore_angle(double angle)
         return false;
 }
 
+
 // ----- OdomModel -----
 // デフォルトコンストラクタ
 OdomModel::OdomModel()
@@ -243,11 +245,22 @@ OdomModel::OdomModel(double ff, double fr, double rf, double rr)
     rot_var_per_rot_ = pow(rr ,2.0);
 }
 
-// 並進，回転に関する標準偏差の設定
-void OdomModel::set_dev(const double lengh, const double angle)
+// 自身の情報を表示
+void OdomModel::show_info()
 {
-    fw_dev_  = sqrt(fabs(lengh)*fw_var_per_fw_  + fabs(angle)*fw_var_per_rot_);
-    rot_dev_ = sqrt(fabs(lengh)*rot_var_per_fw_ + fabs(angle)*rot_var_per_rot_);
+    std::cout << "[Info] OdomModel" << std::endl;
+    std::cout << "fw_var_per_fw"    << fw_var_per_fw_   << std::endl;
+    std::cout << "fw_var_per_rot"   << fw_var_per_rot_  << std::endl;
+    std::cout << "rot_var_per_fw"   << rot_var_per_fw_  << std::endl;
+    std::cout << "rot_var_per_rot"  << rot_var_per_rot_ << std::endl;
+    std::cout << "std_norm_dist"    << std_norm_dist_ << std::endl;
+}
+
+// 並進，回転に関する標準偏差の設定
+void OdomModel::set_dev(const double length, const double angle)
+{
+    fw_dev_  = sqrt(fabs(length)*fw_var_per_fw_  + fabs(angle)*fw_var_per_rot_);
+    rot_dev_ = sqrt(fabs(length)*rot_var_per_fw_ + fabs(angle)*rot_var_per_rot_);
 }
 
 // 直進に関するノイズの取得
