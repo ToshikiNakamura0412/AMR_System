@@ -6,11 +6,11 @@ AMCL::AMCL():private_nh_("~")
 {
     // パラメータの取得(AMCL)
     private_nh_.getParam("hz", hz_);
+    private_nh_.getParam("laser_step", laser_step_);
+    private_nh_.getParam("particle_num", particle_num_);
     private_nh_.getParam("init_x", init_x_);
     private_nh_.getParam("init_y", init_y_);
     private_nh_.getParam("init_yaw", init_yaw_);
-    private_nh_.getParam("particle_num_", particle_num_);
-    private_nh_.getParam("laser_step", laser_step_);
     private_nh_.getParam("ignore_angle_range_list", ignore_angle_range_list_);
     // パラメータの取得(OdomModel)
     private_nh_.getParam("ff", ff_);
@@ -26,7 +26,6 @@ AMCL::AMCL():private_nh_("~")
     particle_cloud_.poses.reserve(particle_num_);
     // odomのモデルの初期化
     odom_model_ = OdomModel(ff_, fr_, rf_, rr_);
-    odom_model_.show_info();
 
     // Subscriber
     sub_map_   = nh_.subscribe("/map", 1, &AMCL::map_callback, this);
@@ -70,7 +69,7 @@ void AMCL::process()
     {
         if(flag_map_ && flag_odom_ && flag_laser_)
         {
-            broadcast_odom_state(); // map座標系とodom座標系の関係を報告
+            // broadcast_odom_state(); // map座標系とodom座標系の関係を報告
             localize(); // 自己位置推定
         }
         ros::spinOnce();   // コールバック関数の実行
@@ -151,12 +150,12 @@ double AMCL::normalize_angle(double angle)
 // 自己位置推定
 void AMCL::localize()
 {
-    motion_update();
-    // measurement_update();
-    // resampling();
-    // estimate_pose();
-    pub_estimated_pose_.publish(estimated_pose_);
-    publish_particles();
+    motion_update();      // 動作更新
+    // measurement_update(); // 観測更新
+    // resampling();         // リサンプリング
+    // estimate_pose();      // 推定位置の決定
+    pub_estimated_pose_.publish(estimated_pose_); // 推定位置のパブリッシュ
+    publish_particles();  // パーティクルクラウドのパブリッシュ
 }
 
 // 動作更新
@@ -183,18 +182,21 @@ void AMCL::motion_update()
 // パーティクルの移動
 void AMCL::move_particle(Particle& p, double length, double direction, double rotation)
 {
+    // 標準偏差を設定
+    odom_model_.set_dev(length, rotation);
+
     // ノイズを加える
-    lengh     += odom_model_.get_fw_noise();
+    length    += odom_model_.get_fw_noise();
     direction += odom_model_.get_rot_noise();
     rotation  += odom_model_.get_rot_noise();
 
     // 移動
-    p.x   += lengh * cos(normalize_angle(direction + p.yaw));
-    p.y   += lengh * sin(normalize_angle(direction + p.yaw));
+    p.x   += length * cos(normalize_angle(direction + p.yaw));
+    p.y   += length * sin(normalize_angle(direction + p.yaw));
     p.yaw  = normalize_angle(p.yaw + rotation);
 }
 
-// 最終的にパブリッシュする位置の決定
+// 推定位置の決定
 void AMCL::estimate_pose()
 {
 }
@@ -208,9 +210,13 @@ void AMCL::publish_particles()
 
     for(const auto& particle : particles_)
     {
-        pose.position.x    = particle.x;
-        pose.position.y    = particle.y;
-        pose.orientation.z = particle.yaw;
+        pose.position.x = particle.x;
+        pose.position.y = particle.y;
+
+        tf2::Quaternion q;
+        q.setRPY(0, 0, particle.yaw);
+        tf2::convert(q, pose.orientation);
+
         particle_cloud_.poses.push_back(pose);
     }
 
@@ -232,9 +238,6 @@ bool AMCL::is_ignore_angle(double angle)
 
 
 // ----- OdomModel -----
-// デフォルトコンストラクタ
-OdomModel::OdomModel()
-    : std_norm_dist_(0.0, 1.0), fw_dev_(0.0), rot_dev_(0.0), engine_(seed_gen_()){}
 // コンストラクタ
 OdomModel::OdomModel(double ff, double fr, double rf, double rr)
     : std_norm_dist_(0.0, 1.0), fw_dev_(0.0), rot_dev_(0.0), engine_(seed_gen_())
@@ -243,17 +246,6 @@ OdomModel::OdomModel(double ff, double fr, double rf, double rr)
     fw_var_per_rot_  = pow(fr ,2.0);
     rot_var_per_fw_  = pow(rf ,2.0);
     rot_var_per_rot_ = pow(rr ,2.0);
-}
-
-// 自身の情報を表示
-void OdomModel::show_info()
-{
-    std::cout << "[Info] OdomModel" << std::endl;
-    std::cout << "fw_var_per_fw"    << fw_var_per_fw_   << std::endl;
-    std::cout << "fw_var_per_rot"   << fw_var_per_rot_  << std::endl;
-    std::cout << "rot_var_per_fw"   << rot_var_per_fw_  << std::endl;
-    std::cout << "rot_var_per_rot"  << rot_var_per_rot_ << std::endl;
-    std::cout << "std_norm_dist"    << std_norm_dist_ << std::endl;
 }
 
 // 並進，回転に関する標準偏差の設定

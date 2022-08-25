@@ -28,7 +28,7 @@ struct Particle
 class OdomModel
 {
 public:
-    OdomModel(); // デフォルトコンストラクタ
+    OdomModel(){} // デフォルトコンストラクタ
     OdomModel(double ff, double fr, double rf, double rr); // コンストラクタ
     /*  引数  */
     // ff: 直進1[m]で生じる道のりのばらつきの標準偏差
@@ -36,7 +36,6 @@ public:
     // rf: 直進1[m]で生じる向きのばらつきの標準偏差
     // rr: 回転1[rad]で生じる向きのばらつきの標準偏差
 
-    void   show_info();
     void   set_dev(const double length, const double angle); // 標準偏差の設定
     double get_fw_noise();  // 直進に関するノイズの取得
     double get_rot_noise(); // 回転に関するノイズの取得
@@ -91,11 +90,11 @@ private:
     // ----- 変数 -----
     int    hz_;                                   // ループ周波数 [Hz]
     int    laser_step_;                           // 何本ずつレーザを見るか
+    int    particle_num_;                         // パーティクルの個数
     double init_x_;                               // 初期位置 [m]
     double init_y_;                               // 初期位置 [m]
     double init_yaw_;                             // 初期姿勢 [rad]
     double init_dev_;                             // 正規分布の標準偏差 [m]
-    double particle_num_;                         // パーティクルの個数
     OdomModel odom_model_;
     Particle  estimated_particle_;
     std::vector<Particle> particles_;
