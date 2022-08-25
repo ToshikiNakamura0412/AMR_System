@@ -268,7 +268,7 @@ std::vector<State> DWAPlanner::calc_traj(const double velocity, const double yaw
 void DWAPlanner::move(State& state, const double velocity, const double yawrate)
 {
     state.yaw      += yawrate * dt_;
-    state.yaw       = optimize_angle(state.yaw);
+    state.yaw       = normalize_angle(state.yaw);
     state.x        += velocity * cos(state.yaw) * dt_;
     state.y        += velocity * sin(state.yaw) * dt_;
     state.velocity  = velocity;
@@ -276,7 +276,7 @@ void DWAPlanner::move(State& state, const double velocity, const double yawrate)
 }
 
 // 適切な角度(-M_PI ~ M_PI)を返す
-double DWAPlanner::optimize_angle(double angle)
+double DWAPlanner::normalize_angle(double angle)
 {
     if(M_PI  < angle) angle -= 2.0*M_PI;
     if(angle < -M_PI) angle += 2.0*M_PI;
@@ -313,7 +313,7 @@ double DWAPlanner::calc_heading_eval(const std::vector<State>& traj)
         target_theta = theta - goal_theta;
 
     // headingの評価値
-    const double heading_eval = (M_PI - abs(optimize_angle(target_theta)))/M_PI; // 正規化
+    const double heading_eval = (M_PI - abs(normalize_angle(target_theta)))/M_PI; // 正規化
 
     return heading_eval;
 }

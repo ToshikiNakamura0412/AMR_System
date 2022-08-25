@@ -56,7 +56,7 @@ private:
     void   roomba_control(const double velocity, const double yawrate);                                         // Roombaの制御入力
     void   move(State& state, const double velocity, const double yawrate);                                     // 予測軌跡作成時における仮想ロボットの移動
     void   visualize_traj(const std::vector<State>& traj, const ros::Publisher& pub_local_path, ros::Time now); // 軌跡を可視化
-    double optimize_angle(double angle);                                                                        // 適切な角度(-M_PI ~ M_PI)を返す
+    double normalize_angle(double angle);                                                                        // 適切な角度(-M_PI ~ M_PI)を返す
     double calc_evaluation(const std::vector<State>& traj);                                                     // 評価関数を計算
     double calc_heading_eval(const std::vector<State>& traj);                                                   // headingの評価関数を計算
     double calc_dist_eval(const std::vector<State>& traj);                                                      // distの評価関数を計算
