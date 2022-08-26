@@ -24,7 +24,7 @@ AMCL::AMCL():private_nh_("~")
     particle_cloud_.header.frame_id = "map";
     // メモリの確保
     particle_cloud_.poses.reserve(particle_num_);
-    // odomのモデルの初期化
+    // odometryのモデルの初期化
     odom_model_ = OdomModel(ff_, fr_, rf_, rr_);
 
     // Subscriber
@@ -48,9 +48,9 @@ void AMCL::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 // odometryのコールバック関数
 void AMCL::odom_callback(const nav_msgs::Odometry::ConstPtr& msg)
 {
-    previous_odom_ = current_odom_;
-    current_odom_  = *msg;
-    flag_odom_     = true;
+    prev_odom_ = last_odom_;
+    last_odom_ = *msg;
+    flag_odom_ = true;
 }
 
 // laserのコールバック関数
@@ -88,6 +88,15 @@ void AMCL::initialize()
         particle.yaw = init_yaw_;
         particles_.push_back(particle);
     }
+
+    reset_weight(); // 重みの初期化
+}
+
+// 重みの初期化
+void AMCL::reset_weight()
+{
+    for(auto& p : particles_)
+        p.weight = 1.0/particles_.size();
 }
 
 // map座標系とodom座標系の関係を報告
@@ -102,15 +111,17 @@ void AMCL::broadcast_odom_state()
     const double map_to_base_y   = estimated_pose_.pose.position.y;
 
     // odom座標系からみたbase_link座標系の位置と姿勢の取得
-    const double odom_to_base_yaw = tf2::getYaw(current_odom_.pose.pose.orientation);
-    const double odom_to_base_x   = current_odom_.pose.pose.position.x;
-    const double odom_to_base_y   = current_odom_.pose.pose.position.y;
+    const double odom_to_base_yaw = tf2::getYaw(last_odom_.pose.pose.orientation);
+    const double odom_to_base_x   = last_odom_.pose.pose.position.x;
+    const double odom_to_base_y   = last_odom_.pose.pose.position.y;
 
     // map座標系からみたodom座標系の位置と姿勢の取得
     // (回転行列を使った単純な座標変換)
     const double map_to_odom_yaw = normalize_angle(map_to_base_yaw - odom_to_base_yaw);
-    const double map_to_odom_x   = map_to_base_x - odom_to_base_x * cos(map_to_odom_yaw) + odom_to_base_y * sin(map_to_odom_yaw);
-    const double map_to_odom_y   = map_to_base_y - odom_to_base_x * sin(map_to_odom_yaw) - odom_to_base_y * cos(map_to_odom_yaw);
+    const double map_to_odom_x   = map_to_base_x - odom_to_base_x * cos(map_to_odom_yaw)
+        + odom_to_base_y * sin(map_to_odom_yaw);
+    const double map_to_odom_y   = map_to_base_y - odom_to_base_x * sin(map_to_odom_yaw)
+        - odom_to_base_y * cos(map_to_odom_yaw);
 
     // yawからquaternionを作成
     tf2::Quaternion map_to_odom_quat;
@@ -124,7 +135,7 @@ void AMCL::broadcast_odom_state()
 
     // 親フレーム・子フレームの指定
     odom_state.header.frame_id = map_.header.frame_id;
-    odom_state.child_frame_id  = current_odom_.header.frame_id;
+    odom_state.child_frame_id  = last_odom_.header.frame_id;
 
     // map座標系からみたodom座標系の原点位置と方向の格納
     odom_state.transform.translation.x = map_to_odom_x;
@@ -150,29 +161,29 @@ double AMCL::normalize_angle(double angle)
 // 自己位置推定
 void AMCL::localize()
 {
-    motion_update();      // 動作更新
-    // measurement_update(); // 観測更新
-    // resampling();         // リサンプリング
-    // estimate_pose();      // 推定位置の決定
+    motion_update();                              // 動作更新
+    observation_update();                         // 観測更新
+    // estimate_pose();                              // 推定位置の決定
     pub_estimated_pose_.publish(estimated_pose_); // 推定位置のパブリッシュ
-    publish_particles();  // パーティクルクラウドのパブリッシュ
+    publish_particles();                          // パーティクルクラウドのパブリッシュ
+    // resampling();                                 // リサンプリング
 }
 
 // 動作更新
 void AMCL::motion_update()
 {
     // quaternionからyawを算出
-    const double current_yaw  = tf2::getYaw(current_odom_.pose.pose.orientation);
-    const double previous_yaw = tf2::getYaw(previous_odom_.pose.pose.orientation);
+    const double last_yaw = tf2::getYaw(last_odom_.pose.pose.orientation);
+    const double prev_yaw = tf2::getYaw(prev_odom_.pose.pose.orientation);
 
     // 微小移動量を算出
-    const double dx   = current_odom_.pose.pose.position.x - previous_odom_.pose.pose.position.x;
-    const double dy   = current_odom_.pose.pose.position.y - previous_odom_.pose.pose.position.y;
-    const double dyaw = normalize_angle(current_yaw - previous_yaw);
+    const double dx   = last_odom_.pose.pose.position.x - prev_odom_.pose.pose.position.x;
+    const double dy   = last_odom_.pose.pose.position.y - prev_odom_.pose.pose.position.y;
+    const double dyaw = normalize_angle(last_yaw - prev_yaw);
 
     // 1制御周期前のロボットから見た現在位置の距離と方位を算出
     const double length    = hypot(dx, dy);
-    const double direction = normalize_angle(atan2(dy, dx) - previous_yaw);
+    const double direction = normalize_angle(atan2(dy, dx) - prev_yaw);
 
     // 全パーティルクの移動
     for(auto& particle : particles_)
@@ -196,9 +207,47 @@ void AMCL::move_particle(Particle& p, double length, double direction, double ro
     p.yaw  = normalize_angle(p.yaw + rotation);
 }
 
+// 観測更新
+void AMCL::observation_update()
+{
+    for(auto& particle : particles_)
+        particle.weight = calc_weight(particle);
+
+    normalize_weight();
+    estimate_pose();
+}
+
+// 重みの算出
+void AMCL::calc_weight(const Particle p)
+{
+    double weight = 0.0;
+    // double angle  = normalize_angle(p.yaw + laser_.angle_min); // パーティクルから見た1本目のレーザの角度
+
+    for(int i=0; i<laser_.ranges.size(); i+=laser_step_)
+    {
+        // レーザ値の距離と角度の算出
+        const double dist  = laser_.ranges[i];
+        const double angle = i * laser_.angle_increment + laser_.angle_min;
+
+        // 柱と被るレーザ値のスキップ
+        if(is_ignore_angle(angle)) continue;
+    }
+}
+
+// 重みの正規化
+void AMCL::normalize_weight()
+{
+    double alpha = 0.0;
+    for(const auto& p : particles_)
+        alpha += p.weight;
+    for(const auto& p : particles_)
+        p.weight /= alpha;
+}
+
 // 推定位置の決定
 void AMCL::estimate_pose()
 {
+
 }
 
 // パーティクルクラウドのパブリッシュ
@@ -239,7 +288,7 @@ bool AMCL::is_ignore_angle(double angle)
 
 // ----- OdomModel -----
 // コンストラクタ
-OdomModel::OdomModel(double ff, double fr, double rf, double rr)
+OdomModel::OdomModel(const double ff, const double fr, const double rf, const double rr)
     : std_norm_dist_(0.0, 1.0), fw_dev_(0.0), rot_dev_(0.0), engine_(seed_gen_())
 {
     fw_var_per_fw_   = pow(ff ,2.0);
@@ -274,7 +323,6 @@ OdomModel& OdomModel::operator =(const OdomModel& t)
     fw_var_per_rot_  = t.fw_var_per_rot_;
     rot_var_per_fw_  = t.rot_var_per_fw_;
     rot_var_per_rot_ = t.rot_var_per_rot_;
-
     fw_dev_  = t.fw_dev_;
     rot_dev_ = t.rot_dev_;
 

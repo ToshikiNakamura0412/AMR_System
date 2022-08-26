@@ -29,7 +29,7 @@ class OdomModel
 {
 public:
     OdomModel(){} // デフォルトコンストラクタ
-    OdomModel(double ff, double fr, double rf, double rr); // コンストラクタ
+    OdomModel(const double ff, const double fr, const double rf, const double rr); // コンストラクタ
     /*  引数  */
     // ff: 直進1[m]で生じる道のりのばらつきの標準偏差
     // fr: 回転1[rad]で生じる道のりのばらつきの標準偏差
@@ -71,20 +71,24 @@ private:
     void laser_callback(const sensor_msgs::LaserScan::ConstPtr& msg);
 
     // その他の関数
-    void   move_particle(Particle& p, double length, double direction, double rotation);
+    void   move_particle(Particle& p, double length, double direction, double rotation); // パーティクルの移動
+    void   calc_weight(const Particle p);
     bool   is_ignore_angle(double angle); // 柱か判断
     double normalize_angle(double angle); // 適切な角度(-M_PI ~ M_PI)を返す
 
 
     // ----- 関数（引数なし）------
-    void localize();
-    void initialize();
-    void motion_update();
-    void measurement_update();
-    void resampling();
+    void initialize();           // パーティクルの初期化
+    void reset_weight();         // 重みの初期化
+    void broadcast_odom_state(); // map座標系とodom座標系の関係を報告
+    void localize();             // 自己位置推定
+    void motion_update();        // 動作更新
+    void observation_update();   // 観測更新
+    void resampling();           // リサンプリング
+    void estimate_pose();        // 推定位置の決定
+    void publish_particles();    // パーティクルクラウドのパブリッシュ
+    void normalize_weight();
     void estimate_pose();
-    void publish_particles();
-    void broadcast_odom_state();
 
 
     // ----- 変数 -----
@@ -95,9 +99,8 @@ private:
     double init_y_;                               // 初期位置 [m]
     double init_yaw_;                             // 初期姿勢 [rad]
     double init_dev_;                             // 正規分布の標準偏差 [m]
-    OdomModel odom_model_;
-    Particle  estimated_particle_;
-    std::vector<Particle> particles_;
+    OdomModel odom_model_;                        // odometryのモデル
+    std::vector<Particle> particles_;             // パーティクルクラウド（計算用）
     std::vector<double> ignore_angle_range_list_; // 柱に関する角度範囲の配列 [rad]
 
     // msg受け取りフラグ
@@ -105,7 +108,7 @@ private:
     bool flag_odom_  = false;
     bool flag_laser_ = false;
 
-    // odomモデル関連
+    // OdomModel関連
     double ff_;
     double fr_;
     double rf_;
@@ -127,12 +130,12 @@ private:
     ros::Publisher pub_particle_cloud_;
 
     // 各種オブジェクト
-    geometry_msgs::PoseStamped estimated_pose_; // 推定位置
-    geometry_msgs::PoseArray   particle_cloud_; // パーティクルクラウド
     nav_msgs::OccupancyGrid    map_;            // map_serverから受け取るマップ
-    nav_msgs::Odometry         current_odom_;   // 現在のodometry
-    nav_msgs::Odometry         previous_odom_;  // 1制御周期前のodometry
+    nav_msgs::Odometry         last_odom_;      // 最新のodometry
+    nav_msgs::Odometry         prev_odom_;      // 1制御周期前のodometry
     sensor_msgs::LaserScan     laser_;          // レーザ値
+    geometry_msgs::PoseStamped estimated_pose_; // 推定位置
+    geometry_msgs::PoseArray   particle_cloud_; // パーティクルクラウド（パブリッシュ用）
 };
 
 #endif
