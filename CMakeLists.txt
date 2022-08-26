@@ -145,7 +145,7 @@ add_executable(local_goal_creator  src/local_goal_creator_node.cpp  src/local_go
 add_executable(local_map_creator   src/local_map_creator_node.cpp   src/local_map_creator.cpp)
 add_executable(local_path_planner  src/local_path_planner_node.cpp  src/local_path_planner.cpp)
 add_executable(obstacle_expander   src/obstacle_expander_node.cpp   src/obstacle_expander.cpp)
-add_executable(obstacle_scanner    src/obstacle_scanner_node.cpp    src/obstacle_scanner.cpp)
+add_executable(obstacle_detector   src/obstacle_detector_node.cpp   src/obstacle_detector.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -162,7 +162,7 @@ add_dependencies(local_goal_creator  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catki
 add_dependencies(local_map_creator   ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(local_path_planner  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(obstacle_expander   ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(obstacle_scanner    ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(obstacle_detector   ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
@@ -172,7 +172,7 @@ target_link_libraries(local_goal_creator  ${catkin_LIBRARIES})
 target_link_libraries(local_map_creator   ${catkin_LIBRARIES})
 target_link_libraries(local_path_planner  ${catkin_LIBRARIES})
 target_link_libraries(obstacle_expander   ${catkin_LIBRARIES})
-target_link_libraries(obstacle_scanner    ${catkin_LIBRARIES})
+target_link_libraries(obstacle_detector   ${catkin_LIBRARIES})
 
 #############
 ## Install ##

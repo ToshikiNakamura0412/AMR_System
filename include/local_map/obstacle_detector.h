@@ -1,5 +1,5 @@
-#ifndef OBSTACLE_SCANNER_H
-#define OBSTACLE_SCANNER_H
+#ifndef OBSTACLE_DETECTOR_H
+#define OBSTACLE_DETECTOR_H
 
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
@@ -8,10 +8,10 @@
 
 
 // ===== クラス =====
-class ObstacleScanner
+class ObstacleDetector
 {
 public:
-    ObstacleScanner(); // デフォルトコンストラクタ
+    ObstacleDetector(); // デフォルトコンストラクタ
     void process();
 
 private:

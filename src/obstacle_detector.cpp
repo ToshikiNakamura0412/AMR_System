@@ -1,7 +1,7 @@
-#include "local_map/obstacle_scanner.h"
+#include "local_map/obstacle_detector.h"
 
 // コンストラクタ
-ObstacleScanner::ObstacleScanner():private_nh_("~")
+ObstacleDetector::ObstacleDetector():private_nh_("~")
 {
     // パラメータの取得
     private_nh_.getParam("hz", hz_);
@@ -12,21 +12,21 @@ ObstacleScanner::ObstacleScanner():private_nh_("~")
     obs_poses_.header.frame_id = "base_link";
 
     // Subscriber
-    sub_laser_ = nh_.subscribe("/scan", 1, &ObstacleScanner::laser_callback, this);
+    sub_laser_ = nh_.subscribe("/scan", 1, &ObstacleDetector::laser_callback, this);
 
     // Publisher
     pub_obs_poses_ = nh_.advertise<geometry_msgs::PoseArray>("/local_map2/obstacle", 1);
 }
 
 // laserのコールバック関数
-void ObstacleScanner::laser_callback(const sensor_msgs::LaserScan::ConstPtr& msg)
+void ObstacleDetector::laser_callback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
     laser_      = *msg;
     flag_laser_ = true;
 }
 
 // 唯一，main文で実行する関数
-void ObstacleScanner::process()
+void ObstacleDetector::process()
 {
     ros::Rate loop_rate(hz_); // 制御周波数の設定
 
@@ -40,7 +40,7 @@ void ObstacleScanner::process()
 }
 
 // 障害物検知
-void ObstacleScanner::scan_obstacle()
+void ObstacleDetector::scan_obstacle()
 {
     // 障害物情報のクリア
     obs_poses_.poses.clear();
@@ -68,7 +68,7 @@ void ObstacleScanner::scan_obstacle()
 }
 
 // 柱の場合、trueを返す
-bool ObstacleScanner::is_ignore_angle(double angle)
+bool ObstacleDetector::is_ignore_angle(double angle)
 {
     angle = abs(angle);
 
