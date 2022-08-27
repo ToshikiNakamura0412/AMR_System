@@ -72,23 +72,25 @@ private:
 
     // その他の関数
     void   move_particle(Particle& p, double length, double direction, double rotation); // パーティクルの移動
-    void   calc_weight(const Particle p);
+    void   likelihood(const Particle p);  // 尤度関数
     bool   is_ignore_angle(double angle); // 柱か判断
     double normalize_angle(double angle); // 適切な角度(-M_PI ~ M_PI)を返す
 
+    double norm_rv(const double mean, const double stddev);
+    double norm_pdf(const double x, const double mean, const double stddev);
+
 
     // ----- 関数（引数なし）------
-    void initialize();           // パーティクルの初期化
-    void reset_weight();         // 重みの初期化
-    void broadcast_odom_state(); // map座標系とodom座標系の関係を報告
-    void localize();             // 自己位置推定
-    void motion_update();        // 動作更新
-    void observation_update();   // 観測更新
-    void resampling();           // リサンプリング
-    void estimate_pose();        // 推定位置の決定
-    void publish_particles();    // パーティクルクラウドのパブリッシュ
-    void normalize_weight();
-    void estimate_pose();
+    void   initialize();           // パーティクルの初期化
+    void   reset_weight();         // 重みの初期化
+    void   broadcast_odom_state(); // map座標系とodom座標系の関係を報告
+    void   localize();             // 自己位置推定
+    void   motion_update();        // 動作更新
+    void   observation_update();   // 観測更新
+    void   resampling();           // リサンプリング
+    void   estimate_pose();        // 推定位置の決定
+    void   publish_particles();    // パーティクルクラウドのパブリッシュ
+    double normalize_belief();     // 尤度の正規化
 
 
     // ----- 変数 -----
@@ -98,7 +100,8 @@ private:
     double init_x_;                               // 初期位置 [m]
     double init_y_;                               // 初期位置 [m]
     double init_yaw_;                             // 初期姿勢 [rad]
-    double init_dev_;                             // 正規分布の標準偏差 [m]
+    double init_dev_;                             // 正規分布の初期の標準偏差 [m]
+    double reset_threshold_;                      // 重みのリセットに関する尤度合計の閾値
     OdomModel odom_model_;                        // odometryのモデル
     std::vector<Particle> particles_;             // パーティクルクラウド（計算用）
     std::vector<double> ignore_angle_range_list_; // 柱に関する角度範囲の配列 [rad]
@@ -114,6 +117,10 @@ private:
     double rf_;
     double rr_;
 
+    // 正規分布用乱数
+    std::random_device seed_gen_;
+    std::default_random_engine engine_;
+    
 
     // ----- その他のオブジェクト -----
     // NodeHandle

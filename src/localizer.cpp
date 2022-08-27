@@ -2,7 +2,7 @@
 
 // ----- AMCL -----
 // コンストラクタ
-AMCL::AMCL():private_nh_("~")
+AMCL::AMCL():private_nh_("~"), engine_(seed_gen_())
 {
     // パラメータの取得(AMCL)
     private_nh_.getParam("hz", hz_);
@@ -11,6 +11,8 @@ AMCL::AMCL():private_nh_("~")
     private_nh_.getParam("init_x", init_x_);
     private_nh_.getParam("init_y", init_y_);
     private_nh_.getParam("init_yaw", init_yaw_);
+    private_nh_.getParam("init_dev", init_dev_);
+    private_nh_.getParam("reset_threshold", reset_threshold_);
     private_nh_.getParam("ignore_angle_range_list", ignore_angle_range_list_);
     // パラメータの取得(OdomModel)
     private_nh_.getParam("ff", ff_);
@@ -81,16 +83,26 @@ void AMCL::process()
 void AMCL::initialize()
 {
     Particle particle;
+
+    // 初期位置近傍にパーティクルを配置
     for(int i=0; i<particle_num_; i++)
     {
-        particle.x   = init_x_;
-        particle.y   = init_y_;
-        particle.yaw = init_yaw_;
+        particle.x   = norm_rv(init_x_,   init_dev_);
+        particle.y   = norm_rv(init_y_,   init_dev_);
+        particle.yaw = norm_rv(init_yaw_, init_dev_);
         particles_.push_back(particle);
     }
 
     reset_weight(); // 重みの初期化
 }
+
+// 確率密度関数
+double norm_rv(const double mean, const double stddev)
+{
+    std::normal_distribution<> norm_dist(mean, stddev);
+    return norm_dist(engine_);
+}
+
 
 // 重みの初期化
 void AMCL::reset_weight()
@@ -162,11 +174,10 @@ double AMCL::normalize_angle(double angle)
 void AMCL::localize()
 {
     motion_update();                              // 動作更新
-    observation_update();                         // 観測更新
+    // observation_update();                         // 観測更新（リサンプリングを含む）
     // estimate_pose();                              // 推定位置の決定
     pub_estimated_pose_.publish(estimated_pose_); // 推定位置のパブリッシュ
     publish_particles();                          // パーティクルクラウドのパブリッシュ
-    // resampling();                                 // リサンプリング
 }
 
 // 動作更新
@@ -207,18 +218,20 @@ void AMCL::move_particle(Particle& p, double length, double direction, double ro
     p.yaw  = normalize_angle(p.yaw + rotation);
 }
 
-// 観測更新
+// 観測更新（リサンプリングを含む）
 void AMCL::observation_update()
 {
     for(auto& particle : particles_)
-        particle.weight = calc_weight(particle);
+        particle.weight *= likelihood(particle); // 尤度計算
 
-    normalize_weight();
-    estimate_pose();
+    if(normalize_belief() < reset_threshold_) // 重みの正規化
+        reset_weight(); // 重みの初期化
+    else
+        resampling(); // リサンプリング
 }
 
-// 重みの算出
-void AMCL::calc_weight(const Particle p)
+// 尤度関数
+void AMCL::likelihood(const Particle p)
 {
     double weight = 0.0;
     // double angle  = normalize_angle(p.yaw + laser_.angle_min); // パーティクルから見た1本目のレーザの角度
@@ -227,21 +240,49 @@ void AMCL::calc_weight(const Particle p)
     {
         // レーザ値の距離と角度の算出
         const double dist  = laser_.ranges[i];
-        const double angle = i * laser_.angle_increment + laser_.angle_min;
+        double angle = i * laser_.angle_increment + laser_.angle_min;
 
         // 柱と被るレーザ値のスキップ
         if(is_ignore_angle(angle)) continue;
+
+        // パーティクルから見た角度に変換
+        angle = normalize_angle(angle + p.yaw);
     }
 }
 
-// 重みの正規化
-void AMCL::normalize_weight()
+// 柱の場合、trueを返す
+bool AMCL::is_ignore_angle(double angle)
 {
-    double alpha = 0.0;
+    angle = abs(angle);
+
+    if(ignore_angle_range_list_[0] < angle && angle < ignore_angle_range_list_[1])
+        return true;
+    else if(ignore_angle_range_list_[2] < angle)
+        return true;
+    else
+        return false;
+}
+
+// 重みの正規化
+double AMCL::normalize_belief()
+{
+    double sum = 0.0;
     for(const auto& p : particles_)
-        alpha += p.weight;
-    for(const auto& p : particles_)
-        p.weight /= alpha;
+        sum += p.weight;
+    
+    if(sum < reset_threshold_)
+        return sum;
+
+    for(auto& p : particles_)
+        p.weight /= sum;
+
+    return sum;
+}
+
+// リサンプリング
+void AMCL::resampling()
+{
+
 }
 
 // 推定位置の決定
@@ -272,24 +313,11 @@ void AMCL::publish_particles()
     pub_particle_cloud_.publish(particle_cloud_);
 }
 
-// 柱の場合、trueを返す
-bool AMCL::is_ignore_angle(double angle)
-{
-    angle = abs(angle);
-
-    if(ignore_angle_range_list_[0] < angle && angle < ignore_angle_range_list_[1])
-        return true;
-    else if(ignore_angle_range_list_[2] < angle)
-        return true;
-    else
-        return false;
-}
-
 
 // ----- OdomModel -----
 // コンストラクタ
 OdomModel::OdomModel(const double ff, const double fr, const double rf, const double rr)
-    : std_norm_dist_(0.0, 1.0), fw_dev_(0.0), rot_dev_(0.0), engine_(seed_gen_())
+    : engine_(seed_gen_()), std_norm_dist_(0.0, 1.0), fw_dev_(0.0), rot_dev_(0.0)
 {
     fw_var_per_fw_   = pow(ff ,2.0);
     fw_var_per_rot_  = pow(fr ,2.0);
