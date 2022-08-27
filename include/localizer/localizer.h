@@ -72,9 +72,9 @@ private:
 
     // その他の関数
     void   move_particle(Particle& p, double length, double direction, double rotation); // パーティクルの移動
-    void   likelihood(const Particle p);  // 尤度関数
     bool   is_ignore_angle(double angle); // 柱か判断
     double normalize_angle(double angle); // 適切な角度(-M_PI ~ M_PI)を返す
+    double likelihood(const Particle p);  // 尤度関数
 
     double norm_rv(const double mean, const double stddev);
     double norm_pdf(const double x, const double mean, const double stddev);
@@ -120,7 +120,7 @@ private:
     // 正規分布用乱数
     std::random_device seed_gen_;
     std::default_random_engine engine_;
-    
+
 
     // ----- その他のオブジェクト -----
     // NodeHandle

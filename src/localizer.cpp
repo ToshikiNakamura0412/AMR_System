@@ -97,7 +97,7 @@ void AMCL::initialize()
 }
 
 // 確率密度関数
-double norm_rv(const double mean, const double stddev)
+double AMCL::norm_rv(const double mean, const double stddev)
 {
     std::normal_distribution<> norm_dist(mean, stddev);
     return norm_dist(engine_);
@@ -231,7 +231,7 @@ void AMCL::observation_update()
 }
 
 // 尤度関数
-void AMCL::likelihood(const Particle p)
+double AMCL::likelihood(const Particle p)
 {
     double weight = 0.0;
     // double angle  = normalize_angle(p.yaw + laser_.angle_min); // パーティクルから見た1本目のレーザの角度
@@ -248,6 +248,8 @@ void AMCL::likelihood(const Particle p)
         // パーティクルから見た角度に変換
         angle = normalize_angle(angle + p.yaw);
     }
+
+    return weight;
 }
 
 // 柱の場合、trueを返す
@@ -269,7 +271,7 @@ double AMCL::normalize_belief()
     double sum = 0.0;
     for(const auto& p : particles_)
         sum += p.weight;
-    
+
     if(sum < reset_threshold_)
         return sum;
 
