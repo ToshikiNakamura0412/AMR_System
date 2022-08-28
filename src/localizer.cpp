@@ -230,7 +230,7 @@ void AMCL::observation_update()
     if(normalize_belief() < reset_threshold_) // 重みの正規化
         reset_weight(); // 重みの初期化
     else
-        resampling(); // リサンプリング
+        resampling(); // 系統リサンプリング
 }
 
 // 尤度関数
@@ -241,11 +241,11 @@ double AMCL::likelihood(const Particle p)
     // センサ情報からパーティクルの姿勢を評価
     for(int i=0; i<laser_.ranges.size(); i+=laser_step_)
     {
-        double angle = i * laser_.angle_increment + laser_.angle_min; // レーザ値の角度
+        const double angle = i * laser_.angle_increment + laser_.angle_min; // レーザ値の角度
 
         if(not is_ignore_angle(angle)) // 柱と被るレーザ値のスキップ
         {
-            double range = calc_dist_to_wall(p.x, p.y, normalize_angle(angle + p.yaw), laser_.ranges[i]);
+            const double range = calc_dist_to_wall(p.x, p.y, normalize_angle(angle + p.yaw), laser_.ranges[i]);
             L += norm_pdf(range, laser_.ranges[i], laser_.ranges[i] * sensor_noise_ratio_);
         }
     }
@@ -334,10 +334,43 @@ double AMCL::normalize_belief()
     return sum;
 }
 
-// リサンプリング
+// 系統リサンプリング
 void AMCL::resampling()
 {
+    // パーティクルの重みを積み上げたリストを作成
+    std::vector<double> accum;
+    accum.push_back(particles_[0].weight);
+    for(int i=1; i<particles_.size(); i++)
+        acuum.push_back(accum.back() + particles_[i].weight);
 
+    // サンプリングのスタート位置とステップを設定
+    std::vector<Particle> old(particles_);
+    double start = (double)rand()/(RAND_MAX * particles_.size()); // 0 ~ 1/N
+    double step = 1.0 / particles_,size();
+
+    // サンプリングするパーティクルのインデックスを保持
+    std::vector<int> chosen_indexes;
+    int tick=0;
+    for(int i=0; i<particles_.size(); i++)
+    {
+        while(accum[tick] <= start + i*step)
+        {
+            tick++;
+            if(tick == particles_.size())
+            {
+                ROS_ERROR("Resampling Failed") // 配列の不正アクセス防止
+                exit(1);
+            }
+        }
+        chosen_indexes.push_back(tick);
+    }
+
+    // リサンプリング
+    for(int i=0; i<particle_.size(); i++)
+        particles_[i] = old[chosen_indexes[i]];
+
+    // 重みを初期化
+    reset_weight();
 }
 
 // 推定位置の決定（平均）

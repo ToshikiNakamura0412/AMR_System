@@ -91,7 +91,7 @@ private:
     void   localize();               // 自己位置推定
     void   motion_update();          // 動作更新
     void   observation_update();     // 観測更新
-    void   resampling();             // リサンプリング
+    void   resampling();             // 系統リサンプリング
     void   mean_pose();              // 推定位置の決定（平均）
     void   publish_estimated_pose(); // 推定位置のパブリッシュ
     void   publish_particles();      // パーティクルクラウドのパブリッシュ
