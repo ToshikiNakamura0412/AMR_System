@@ -72,11 +72,13 @@ private:
 
     // その他の関数
     void   move_particle(Particle& p, double length, double direction, double rotation); // パーティクルの移動
+    void   sort_data(std::vector<double>& data);             // 配列のデータを昇順に並び替える
     bool   is_ignore_angle(double angle);                    // 柱か判断
     bool   in_map(const int grid_index);                     // マップ内か判断
     int    xy_to_grid_index(const double x, const double y); // 座標からグリッドのインデックスを返す
     double normalize_angle(double angle);                    // 適切な角度(-M_PI ~ M_PI)を返す
     double likelihood(const Particle p);                     // 尤度関数
+    double get_median(std::vector<double>& data);            // 配列の中央値を返す
     double calc_dist_to_wall(double x, double y, const double laser_angle, const double laser_range); // 壁までの距離を算出
 
     // 正規分布
@@ -91,8 +93,12 @@ private:
     void   localize();               // 自己位置推定
     void   motion_update();          // 動作更新
     void   observation_update();     // 観測更新
-    void   resampling();             // 系統リサンプリング
+    void   estimate_pose();          // 推定位置の決定
     void   mean_pose();              // 推定位置の決定（平均）
+    void   weighted_mean_pose();     // 推定位置の決定（加重平均）
+    void   max_weight_pose();        // 推定位置の決定（最大の重みを有するポーズ）
+    void   median_pose();            // 推定位置の決定（中央値）
+    void   resampling();             // 系統リサンプリング
     void   publish_estimated_pose(); // 推定位置のパブリッシュ
     void   publish_particles();      // パーティクルクラウドのパブリッシュ
     double normalize_belief();       // 尤度の正規化

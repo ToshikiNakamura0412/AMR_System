@@ -177,8 +177,7 @@ double AMCL::normalize_angle(double angle)
 void AMCL::localize()
 {
     motion_update();          // 動作更新
-    observation_update();     // 観測更新（リサンプリングを含む）
-    mean_pose();              // 推定位置の決定（平均）
+    observation_update();     // 観測更新（位置推定・リサンプリングを含む）
     publish_estimated_pose(); // 推定位置のパブリッシュ
     publish_particles();      // パーティクルクラウドのパブリッシュ
 }
@@ -221,16 +220,22 @@ void AMCL::move_particle(Particle& p, double length, double direction, double ro
     p.yaw  = normalize_angle(p.yaw + rotation);
 }
 
-// 観測更新（リサンプリングを含む）
+// 観測更新（位置推定・リサンプリングを含む）
 void AMCL::observation_update()
 {
     for(auto& particle : particles_)
         particle.weight *= likelihood(particle); // 尤度計算
 
     if(normalize_belief() < reset_threshold_) // 重みの正規化
+    {
+        median_pose();  // 推定位置の決定
         reset_weight(); // 重みの初期化
+    }
     else
-        resampling(); // 系統リサンプリング
+    {
+        estimate_pose(); // 推定位置の決定
+        resampling();    // 系統リサンプリング
+    }
 }
 
 // 尤度関数
@@ -334,6 +339,118 @@ double AMCL::normalize_belief()
     return sum;
 }
 
+// 推定位置の決定
+void AMCL::estimate_pose()
+{
+    // mean_pose(); // 平均
+    weighted_mean_pose(); // 加重平均
+    // max_weight_pose(); // 最大の重みを有するポーズ
+    // median_pose(); // 中央値
+}
+
+// 推定位置の決定（平均）
+void AMCL::mean_pose()
+{
+    // 合計値
+    Particle pose_sum;
+    for(const auto& particle : particles_)
+    {
+        pose_sum.x   += particle.x;
+        pose_sum.y   += particle.y;
+        pose_sum.yaw += particle.yaw;
+    }
+
+    // 平均値
+    particle_.x   = pose_sum.x   / particles_.size();
+    particle_.y   = pose_sum.y   / particles_.size();
+    particle_.yaw = pose_sum.yaw / particles_.size();
+}
+
+// 推定位置の決定（加重平均）
+void AMCL::weighted_mean_pose()
+{
+    // 平均値
+    Particle mean_pose;
+    double max_weight = particles_[0].weight;
+    mean_pose.yaw = particles_[0].yaw;
+    for(const auto& particle : particles_)
+    {
+        mean_pose.x += particle.x * particle.weight;
+        mean_pose.y += particle.y * particle.weight;
+
+        if(max_weight < particle.weight)
+        {
+            mean_pose.yaw = particle.yaw; // 重みが最大のパーティクルの値を取得
+            max_weight    = particle.weight;
+        }
+    }
+
+    // コピー
+    particle_ = mean_pose;
+}
+
+// 推定位置の決定（最大の重みを有するポーズ）
+void AMCL::max_weight_pose()
+{
+    double max_weight = particles_[0].weight;
+    particle_ = particles_[0]
+    for(const auto& p : particles_)
+    {
+        if(max_weight < p.weight)
+        {
+            max_weight = p.weight;
+            particle_  = p;
+        }
+    }
+}
+
+// 推定位置の決定（中央値）
+void AMCL::median_pose()
+{
+    std::vector<double> x_list;
+    std::vector<double> y_list;
+    std::vector<double> yaw_list;
+
+    for(const auto& p : particles_)
+    {
+        x_list.push_back(p.x);
+        y_list.push_back(p.y);
+        yaw_list.push_back(p.yaw);
+    }
+
+    particle_.x   = get_median(x_list);
+    particle_.y   = get_median(y_list);
+    particle_.yaw = get_median(yaw_list);
+}
+
+// 配列の中央値を返す
+double AMCL::get_median(std::vector<double>& data)
+{
+    sort_data(data);
+    if(data.size()%2 == 1)
+        return data[(data.size()-1) / 2];
+    else
+        return (data[data.size()/2 - 1] + data[data.size()/2]) / 2.0;
+}
+
+// 配列のデータを昇順に並び替える
+void AMCL::sort_data(std::vector<double>& data)
+{
+    double tmp;
+    for(int i=0; i<data.size()-1; i++)
+    {
+        for(int j=i+1; j<data.size(); j++)
+        {
+            if(data[i] > data[j])
+            {
+                tmp     = data[i];
+                data[i] = data[j];
+                data[j] = tmp;
+            }
+        }
+    }
+}
+
 // 系統リサンプリング
 void AMCL::resampling()
 {
@@ -371,24 +488,6 @@ void AMCL::resampling()
 
     // 重みを初期化
     reset_weight();
-}
-
-// 推定位置の決定（平均）
-void AMCL::mean_pose()
-{
-    // 合計値
-    Particle pose_sum;
-    for(const auto& particle : particles_)
-    {
-        pose_sum.x   += particle.x;
-        pose_sum.y   += particle.y;
-        pose_sum.yaw += particle.yaw;
-    }
-
-    // 平均値
-    particle_.x   = pose_sum.x   / particles_.size();
-    particle_.y   = pose_sum.y   / particles_.size();
-    particle_.yaw = pose_sum.yaw / particles_.size();
 }
 
 // 推定位置のパブリッシュ
