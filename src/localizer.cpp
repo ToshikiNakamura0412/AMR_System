@@ -318,12 +318,16 @@ double AMCL::norm_pdf(const double x, const double mean, const double stddev)
 double AMCL::normalize_belief()
 {
     double sum = 0.0;
+
+    // 尤度の合計
     for(const auto& p : particles_)
         sum += p.weight;
 
+    // 尤度の合計が小さ過ぎる場合
     if(sum < reset_threshold_)
         return sum;
 
+    // 正規化
     for(auto& p : particles_)
         p.weight /= sum;
 
@@ -339,26 +343,32 @@ void AMCL::resampling()
 // 推定位置の決定（平均）
 void AMCL::mean_pose()
 {
+    // 合計値
     Particle pose_sum;
-
     for(const auto& particle : particles_)
     {
         pose_sum.x   += particle.x;
         pose_sum.y   += particle.y;
         pose_sum.yaw += particle.yaw;
     }
-
-    estimated_pose_.pose.position.x = pose_sum.x / particles_.size();
-    estimated_pose_.pose.position.y = pose_sum.y / particles_.size();
-
-    tf2::Quaternion q;
-    q.setRPY(0, 0, pose_sum.yaw / particles_.size());
-    tf2::convert(q, estimated_pose_.pose.orientation);
+    
+    // 平均値
+    particle_.x   = pose_sum.x   / particles_.size();
+    particle_.y   = pose_sum.y   / particles_.size();
+    particle_.yaw = pose_sum.yaw / particles_.size();
 }
 
 // 推定位置のパブリッシュ
 void AMCL::publish_estimated_pose()
 {
+    estimated_pose_.pose.position.x = particle_.x;
+    estimated_pose_.pose.position.y = particle_.y;
+
+    // yawからquaternionを作成
+    tf2::Quaternion q;
+    q.setRPY(0, 0, particle_.yaw);
+    tf2::convert(q, estimated_pose_.pose.orientation);
+
     pub_estimated_pose_.publish(estimated_pose_);
 }
 
@@ -374,6 +384,7 @@ void AMCL::publish_particles()
         pose.position.x = particle.x;
         pose.position.y = particle.y;
 
+        // yawからquaternionを作成
         tf2::Quaternion q;
         q.setRPY(0, 0, particle.yaw);
         tf2::convert(q, pose.orientation);
@@ -383,6 +394,7 @@ void AMCL::publish_particles()
 
     pub_particle_cloud_.publish(particle_cloud_);
 }
+
 
 
 // ----- OdomModel -----
