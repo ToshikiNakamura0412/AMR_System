@@ -72,7 +72,7 @@ bool ObstacleDetector::is_ignore_angle(double angle)
 {
     angle = abs(angle);
 
-    if(ignore_angle_range_list_[0] < angle && angle < ignore_angle_range_list_[1])
+    if(ignore_angle_range_list_[0] < angle and angle < ignore_angle_range_list_[1])
         return true;
     else if(ignore_angle_range_list_[2] < angle)
         return true;

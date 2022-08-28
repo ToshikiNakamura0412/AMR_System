@@ -100,7 +100,7 @@ void DWAPlanner::process()
 // ゴールに着くまでTrueを返す
 bool DWAPlanner::can_move()
 {
-    if(!(flag_local_goal_ && flag_obs_poses_)) return false; // msg受信済みか
+    if(not (flag_local_goal_ and flag_obs_poses_)) return false; // msg受信済みか
 
     const double dx = local_goal_.point.x;
     const double dy = local_goal_.point.y;
@@ -142,12 +142,11 @@ std::vector<double> DWAPlanner::calc_final_input()
     {
         for(double yawrate=dw_.min_yawrate; yawrate<=dw_.max_yawrate; yawrate+=yawrate_reso_)
         {
-
-            if(velocity<vel_reso_*0.5 && abs(yawrate)<yawrate_reso_*4.5)
+            if(velocity<vel_reso_*0.5 and abs(yawrate)<yawrate_reso_*4.5)
                 continue;
-            else if(yawrate_reso_*0.5 < yawrate && yawrate<=yawrate_reso_*1.5 && mode_==1)
+            else if(yawrate_reso_*0.5 < yawrate and yawrate<=yawrate_reso_*1.5 and mode_==1)
                 continue;
-            else if(-yawrate_reso_*5.5 < yawrate && yawrate<=-yawrate_reso_*0.5 && mode_==1)
+            else if(-yawrate_reso_*5.5 < yawrate and yawrate<=-yawrate_reso_*0.5 and mode_==1)
                 continue;
 
             const std::vector<State> trajectory = calc_traj(velocity, yawrate); // 予測軌跡の生成
@@ -189,7 +188,7 @@ std::vector<double> DWAPlanner::calc_final_input()
 // 旋回状況に応じた減速機能
 void DWAPlanner::change_mode()
 {
-    if(abs(roomba_.yawrate)>turn_thres_yawrate_ || roomba_.velocity<avoid_thres_vel_)
+    if(abs(roomba_.yawrate)>turn_thres_yawrate_ or roomba_.velocity<avoid_thres_vel_)
         mode_log_.push_back(2.0); // 減速モード
     else
         mode_log_.push_back(1.0);
@@ -278,8 +277,8 @@ void DWAPlanner::move(State& state, const double velocity, const double yawrate)
 // 適切な角度(-M_PI ~ M_PI)を返す
 double DWAPlanner::normalize_angle(double angle)
 {
-    if(M_PI  < angle) angle -= 2.0*M_PI;
-    if(angle < -M_PI) angle += 2.0*M_PI;
+    while(M_PI  < angle) angle -= 2.0*M_PI;
+    while(angle < -M_PI) angle += 2.0*M_PI;
 
     return angle;
 }

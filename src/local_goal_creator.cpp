@@ -41,7 +41,7 @@ void LocalGoalCreator::process()
 
     while(ros::ok())
     {
-        if(flag_estimated_pose_ && flag_global_path_)
+        if(flag_estimated_pose_ and flag_global_path_)
             update_goal(); // ゴールの更新
         ros::spinOnce();   // コールバック関数の実行
         loop_rate.sleep(); // 周期が終わるまで待つ

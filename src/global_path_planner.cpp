@@ -168,7 +168,7 @@ bool AStarPlanner::is_goal(const Node node)
 // 2つが同じノードの場合、trueを返す
 bool AStarPlanner::is_same_node(const Node n1, const Node n2)
 {
-    if(n1.index_x == n2.index_x && n1.index_y == n2.index_y)
+    if(n1.index_x == n2.index_x and n1.index_y == n2.index_y)
         return true;
     else
         return false;
@@ -180,7 +180,7 @@ void AStarPlanner::create_path(Node current_node)
     nav_msgs::Path partial_path;
     partial_path.poses.push_back(calc_pose(current_node));
 
-    while(!is_start(current_node))
+    while(not is_start(current_node))
     {
         for(int i=0; i<closed_set_.size() ;i++)
         {
@@ -219,7 +219,7 @@ bool AStarPlanner::is_parent(const int closed_node_index, const Node node)
 {
     bool is_same_x = closed_set_[closed_node_index].index_x == node.parent_index_x;
     bool is_same_y = closed_set_[closed_node_index].index_y == node.parent_index_y;
-    return  is_same_x && is_same_y;
+    return  is_same_x and is_same_y;
 }
 
 // set1からset2にノードを移動
@@ -325,7 +325,7 @@ void AStarPlanner::creat_motion_model(std::vector<Motion>& motion_set)
 Motion AStarPlanner::get_motion(const int dx, const int dy, const double cost)
 {
     // 隣接したグリッドに移動しない場合
-    if(1 < abs(dx) || 1 < abs(dy))
+    if(1 < abs(dx) or 1 < abs(dy))
     {
         ROS_ERROR_STREAM("The motion is inappropriate..");
         exit(5);
@@ -378,7 +378,7 @@ std::tuple<int, int> AStarPlanner::search_node(const Node target_node)
 // [デバッグ用] ノードをRvizに表示
 void  AStarPlanner::show_node_point(const Node node, const double sleep_time)
 {
-    if(!is_visible_) return;
+    if(not is_visible_) return;
     current_node_.point.x = node.index_x * map_.info.resolution + map_.info.origin.position.x;
     current_node_.point.y = node.index_y * map_.info.resolution + map_.info.origin.position.y;
     pub_node_point_.publish(current_node_);
@@ -388,7 +388,7 @@ void  AStarPlanner::show_node_point(const Node node, const double sleep_time)
 // [デバッグ用] パスをRvizに表示
 void  AStarPlanner::show_path(nav_msgs::Path& current_path, const double sleep_time)
 {
-    if(!is_visible_) return;
+    if(not is_visible_) return;
     current_path.header.frame_id = "map";
     pub_current_path_.publish(current_path);
     ros::Duration(sleep_time).sleep();

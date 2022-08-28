@@ -64,7 +64,7 @@ void LocalMapCreator::update_map()
         const double obs_dist  = hypot(obs_y, obs_x);
         const double obs_angle = atan2(obs_y, obs_x);
 
-        for(double dist_from_start=0.0; (dist_from_start<obs_dist && in_map(dist_from_start, obs_angle)); dist_from_start+=map_reso_)
+        for(double dist_from_start=0.0; (dist_from_start<obs_dist and in_map(dist_from_start, obs_angle)); dist_from_start+=map_reso_)
         {
             const int grid_index = get_grid_index(dist_from_start, obs_angle);
             local_map_.data[grid_index] = 0; //「空き」にする
@@ -100,7 +100,7 @@ bool LocalMapCreator::in_map(const double dist, const double angle)
     const int index_x = int(round((x - local_map_.info.origin.position.x) / local_map_.info.resolution));
     const int index_y = int(round((y - local_map_.info.origin.position.y) / local_map_.info.resolution));
 
-    if(index_x<local_map_.info.width && index_y<local_map_.info.height)
+    if(index_x<local_map_.info.width and index_y<local_map_.info.height)
         return true;
     else
         return false;
