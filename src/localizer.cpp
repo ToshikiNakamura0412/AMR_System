@@ -393,7 +393,7 @@ void AMCL::weighted_mean_pose()
 void AMCL::max_weight_pose()
 {
     double max_weight = particles_[0].weight;
-    particle_ = particles_[0]
+    particle_ = particles_[0];
     for(const auto& p : particles_)
     {
         if(max_weight < p.weight)
