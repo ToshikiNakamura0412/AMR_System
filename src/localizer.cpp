@@ -242,7 +242,7 @@ double AMCL::likelihood(const Particle p)
     for(int i=0; i<laser_.ranges.size(); i+=laser_step_)
     {
         double angle = i * laser_.angle_increment + laser_.angle_min; // レーザ値の角度
-        
+
         if(not is_ignore_angle(angle)) // 柱と被るレーザ値のスキップ
         {
             double range = calc_dist_to_wall(p.x, p.y, normalize_angle(angle + p.yaw), laser_.ranges[i]);
@@ -267,7 +267,7 @@ bool AMCL::is_ignore_angle(double angle)
 }
 
 // 壁までの距離を算出
-double AMCL::clac_dist_to_wall(double x, double y, const double laser_angle, const double laser_range)
+double AMCL::calc_dist_to_wall(double x, double y, const double laser_angle, const double laser_range)
 {
     const double search_step = map_.info.resolution;
     const double search_limit = laser_range;
@@ -339,20 +339,20 @@ void AMCL::resampling()
 // 推定位置の決定（平均）
 void AMCL::mean_pose()
 {
-    Particle mean_pose;
+    Particle pose_sum;
 
     for(const auto& particle : particles_)
     {
-        mean_pose.x   += particle.x;
-        mean_pose.y   += particle.y;
-        mean_pose.yaw += particle.yaw;
+        pose_sum.x   += particle.x;
+        pose_sum.y   += particle.y;
+        pose_sum.yaw += particle.yaw;
     }
 
-    estimated_pose_.pose.position.x = mean_pose.x;
-    estimated_pose_.pose.position.y = mean_pose.y;
+    estimated_pose_.pose.position.x = pose_sum.x / particles_.size();
+    estimated_pose_.pose.position.y = pose_sum.y / particles_.size();
 
     tf2::Quaternion q;
-    q.setRPY(0, 0, mean_pose.yaw);
+    q.setRPY(0, 0, pose_sum.yaw / particles_.size());
     tf2::convert(q, estimated_pose_.pose.orientation);
 }
 

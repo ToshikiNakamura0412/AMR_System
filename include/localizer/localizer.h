@@ -77,7 +77,7 @@ private:
     int    xy_to_grid_index(const double x, const double y); // 座標からグリッドのインデックスを返す
     double normalize_angle(double angle);                    // 適切な角度(-M_PI ~ M_PI)を返す
     double likelihood(const Particle p);                     // 尤度関数
-    double clac_dist_to_wall(double x, double y, const double laser_angle, const double laser_range) // 壁までの距離を算出
+    double calc_dist_to_wall(double x, double y, const double laser_angle, const double laser_range); // 壁までの距離を算出
 
     // 正規分布
     double norm_rv(const double mean, const double stddev);                  // ランダム変数生成関数
