@@ -341,12 +341,12 @@ void AMCL::resampling()
     std::vector<double> accum;
     accum.push_back(particles_[0].weight);
     for(int i=1; i<particles_.size(); i++)
-        acuum.push_back(accum.back() + particles_[i].weight);
+        accum.push_back(accum.back() + particles_[i].weight);
 
     // サンプリングのスタート位置とステップを設定
-    std::vector<Particle> old(particles_);
-    double start = (double)rand()/(RAND_MAX * particles_.size()); // 0 ~ 1/N
-    double step = 1.0 / particles_,size();
+    const std::vector<Particle> old(particles_);
+    const double start = (double)rand()/(RAND_MAX * particles_.size()); // 0 ~ 1/N
+    const double step = 1.0 / particles_.size();
 
     // サンプリングするパーティクルのインデックスを保持
     std::vector<int> chosen_indexes;
@@ -358,7 +358,7 @@ void AMCL::resampling()
             tick++;
             if(tick == particles_.size())
             {
-                ROS_ERROR("Resampling Failed") // 配列の不正アクセス防止
+                ROS_ERROR("Resampling Failed"); // 配列の不正アクセス防止
                 exit(1);
             }
         }
@@ -366,7 +366,7 @@ void AMCL::resampling()
     }
 
     // リサンプリング
-    for(int i=0; i<particle_.size(); i++)
+    for(int i=0; i<particles_.size(); i++)
         particles_[i] = old[chosen_indexes[i]];
 
     // 重みを初期化
@@ -384,7 +384,7 @@ void AMCL::mean_pose()
         pose_sum.y   += particle.y;
         pose_sum.yaw += particle.yaw;
     }
-    
+
     // 平均値
     particle_.x   = pose_sum.x   / particles_.size();
     particle_.y   = pose_sum.y   / particles_.size();
