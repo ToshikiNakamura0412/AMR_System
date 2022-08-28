@@ -70,6 +70,10 @@ private:
     void odom_callback(const nav_msgs::Odometry::ConstPtr& msg);
     void laser_callback(const sensor_msgs::LaserScan::ConstPtr& msg);
 
+    // 正規分布
+    double norm_rv(const double mean, const double stddev);                  // ランダム変数生成関数
+    double norm_pdf(const double x, const double mean, const double stddev); // 確率密度関数
+
     // その他の関数
     void   move_particle(Particle& p, double length, double direction, double rotation); // パーティクルの移動
     void   sort_data(std::vector<double>& data);             // 配列のデータを昇順に並び替える
@@ -80,10 +84,6 @@ private:
     double likelihood(const Particle p);                     // 尤度関数
     double get_median(std::vector<double>& data);            // 配列の中央値を返す
     double calc_dist_to_wall(double x, double y, const double laser_angle, const double laser_range); // 壁までの距離を算出
-
-    // 正規分布
-    double norm_rv(const double mean, const double stddev);                  // ランダム変数生成関数
-    double norm_pdf(const double x, const double mean, const double stddev); // 確率密度関数
 
 
     // ----- 関数（引数なし）------
@@ -105,17 +105,20 @@ private:
 
 
     // ----- 変数 -----
-    int       hz_;                                // ループ周波数 [Hz]
-    int       laser_step_;                        // 何本ずつレーザを見るか
-    int       particle_num_;                      // パーティクルの個数
-    double    init_x_;                            // 初期位置 [m]
-    double    init_y_;                            // 初期位置 [m]
-    double    init_yaw_;                          // 初期姿勢 [rad]
-    double    init_dev_;                          // 正規分布の初期の標準偏差 [m]
-    double    sensor_noise_ratio_;                // センサノイズ
-    double    reset_threshold_;                   // 重みのリセットに関する尤度合計の閾値
-    OdomModel odom_model_;                        // odometryのモデル
-    Particle  particle_;                          // 推定位置格納用
+    int       hz_;                 // ループ周波数 [Hz]
+    int       laser_step_;         // 何本ずつレーザを見るか [-]
+    int       particle_num_;       // パーティクルの個数 [-]
+    double    init_x_;             // 初期位置 [m]
+    double    init_y_;             // 初期位置 [m]
+    double    init_yaw_;           // 初期姿勢 [rad]
+    double    init_pos_dev_;       // 初期位置の標準偏差 [m]
+    double    init_yaw_dev_;       // 初期姿勢の標準偏差 [rad]
+    double    sensor_noise_ratio_; // 距離に対するセンサノイズ比 [-]
+    double    reset_threshold_;    // 重みのリセットに関する尤度合計の閾値 [-]
+    OdomModel odom_model_;         // odometryのモデル
+    Particle  particle_;           // 推定位置格納用
+
+    // リスト
     std::vector<Particle> particles_;             // パーティクルクラウド（計算用）
     std::vector<double> ignore_angle_range_list_; // 柱に関する角度範囲の配列 [rad]
 

@@ -11,7 +11,8 @@ AMCL::AMCL():private_nh_("~"), engine_(seed_gen_())
     private_nh_.getParam("init_x", init_x_);
     private_nh_.getParam("init_y", init_y_);
     private_nh_.getParam("init_yaw", init_yaw_);
-    private_nh_.getParam("init_dev", init_dev_);
+    private_nh_.getParam("init_pos_dev", init_pos_dev_);
+    private_nh_.getParam("init_yaw_dev", init_yaw_dev_);
     private_nh_.getParam("sensor_noise_ratio", sensor_noise_ratio_);
     private_nh_.getParam("reset_threshold", reset_threshold_);
     private_nh_.getParam("ignore_angle_range_list", ignore_angle_range_list_);
@@ -91,9 +92,10 @@ void AMCL::initialize()
         particle.x   = init_x_;
         particle.y   = init_y_;
         particle.yaw = init_yaw_;
-        // particle.x   = norm_rv(init_x_,   init_dev_);
-        // particle.y   = norm_rv(init_y_,   init_dev_);
-        // particle.yaw = norm_rv(init_yaw_, init_dev_);
+        // particle.x   = norm_rv(init_x_,   init_pos_dev_);
+        // particle.y   = norm_rv(init_y_,   init_pos_dev_);
+        // particle.yaw = norm_rv(init_yaw_, init_yaw_dev_);
+        // particle.yaw = normalize_angle(particle.yaw);
         particles_.push_back(particle);
     }
 
@@ -364,6 +366,7 @@ void AMCL::mean_pose()
     particle_.x   = pose_sum.x   / particles_.size();
     particle_.y   = pose_sum.y   / particles_.size();
     particle_.yaw = pose_sum.yaw / particles_.size();
+    particle_.yaw = normalize_angle(particle_.yaw);
 }
 
 // 推定位置の決定（加重平均）

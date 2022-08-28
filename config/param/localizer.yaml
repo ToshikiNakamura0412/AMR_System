@@ -1,13 +1,14 @@
 # --- クラスAMCL ---
-hz: 10        # ループ周期 [Hz]
-laser_step: 3 # 何本ずつレーザを見るか(全1080本)
-particle_num: 200
-init_x: 0.0
-init_y: 0.0
-init_yaw: 0.0
-init_dev: 0.95
-sensor_noise_ratio: 0.03
-reset_threshold: 0.000001
+hz: 10                    # ループ周期 [Hz]
+laser_step: 3             # 何本ずつレーザを見るか(全1080本)[-]
+particle_num: 200         # パーティクルの個数 [-]
+init_x: 0.0               # 初期位置 [m]
+init_y: 0.0               # 初期位置 [m]
+init_yaw: 0.0             # 初期姿勢 [rad]
+init_pos_dev: 0.8         # 初期位置の標準偏差 [m]
+init_yaw_dev: 0.5         # 初期姿勢の標準偏差 [rad]
+sensor_noise_ratio: 0.03  # 距離に対するセンサノイズ比 [-]
+reset_threshold: 0.000001 # 重みのリセットに関する尤度合計の閾値 [-]
 
 # --- 柱に関する角度範囲の配列 [rad] ---
 # 以下が無視される
@@ -16,7 +17,7 @@ reset_threshold: 0.000001
 ignore_angle_range_list: [rad(1.5*pi/16.0), rad(5.0*pi/16.0), rad(10.0*pi/16.0)]
 
 # --- クラスOdomModel ---
-ff: 0.19   # 直進1[m]で生じる道のりのばらつきの標準偏差
-fr: 0.0001 # 回転1[rad]で生じる道のりのばらつきの標準偏差
-rf: 0.13   # 直進1[m]で生じる向きのばらつきの標準偏差
-rr: 0.2    # 回転1[rad]で生じる向きのばらつきの標準偏差
+ff: 0.19   # 直進1[m]で生じる道のりのばらつきの標準偏差 [m]
+fr: 0.0001 # 回転1[rad]で生じる道のりのばらつきの標準偏差 [m]
+rf: 0.13   # 直進1[m]で生じる向きのばらつきの標準偏差 [rad]
+rr: 0.2    # 回転1[rad]で生じる向きのばらつきの標準偏差 [rad]
