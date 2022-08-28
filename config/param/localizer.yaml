@@ -6,6 +6,7 @@ init_x: 0.0
 init_y: 0.0
 init_yaw: 0.0
 init_dev: 0.95
+sensor_noise_ratio: 0.03
 reset_threshold: 0.000001
 
 # --- 柱に関する角度範囲の配列 [rad] ---

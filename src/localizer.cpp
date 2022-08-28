@@ -12,6 +12,7 @@ AMCL::AMCL():private_nh_("~"), engine_(seed_gen_())
     private_nh_.getParam("init_y", init_y_);
     private_nh_.getParam("init_yaw", init_yaw_);
     private_nh_.getParam("init_dev", init_dev_);
+    private_nh_.getParam("sensor_noise_ratio", sensor_noise_ratio_);
     private_nh_.getParam("reset_threshold", reset_threshold_);
     private_nh_.getParam("ignore_angle_range_list", ignore_angle_range_list_);
     // パラメータの取得(OdomModel)
@@ -69,7 +70,7 @@ void AMCL::process()
 
     while(ros::ok())
     {
-        if(flag_map_ && flag_odom_ && flag_laser_)
+        if(flag_map_ and flag_odom_ and flag_laser_)
         {
             // broadcast_odom_state(); // map座標系とodom座標系の関係を報告
             localize(); // 自己位置推定
@@ -87,22 +88,24 @@ void AMCL::initialize()
     // 初期位置近傍にパーティクルを配置
     for(int i=0; i<particle_num_; i++)
     {
-        particle.x   = norm_rv(init_x_,   init_dev_);
-        particle.y   = norm_rv(init_y_,   init_dev_);
-        particle.yaw = norm_rv(init_yaw_, init_dev_);
+        particle.x   = init_x_;
+        particle.y   = init_y_;
+        particle.yaw = init_yaw_;
+        // particle.x   = norm_rv(init_x_,   init_dev_);
+        // particle.y   = norm_rv(init_y_,   init_dev_);
+        // particle.yaw = norm_rv(init_yaw_, init_dev_);
         particles_.push_back(particle);
     }
 
     reset_weight(); // 重みの初期化
 }
 
-// 確率密度関数
+// ランダム変数生成関数（正規分布）
 double AMCL::norm_rv(const double mean, const double stddev)
 {
     std::normal_distribution<> norm_dist(mean, stddev);
     return norm_dist(engine_);
 }
-
 
 // 重みの初期化
 void AMCL::reset_weight()
@@ -173,11 +176,11 @@ double AMCL::normalize_angle(double angle)
 // 自己位置推定
 void AMCL::localize()
 {
-    motion_update();                              // 動作更新
-    // observation_update();                         // 観測更新（リサンプリングを含む）
-    // estimate_pose();                              // 推定位置の決定
-    pub_estimated_pose_.publish(estimated_pose_); // 推定位置のパブリッシュ
-    publish_particles();                          // パーティクルクラウドのパブリッシュ
+    motion_update();          // 動作更新
+    observation_update();     // 観測更新（リサンプリングを含む）
+    mean_pose();              // 推定位置の決定（平均）
+    publish_estimated_pose(); // 推定位置のパブリッシュ
+    publish_particles();      // パーティクルクラウドのパブリッシュ
 }
 
 // 動作更新
@@ -233,23 +236,21 @@ void AMCL::observation_update()
 // 尤度関数
 double AMCL::likelihood(const Particle p)
 {
-    double weight = 0.0;
-    // double angle  = normalize_angle(p.yaw + laser_.angle_min); // パーティクルから見た1本目のレーザの角度
+    double L = 0.0; // 尤度
 
+    // センサ情報からパーティクルの姿勢を評価
     for(int i=0; i<laser_.ranges.size(); i+=laser_step_)
     {
-        // レーザ値の距離と角度の算出
-        const double dist  = laser_.ranges[i];
-        double angle = i * laser_.angle_increment + laser_.angle_min;
-
-        // 柱と被るレーザ値のスキップ
-        if(is_ignore_angle(angle)) continue;
-
-        // パーティクルから見た角度に変換
-        angle = normalize_angle(angle + p.yaw);
+        double angle = i * laser_.angle_increment + laser_.angle_min; // レーザ値の角度
+        
+        if(not is_ignore_angle(angle)) // 柱と被るレーザ値のスキップ
+        {
+            double range = calc_dist_to_wall(p.x, p.y, normalize_angle(angle + p.yaw), laser_.ranges[i]);
+            L += norm_pdf(range, laser_.ranges[i], laser_.ranges[i] * sensor_noise_ratio_);
+        }
     }
 
-    return weight;
+    return L;
 }
 
 // 柱の場合、trueを返す
@@ -257,12 +258,60 @@ bool AMCL::is_ignore_angle(double angle)
 {
     angle = abs(angle);
 
-    if(ignore_angle_range_list_[0] < angle && angle < ignore_angle_range_list_[1])
+    if(ignore_angle_range_list_[0] < angle and angle < ignore_angle_range_list_[1])
         return true;
     else if(ignore_angle_range_list_[2] < angle)
         return true;
     else
         return false;
+}
+
+// 壁までの距離を算出
+double AMCL::clac_dist_to_wall(double x, double y, const double laser_angle, const double laser_range)
+{
+    const double search_step = map_.info.resolution;
+    const double search_limit = laser_range;
+
+    for(double dist=0.0; dist<search_limit; dist+=search_step)
+    {
+        x += search_step * cos(laser_angle);
+        y += search_step * sin(laser_angle);
+
+        const int grid_index = xy_to_grid_index(x, y);
+
+        if(not in_map(grid_index))
+            return search_limit * 2.0;
+        else if(map_.data[grid_index] == -1)
+            return search_limit * 2.0;
+        else if(map_.data[grid_index] == 100)
+            return dist;
+    }
+
+    return search_limit * 1.3;
+}
+
+// 座標からグリッドのインデックスを返す
+int AMCL::xy_to_grid_index(const double x, const double y)
+{
+    const int index_x = int(round((x - map_.info.origin.position.x) / map_.info.resolution));
+    const int index_y = int(round((y - map_.info.origin.position.y) / map_.info.resolution));
+
+    return index_x + (index_y * map_.info.width);
+}
+
+// マップ内の場合、trueを返す
+bool AMCL::in_map(const int grid_index)
+{
+    if(0 <= grid_index and grid_index < map_.data.size())
+        return true;
+    else
+        return false;
+}
+
+// 確率密度関数（正規分布）
+double AMCL::norm_pdf(const double x, const double mean, const double stddev)
+{
+    return 1.0/sqrt(2.0 * M_PI * pow(stddev, 2.0)) * exp(-pow((x - mean), 2.0)/(2.0*pow(stddev, 2.0)));
 }
 
 // 重みの正規化
@@ -287,10 +336,30 @@ void AMCL::resampling()
 
 }
 
-// 推定位置の決定
-void AMCL::estimate_pose()
+// 推定位置の決定（平均）
+void AMCL::mean_pose()
 {
+    Particle mean_pose;
 
+    for(const auto& particle : particles_)
+    {
+        mean_pose.x   += particle.x;
+        mean_pose.y   += particle.y;
+        mean_pose.yaw += particle.yaw;
+    }
+
+    estimated_pose_.pose.position.x = mean_pose.x;
+    estimated_pose_.pose.position.y = mean_pose.y;
+
+    tf2::Quaternion q;
+    q.setRPY(0, 0, mean_pose.yaw);
+    tf2::convert(q, estimated_pose_.pose.orientation);
+}
+
+// 推定位置のパブリッシュ
+void AMCL::publish_estimated_pose()
+{
+    pub_estimated_pose_.publish(estimated_pose_);
 }
 
 // パーティクルクラウドのパブリッシュ
