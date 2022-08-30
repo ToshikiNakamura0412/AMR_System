@@ -383,6 +383,9 @@ void AMCL::mean_pose()
 // 推定位置の決定（加重平均）
 void AMCL::weighted_mean_pose()
 {
+    // 重みの正規化
+    normalize_belief();
+
     // 平均値
     Particle mean_pose;
     double max_weight = particles_[0].weight;
@@ -401,6 +404,17 @@ void AMCL::weighted_mean_pose()
 
     // コピー
     particle_ = mean_pose;
+}
+
+// 重みの正規化
+void AMCL::normalize_belief()
+{
+    // 尤度の合計
+    const double weight_sum = calc_marginal_likelihood();
+
+    // 正規化
+    for(auto& p : particles_)
+        p.weight /= weight_sum;
 }
 
 // 推定位置の決定（最大の重みを有するポーズ）

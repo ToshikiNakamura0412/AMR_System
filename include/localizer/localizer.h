@@ -98,6 +98,7 @@ private:
     void   weighted_mean_pose();       // 推定位置の決定（加重平均）
     void   max_weight_pose();          // 推定位置の決定（最大の重みを有するポーズ）
     void   median_pose();              // 推定位置の決定（中央値）
+    void   normalize_belief();         // 重みの正規化
     void   expansion_resetting();      // 膨張リセット
     void   resampling();               // リサンプリング
     void   publish_estimated_pose();   // 推定位置のパブリッシュ
