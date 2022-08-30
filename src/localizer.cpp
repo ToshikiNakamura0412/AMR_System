@@ -15,7 +15,12 @@ AMCL::AMCL():private_nh_("~"), engine_(seed_gen_())
     private_nh_.getParam("init_yaw_dev", init_yaw_dev_);
     private_nh_.getParam("sensor_noise_ratio", sensor_noise_ratio_);
     private_nh_.getParam("reset_threshold", reset_threshold_);
+    private_nh_.getParam("reset_count_limit_", reset_count_limit_);
+    private_nh_.getParam("expansion_pos_dev", expansion_pos_dev_);
+    private_nh_.getParam("expansion_yaw_dev", expansion_yaw_dev_);
     private_nh_.getParam("ignore_angle_range_list", ignore_angle_range_list_);
+    private_nh_.getParam("flag_init_noise", flag_init_noise_);
+    private_nh_.getParam("is_visible", is_visible_);
     // パラメータの取得(OdomModel)
     private_nh_.getParam("ff", ff_);
     private_nh_.getParam("fr", fr_);
@@ -86,16 +91,21 @@ void AMCL::initialize()
 {
     Particle particle;
 
-    // 初期位置近傍にパーティクルを配置
     for(int i=0; i<particle_num_; i++)
     {
-        particle.x   = init_x_;
-        particle.y   = init_y_;
-        particle.yaw = init_yaw_;
-        // particle.x   = norm_rv(init_x_,   init_pos_dev_);
-        // particle.y   = norm_rv(init_y_,   init_pos_dev_);
-        // particle.yaw = norm_rv(init_yaw_, init_yaw_dev_);
-        // particle.yaw = normalize_angle(particle.yaw);
+        if(flag_init_noise_) // 初期位置近傍にパーティクルを配置
+        {
+            particle.x   = norm_rv(init_x_,   init_pos_dev_);
+            particle.y   = norm_rv(init_y_,   init_pos_dev_);
+            particle.yaw = norm_rv(init_yaw_, init_yaw_dev_);
+            particle.yaw = normalize_angle(particle.yaw);
+        }
+        else
+        {
+            particle.x   = init_x_;
+            particle.y   = init_y_;
+            particle.yaw = normalize_angle(init_yaw_);
+        }
         particles_.push_back(particle);
     }
 
@@ -225,18 +235,29 @@ void AMCL::move_particle(Particle& p, double length, double direction, double ro
 // 観測更新（位置推定・リサンプリングを含む）
 void AMCL::observation_update()
 {
+    // 尤度計算
     for(auto& particle : particles_)
-        particle.weight *= likelihood(particle); // 尤度計算
+        particle.weight *= likelihood(particle);
 
-    if(normalize_belief() < reset_threshold_) // 重みの正規化
+    // 周辺尤度を算出
+    const double marginal_likelihood = calc_marginal_likelihood();
+    std::cout << "Marginal Likelihood = " << marginal_likelihood << std::endl;
+
+    int reset_counter = 0; // 過剰膨張防止用
+
+    // if(marginal_likelihood < reset_threshold_ and reset_counter < reset_count_limit_) // 周辺尤度が小さ過ぎる場合
+    if(marginal_likelihood < reset_threshold_) // 周辺尤度が小さ過ぎる場合
     {
-        median_pose();  // 推定位置の決定
-        reset_weight(); // 重みの初期化
+        reset_counter++;
+        median_pose();         // 推定位置の決定（中央値）
+        expansion_resetting(); // 膨張リセット
     }
     else
     {
+        std::cout << "Reset Count = " << reset_counter << std::endl;
+        reset_counter = 0;
         estimate_pose(); // 推定位置の決定
-        resampling();    // 系統リサンプリング
+        resampling();    // リサンプリング
     }
 }
 
@@ -321,22 +342,12 @@ double AMCL::norm_pdf(const double x, const double mean, const double stddev)
     return 1.0/sqrt(2.0 * M_PI * pow(stddev, 2.0)) * exp(-pow((x - mean), 2.0)/(2.0*pow(stddev, 2.0)));
 }
 
-// 重みの正規化
-double AMCL::normalize_belief()
+// 周辺尤度の算出
+double AMCL::calc_marginal_likelihood()
 {
     double sum = 0.0;
-
-    // 尤度の合計
     for(const auto& p : particles_)
         sum += p.weight;
-
-    // 尤度の合計が小さ過ぎる場合
-    if(sum < reset_threshold_)
-        return sum;
-
-    // 正規化
-    for(auto& p : particles_)
-        p.weight /= sum;
 
     return sum;
 }
@@ -454,7 +465,23 @@ void AMCL::sort_data(std::vector<double>& data)
     }
 }
 
-// 系統リサンプリング
+// 膨張リセット
+void AMCL::expansion_resetting()
+{
+    // ノイズを加える
+    for(auto& p : particles_)
+    {
+        p.x   = norm_rv(p.x,   expansion_pos_dev_);
+        p.y   = norm_rv(p.y,   expansion_pos_dev_);
+        p.yaw = norm_rv(p.yaw, expansion_yaw_dev_);
+        p.yaw = normalize_angle(p.yaw);
+    }
+
+    // 重みを初期化
+    reset_weight();
+}
+
+// リサンプリング（系統サンプリング）
 void AMCL::resampling()
 {
     // パーティクルの重みを積み上げたリストを作成
@@ -466,7 +493,7 @@ void AMCL::resampling()
     // サンプリングのスタート位置とステップを設定
     const std::vector<Particle> old(particles_);
     const double start = (double)rand()/(RAND_MAX * particles_.size()); // 0 ~ 1/N
-    const double step = 1.0 / particles_.size();
+    const double step = accum.back() / particles_.size();
 
     // サンプリングするパーティクルのインデックスを保持
     std::vector<int> chosen_indexes;
@@ -510,24 +537,27 @@ void AMCL::publish_estimated_pose()
 // パーティクルクラウドのパブリッシュ
 void AMCL::publish_particles()
 {
-    particle_cloud_.poses.clear();
-    /* --- パーティクルの数が変わる場合，ここでresize() --- */
-    geometry_msgs::Pose pose;
-
-    for(const auto& particle : particles_)
+    if(is_visible_)
     {
-        pose.position.x = particle.x;
-        pose.position.y = particle.y;
+        particle_cloud_.poses.clear();
+        /* --- パーティクルの数が変わる場合，ここでresize() --- */
+        geometry_msgs::Pose pose;
 
-        // yawからquaternionを作成
-        tf2::Quaternion q;
-        q.setRPY(0, 0, particle.yaw);
-        tf2::convert(q, pose.orientation);
+        for(const auto& particle : particles_)
+        {
+            pose.position.x = particle.x;
+            pose.position.y = particle.y;
 
-        particle_cloud_.poses.push_back(pose);
+            // yawからquaternionを作成
+            tf2::Quaternion q;
+            q.setRPY(0, 0, particle.yaw);
+            tf2::convert(q, pose.orientation);
+
+            particle_cloud_.poses.push_back(pose);
+        }
+
+        pub_particle_cloud_.publish(particle_cloud_);
     }
-
-    pub_particle_cloud_.publish(particle_cloud_);
 }
 
 

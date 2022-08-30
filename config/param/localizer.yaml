@@ -8,7 +8,15 @@ init_yaw: 0.0             # 初期姿勢 [rad]
 init_pos_dev: 0.65        # 初期位置の標準偏差 [m]
 init_yaw_dev: 0.5         # 初期姿勢の標準偏差 [rad]
 sensor_noise_ratio: 0.03  # 距離に対するセンサノイズ比 [-]
-reset_threshold: 0.000001 # 重みのリセットに関する尤度合計の閾値 [-]
+reset_threshold: 0.000001 # リセットに関する周辺尤度の閾値 [-]
+reset_count_limit: 5      # 連続リセットの回数の上限 [-]
+expansion_pos_dev: 0.2    # 膨張リセットの位置の標準偏差 [m]
+expansion_yaw_dev: 0.1    # 膨張リセットの姿勢の標準偏差 [rad]
+
+# フラグ
+flag_init_noise: false # 初期位置にノイズを加えるか
+is_visible: true      # パーティクルクラウドをパブリッシングするか
+
 
 # --- 柱に関する角度範囲の配列 [rad] ---
 # 以下が無視される

@@ -87,34 +87,38 @@ private:
 
 
     // ----- 関数（引数なし）------
-    void   initialize();             // パーティクルの初期化
-    void   reset_weight();           // 重みの初期化
-    void   broadcast_odom_state();   // map座標系とodom座標系の関係を報告
-    void   localize();               // 自己位置推定
-    void   motion_update();          // 動作更新
-    void   observation_update();     // 観測更新
-    void   estimate_pose();          // 推定位置の決定
-    void   mean_pose();              // 推定位置の決定（平均）
-    void   weighted_mean_pose();     // 推定位置の決定（加重平均）
-    void   max_weight_pose();        // 推定位置の決定（最大の重みを有するポーズ）
-    void   median_pose();            // 推定位置の決定（中央値）
-    void   resampling();             // 系統リサンプリング
-    void   publish_estimated_pose(); // 推定位置のパブリッシュ
-    void   publish_particles();      // パーティクルクラウドのパブリッシュ
-    double normalize_belief();       // 尤度の正規化
+    void   initialize();               // パーティクルの初期化
+    void   reset_weight();             // 重みの初期化
+    void   broadcast_odom_state();     // map座標系とodom座標系の関係を報告
+    void   localize();                 // 自己位置推定
+    void   motion_update();            // 動作更新
+    void   observation_update();       // 観測更新
+    void   estimate_pose();            // 推定位置の決定
+    void   mean_pose();                // 推定位置の決定（平均）
+    void   weighted_mean_pose();       // 推定位置の決定（加重平均）
+    void   max_weight_pose();          // 推定位置の決定（最大の重みを有するポーズ）
+    void   median_pose();              // 推定位置の決定（中央値）
+    void   expansion_resetting();      // 膨張リセット
+    void   resampling();               // リサンプリング
+    void   publish_estimated_pose();   // 推定位置のパブリッシュ
+    void   publish_particles();        // パーティクルクラウドのパブリッシュ
+    double calc_marginal_likelihood(); // 周辺尤度の算出
 
 
     // ----- 変数 -----
     int       hz_;                 // ループ周波数 [Hz]
     int       laser_step_;         // 何本ずつレーザを見るか [-]
     int       particle_num_;       // パーティクルの個数 [-]
+    int       reset_count_limit_;  // 連続リセットの回数の上限 [-]
     double    init_x_;             // 初期位置 [m]
     double    init_y_;             // 初期位置 [m]
     double    init_yaw_;           // 初期姿勢 [rad]
     double    init_pos_dev_;       // 初期位置の標準偏差 [m]
     double    init_yaw_dev_;       // 初期姿勢の標準偏差 [rad]
     double    sensor_noise_ratio_; // 距離に対するセンサノイズ比 [-]
-    double    reset_threshold_;    // 重みのリセットに関する尤度合計の閾値 [-]
+    double    reset_threshold_;    // リセットに関する周辺尤度の閾値 [-]
+    double    expansion_pos_dev_;  // 膨張リセットの位置の標準偏差 [m]
+    double    expansion_yaw_dev_;  // 膨張リセットの姿勢の標準偏差 [rad]
     OdomModel odom_model_;         // odometryのモデル
     Particle  particle_;           // 推定位置格納用
 
@@ -126,6 +130,10 @@ private:
     bool flag_map_   = false;
     bool flag_odom_  = false;
     bool flag_laser_ = false;
+
+    // 各種設定フラグ
+    bool flag_init_noise_; // 初期位置にノイズを加えるか
+    bool is_visible_;     // パーティクルクラウドをパブリッシングするか
 
     // OdomModel関連
     double ff_;
