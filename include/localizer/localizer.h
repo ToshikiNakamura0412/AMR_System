@@ -110,6 +110,7 @@ private:
     int       hz_;                 // ループ周波数 [Hz]
     int       laser_step_;         // 何本ずつレーザを見るか [-]
     int       particle_num_;       // パーティクルの個数 [-]
+    int       reset_counter = 0;   // 連続リセットの回数 [-]
     int       reset_count_limit_;  // 連続リセットの回数の上限 [-]
     double    init_x_;             // 初期位置 [m]
     double    init_y_;             // 初期位置 [m]
