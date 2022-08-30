@@ -1,7 +1,7 @@
 # --- クラスAMCL ---
 hz: 10                    # ループ周期 [Hz]
-laser_step: 3             # 何本ずつレーザを見るか(全1080本)[-]
-particle_num: 200         # パーティクルの個数 [-]
+laser_step: 15            # 何本ずつレーザを見るか(全1080本)[-]
+particle_num: 400         # パーティクルの個数 [-]
 init_x: 0.0               # 初期位置 [m]
 init_y: 0.0               # 初期位置 [m]
 init_yaw: 0.0             # 初期姿勢 [rad]
