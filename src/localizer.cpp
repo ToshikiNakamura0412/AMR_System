@@ -9,6 +9,9 @@ emcl: mcl with expansion resetting
 EMCL::EMCL():private_nh_("~"), engine_(seed_gen_())
 {
     // パラメータの取得(EMCL)
+    private_nh_.getParam("flag_init_noise", flag_init_noise_);
+    private_nh_.getParam("flag_broadcast", flag_broadcast_);
+    private_nh_.getParam("is_visible", is_visible_);
     private_nh_.getParam("hz", hz_);
     private_nh_.getParam("particle_num", particle_num_);
     private_nh_.getParam("move_dist_th", move_dist_th_);
@@ -23,8 +26,6 @@ EMCL::EMCL():private_nh_("~"), engine_(seed_gen_())
     private_nh_.getParam("expansion_x_dev", expansion_x_dev_);
     private_nh_.getParam("expansion_y_dev", expansion_y_dev_);
     private_nh_.getParam("expansion_yaw_dev", expansion_yaw_dev_);
-    private_nh_.getParam("flag_init_noise", flag_init_noise_);
-    private_nh_.getParam("is_visible", is_visible_);
     private_nh_.getParam("laser_step", laser_step_);
     private_nh_.getParam("sensor_noise_ratio", sensor_noise_ratio_);
     private_nh_.getParam("ignore_angle_range_list", ignore_angle_range_list_);
@@ -92,7 +93,7 @@ void EMCL::process()
     {
         if(flag_map_ and flag_odom_ and flag_laser_)
         {
-            // broadcast_odom_state(); // map座標系とodom座標系の関係を報告
+            broadcast_odom_state(); // map座標系とodom座標系の関係を報告
             localize(); // 自己位置推定
         }
         ros::spinOnce();   // コールバック関数の実行
@@ -143,51 +144,54 @@ void EMCL::reset_weight()
 // map座標系とodom座標系の関係を報告
 void EMCL::broadcast_odom_state()
 {
-    // TF Broadcasterの実体化
-    static tf2_ros::TransformBroadcaster odom_state_broadcaster;
+    if(flag_broadcast_)
+    {
+        // TF Broadcasterの実体化
+        static tf2_ros::TransformBroadcaster odom_state_broadcaster;
 
-    // map座標系からみたbase_link座標系の位置と姿勢の取得
-    const double map_to_base_yaw = tf2::getYaw(estimated_pose_.pose.orientation);
-    const double map_to_base_x   = estimated_pose_.pose.position.x;
-    const double map_to_base_y   = estimated_pose_.pose.position.y;
+        // map座標系からみたbase_link座標系の位置と姿勢の取得
+        const double map_to_base_yaw = tf2::getYaw(estimated_pose_.pose.orientation);
+        const double map_to_base_x   = estimated_pose_.pose.position.x;
+        const double map_to_base_y   = estimated_pose_.pose.position.y;
 
-    // odom座標系からみたbase_link座標系の位置と姿勢の取得
-    const double odom_to_base_yaw = tf2::getYaw(last_odom_.pose.pose.orientation);
-    const double odom_to_base_x   = last_odom_.pose.pose.position.x;
-    const double odom_to_base_y   = last_odom_.pose.pose.position.y;
+        // odom座標系からみたbase_link座標系の位置と姿勢の取得
+        const double odom_to_base_yaw = tf2::getYaw(last_odom_.pose.pose.orientation);
+        const double odom_to_base_x   = last_odom_.pose.pose.position.x;
+        const double odom_to_base_y   = last_odom_.pose.pose.position.y;
 
-    // map座標系からみたodom座標系の位置と姿勢の取得
-    // (回転行列を使った単純な座標変換)
-    const double map_to_odom_yaw = normalize_angle(map_to_base_yaw - odom_to_base_yaw);
-    const double map_to_odom_x   = map_to_base_x - odom_to_base_x * cos(map_to_odom_yaw)
-        + odom_to_base_y * sin(map_to_odom_yaw);
-    const double map_to_odom_y   = map_to_base_y - odom_to_base_x * sin(map_to_odom_yaw)
-        - odom_to_base_y * cos(map_to_odom_yaw);
+        // map座標系からみたodom座標系の位置と姿勢の取得
+        // (回転行列を使った単純な座標変換)
+        const double map_to_odom_yaw = normalize_angle(map_to_base_yaw - odom_to_base_yaw);
+        const double map_to_odom_x   = map_to_base_x - odom_to_base_x * cos(map_to_odom_yaw)
+            + odom_to_base_y * sin(map_to_odom_yaw);
+        const double map_to_odom_y   = map_to_base_y - odom_to_base_x * sin(map_to_odom_yaw)
+            - odom_to_base_y * cos(map_to_odom_yaw);
 
-    // yawからquaternionを作成
-    tf2::Quaternion map_to_odom_quat;
-    map_to_odom_quat.setRPY(0, 0, map_to_odom_yaw);
+        // yawからquaternionを作成
+        tf2::Quaternion map_to_odom_quat;
+        map_to_odom_quat.setRPY(0, 0, map_to_odom_yaw);
 
-    // odom座標系の元となodomの位置姿勢情報格納用変数の作成
-    geometry_msgs::TransformStamped odom_state;
+        // odom座標系の元となodomの位置姿勢情報格納用変数の作成
+        geometry_msgs::TransformStamped odom_state;
 
-    // 現在の時間の格納
-    odom_state.header.stamp = ros::Time::now();
+        // 現在の時間の格納
+        odom_state.header.stamp = ros::Time::now();
 
-    // 親フレーム・子フレームの指定
-    odom_state.header.frame_id = map_.header.frame_id;
-    odom_state.child_frame_id  = last_odom_.header.frame_id;
+        // 親フレーム・子フレームの指定
+        odom_state.header.frame_id = map_.header.frame_id;
+        odom_state.child_frame_id  = last_odom_.header.frame_id;
 
-    // map座標系からみたodom座標系の原点位置と方向の格納
-    odom_state.transform.translation.x = map_to_odom_x;
-    odom_state.transform.translation.y = map_to_odom_y;
-    odom_state.transform.rotation.x    = map_to_odom_quat.x();
-    odom_state.transform.rotation.y    = map_to_odom_quat.y();
-    odom_state.transform.rotation.z    = map_to_odom_quat.z();
-    odom_state.transform.rotation.w    = map_to_odom_quat.w();
+        // map座標系からみたodom座標系の原点位置と方向の格納
+        odom_state.transform.translation.x = map_to_odom_x;
+        odom_state.transform.translation.y = map_to_odom_y;
+        odom_state.transform.rotation.x    = map_to_odom_quat.x();
+        odom_state.transform.rotation.y    = map_to_odom_quat.y();
+        odom_state.transform.rotation.z    = map_to_odom_quat.z();
+        odom_state.transform.rotation.w    = map_to_odom_quat.w();
 
-    // tf情報をbroadcast(座標系の設定)
-    odom_state_broadcaster.sendTransform(odom_state);
+        // tf情報をbroadcast(座標系の設定)
+        odom_state_broadcaster.sendTransform(odom_state);
+    }
 }
 
 // 適切な角度(-M_PI ~ M_PI)を返す

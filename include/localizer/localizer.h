@@ -142,6 +142,7 @@ private:
 
     // 各種設定フラグ
     bool flag_init_noise_; // 初期位置にノイズを加えるか
+    bool flag_broadcast_;  // tf broadcastをするか
     bool is_visible_;     // パーティクルクラウドをパブリッシングするか
 
     // OdomModel関連
