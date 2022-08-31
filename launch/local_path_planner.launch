@@ -38,5 +38,5 @@
     <node pkg="second_challenge_toshiki" type="local_path_planner" name="local_path_planner" output="screen">
         <rosparam command="load" file="$(arg local_path_planner_settings)"/>
     </node>
-    <node pkg="rosbag" type="play" name="play" args="$(env HOME)/bag_folder/local_path_planner.bag"/>
+    <node pkg="rosbag" type="play" name="play" args="$(env HOME)/bag_folder/localizer.bag"/>
 </launch>

@@ -70,22 +70,6 @@ Visualization Manager:
       Show Trail: false
       Value: false
     - Alpha: 1
-      Axes Length: 1
-      Axes Radius: 0.10000000149011612
-      Class: rviz/Pose
-      Color: 85; 87; 83
-      Enabled: true
-      Head Length: 0.30000001192092896
-      Head Radius: 0.10000000149011612
-      Name: Estimated Pose
-      Queue Size: 10
-      Shaft Length: 0.10000000149011612
-      Shaft Radius: 0.05000000074505806
-      Shape: Arrow
-      Topic: /estimated_pose
-      Unreliable: false
-      Value: true
-    - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
         Max Value: 10
@@ -156,12 +140,12 @@ Visualization Manager:
       Enabled: true
       Head Length: 0.30000001192092896
       Head Radius: 0.10000000149011612
-      Name: Estimated Pose2
+      Name: Estimated Pose
       Queue Size: 10
       Shaft Length: 0.10000000149011612
       Shaft Radius: 0.05000000074505806
       Shape: Arrow
-      Topic: /estimated_pose2
+      Topic: /estimated_pose
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -173,12 +157,12 @@ Visualization Manager:
       Enabled: true
       Head Length: 0.07000000029802322
       Head Radius: 0.029999999329447746
-      Name: Particle Cloud2
+      Name: Particle Cloud
       Queue Size: 10
       Shaft Length: 0.23000000417232513
       Shaft Radius: 0.009999999776482582
       Shape: Arrow (Flat)
-      Topic: /particle_cloud2
+      Topic: /particle_cloud
       Unreliable: false
       Value: true
   Enabled: true
@@ -217,9 +201,9 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 2.181274890899658
-        Y: 1.6972564458847046
-        Z: -12.62004566192627
+        X: 2.8915905952453613
+        Y: 1.0284661054611206
+        Z: -12.620712280273438
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false

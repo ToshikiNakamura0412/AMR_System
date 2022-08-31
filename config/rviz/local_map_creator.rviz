@@ -118,7 +118,7 @@ Visualization Manager:
       Shaft Length: 0.05000000074505806
       Shaft Radius: 0.05000000074505806
       Shape: Arrow (3D)
-      Topic: /local_map2/obstacle
+      Topic: /local_map/obstacle
       Unreliable: false
       Value: false
     - Alpha: 0.699999988079071
@@ -126,8 +126,8 @@ Visualization Manager:
       Color Scheme: map
       Draw Behind: false
       Enabled: true
-      Name: LocalMap2
-      Topic: /local_map2
+      Name: LocalMap
+      Topic: /local_map
       Unreliable: false
       Use Timestamp: false
       Value: true

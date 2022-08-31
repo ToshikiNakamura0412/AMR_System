@@ -24,7 +24,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: LaserScan
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -84,32 +84,22 @@ Visualization Manager:
       Unreliable: false
       Use Timestamp: false
       Value: true
-    - Alpha: 0.699999988079071
-      Class: rviz/Map
-      Color Scheme: map
-      Draw Behind: false
-      Enabled: false
-      Name: Local Map
-      Topic: /local_map
-      Unreliable: false
-      Use Timestamp: false
-      Value: false
     - Alpha: 1
       Class: rviz/PointStamped
       Color: 204; 41; 204
-      Enabled: false
+      Enabled: true
       History Length: 1
       Name: Local Goal
       Queue Size: 10
       Radius: 0.20000000298023224
       Topic: /local_goal
       Unreliable: false
-      Value: false
+      Value: true
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
       Color: 0; 0; 255
-      Enabled: false
+      Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -128,12 +118,12 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /optimal_local_path
       Unreliable: false
-      Value: false
+      Value: true
     - Alpha: 1
       Buffer Length: 40
       Class: rviz/Path
       Color: 0; 255; 255
-      Enabled: false
+      Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -152,7 +142,7 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /predict_local_paths
       Unreliable: false
-      Value: false
+      Value: true
     - Alpha: 1
       Arrow Length: 0.30000001192092896
       Axes Length: 0.30000001192092896
@@ -218,12 +208,12 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
-      Enabled: true
-      Name: LocalMap2
-      Topic: /local_map2
+      Enabled: false
+      Name: LocalMap
+      Topic: /local_map
       Unreliable: false
       Use Timestamp: false
-      Value: true
+      Value: false
     - Alpha: 1
       Arrow Length: 0.20000000298023224
       Axes Length: 0.30000001192092896
@@ -238,7 +228,7 @@ Visualization Manager:
       Shaft Length: 0.23000000417232513
       Shaft Radius: 0.009999999776482582
       Shape: Arrow (Flat)
-      Topic: /local_map2/obstacle
+      Topic: /local_map/obstacle
       Unreliable: false
       Value: false
   Enabled: true
@@ -269,7 +259,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 22.89540672302246
+      Distance: 32.16640090942383
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -277,9 +267,9 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 3.720364809036255
-        Y: 0.9861550331115723
-        Z: -12.620686531066895
+        X: 1.900298833847046
+        Y: -0.6954803466796875
+        Z: -12.622367858886719
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false

@@ -118,7 +118,7 @@ Visualization Manager:
       Shaft Length: 0.05000000074505806
       Shaft Radius: 0.05000000074505806
       Shape: Arrow (3D)
-      Topic: /local_map2/obstacle
+      Topic: /local_map/obstacle
       Unreliable: false
       Value: true
   Enabled: true
