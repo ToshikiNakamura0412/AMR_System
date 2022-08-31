@@ -112,21 +112,22 @@ private:
 
     // ----- 変数 -----
     int       hz_;                 // ループ周波数 [Hz]
-    int       laser_step_;         // 何本ずつレーザを見るか [-]
     int       particle_num_;       // パーティクルの個数 [-]
     int       reset_counter = 0;   // 連続リセットの回数 [-]
     int       reset_count_limit_;  // 連続リセットの回数の上限 [-]
+    int       laser_step_;         // 何本ずつレーザを見るか [-]
+    double    move_dist_th_;       // ロボットの移動開始判断用（スタートからの距離の閾値）[m]
     double    init_x_;             // 初期位置 [m]
     double    init_y_;             // 初期位置 [m]
     double    init_yaw_;           // 初期姿勢 [rad]
     double    init_pos_dev_;       // 初期位置の標準偏差 [m]
     double    init_yaw_dev_;       // 初期姿勢の標準偏差 [rad]
-    double    sensor_noise_ratio_; // 距離に対するセンサノイズ比 [-]
     double    alpha_th_;           // リセットに関する平均尤度の閾値 [-]
     double    expansion_pos_dev_;  // 膨張リセットの位置の標準偏差 [m]
     double    expansion_yaw_dev_;  // 膨張リセットの姿勢の標準偏差 [rad]
-    OdomModel odom_model_;         // odometryのモデル
+    double    sensor_noise_ratio_; // 距離に対するセンサノイズ比 [-]
     Particle  particle_;           // 推定位置格納用
+    OdomModel odom_model_;         // odometryのモデル
 
     // リスト
     std::vector<Particle> particles_;             // パーティクルクラウド（計算用）

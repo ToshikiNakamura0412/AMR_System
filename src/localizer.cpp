@@ -10,21 +10,22 @@ AMCL::AMCL():private_nh_("~"), engine_(seed_gen_())
 {
     // パラメータの取得(AMCL)
     private_nh_.getParam("hz", hz_);
-    private_nh_.getParam("laser_step", laser_step_);
     private_nh_.getParam("particle_num", particle_num_);
+    private_nh_.getParam("move_dist_th", move_dist_th_);
     private_nh_.getParam("init_x", init_x_);
     private_nh_.getParam("init_y", init_y_);
     private_nh_.getParam("init_yaw", init_yaw_);
     private_nh_.getParam("init_pos_dev", init_pos_dev_);
     private_nh_.getParam("init_yaw_dev", init_yaw_dev_);
-    private_nh_.getParam("sensor_noise_ratio", sensor_noise_ratio_);
     private_nh_.getParam("alpha_th", alpha_th_);
     private_nh_.getParam("reset_count_limit", reset_count_limit_);
     private_nh_.getParam("expansion_pos_dev", expansion_pos_dev_);
     private_nh_.getParam("expansion_yaw_dev", expansion_yaw_dev_);
-    private_nh_.getParam("ignore_angle_range_list", ignore_angle_range_list_);
     private_nh_.getParam("flag_init_noise", flag_init_noise_);
     private_nh_.getParam("is_visible", is_visible_);
+    private_nh_.getParam("laser_step", laser_step_);
+    private_nh_.getParam("sensor_noise_ratio", sensor_noise_ratio_);
+    private_nh_.getParam("ignore_angle_range_list", ignore_angle_range_list_);
     // パラメータの取得(OdomModel)
     private_nh_.getParam("ff", ff_);
     private_nh_.getParam("fr", fr_);
@@ -63,7 +64,15 @@ void AMCL::odom_callback(const nav_msgs::Odometry::ConstPtr& msg)
 {
     prev_odom_ = last_odom_;
     last_odom_ = *msg;
-    flag_odom_ = true;
+
+    if(not flag_odom_)
+    {
+        const double dx = prev_odom_.pose.pose.position.x;
+        const double dy = prev_odom_.pose.pose.position.y;
+        std::cout << "Dist from start = " << hypot(dx, dy) << std::endl;
+        if(move_dist_th_ < hypot(dx, dy)) // 
+            flag_odom_ = true;
+    }
 }
 
 // laserのコールバック関数
