@@ -1,3 +1,7 @@
+/*
+A* search algorithm
+*/
+
 #ifndef GLOBAL_PATH_PLANNER_H
 #define GLOBAL_PATH_PLANNER_H
 

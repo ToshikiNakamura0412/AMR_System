@@ -1,3 +1,7 @@
+/*
+A* search algorithm
+*/
+
 #include "global_path_planner/global_path_planner.h"
 
 // コンストラクタ

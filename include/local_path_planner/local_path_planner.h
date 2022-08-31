@@ -1,4 +1,6 @@
 /*
+DWA: Dynamic Window Approach
+
 速度について以下のようにする
 velocity(vel) : 並進速度
 yawrate       : 旋回速度
