@@ -12,7 +12,7 @@
     <node pkg="second_challenge_toshiki" type="obstacle_expander" name="obstacle_expander" output="screen">
         <rosparam command="load" file="$(arg obstacle_expander_settings)"/>
     </node>
-    <node pkg="second_challenge_toshiki" type="global_path_planner" name="global_path_planner" output="screen">
+    <node pkg="second_challenge_toshiki" type="global_path_planner_node" name="global_path_planner" output="screen">
         <rosparam command="load" file="$(arg global_path_planner_settings)"/>
     </node>
 </launch>
