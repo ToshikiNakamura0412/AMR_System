@@ -14,7 +14,7 @@
     <arg name="local_map_creator_settings" default="$(find second_challenge_toshiki)/config/param/local_map_creator.yaml"/>
     <arg name="local_path_planner_settings" default="$(find second_challenge_toshiki)/config/param/local_path_planner.yaml"/>
 
-    <!-- static TF -->
+    <!-- static tf -->
     <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_publisher" args="0 0 0 0 0 0 1 /base_link /laser"/>
 
     <!-- node launch -->
