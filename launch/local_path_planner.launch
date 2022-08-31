@@ -19,27 +19,27 @@
 
     <!-- node launch -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_settings)"/>
-    <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_settings)" output="screen"/>
-    <node pkg="second_challenge_toshiki" type="localizer" name="localizer">
+    <node pkg="second_challenge_toshiki" type="localizer_node" name="localizer">
         <rosparam command="load" file="$(arg localizer_settings)"/>
     </node>
-    <node pkg="second_challenge_toshiki" type="local_goal_creator" name="local_goal_creator" output="screen">
+    <node pkg="second_challenge_toshiki" type="local_goal_creator_node" name="local_goal_creator" output="screen">
         <rosparam command="load" file="$(arg local_goal_creator_settings)"/>
     </node>
-    <node pkg="second_challenge_toshiki" type="obstacle_expander" name="obstacle_expander" output="screen">
+    <node pkg="second_challenge_toshiki" type="obstacle_expander_node" name="obstacle_expander" output="screen">
         <rosparam command="load" file="$(arg obstacle_expander_settings)"/>
     </node>
-    <node pkg="second_challenge_toshiki" type="global_path_planner" name="global_path_planner" output="screen">
+    <node pkg="second_challenge_toshiki" type="global_path_planner_node" name="global_path_planner" output="screen">
         <rosparam command="load" file="$(arg global_path_planner_settings)"/>
     </node>
-    <node pkg="second_challenge_toshiki" type="obstacle_detector" name="obstacle_detector" output="screen">
+    <node pkg="second_challenge_toshiki" type="obstacle_detector_node" name="obstacle_detector" output="screen">
         <rosparam command="load" file="$(arg obstacle_detector_settings)"/>
     </node>
-    <node pkg="second_challenge_toshiki" type="local_map_creator" name="local_map_creator" output="screen">
+    <node pkg="second_challenge_toshiki" type="local_map_creator_node" name="local_map_creator" output="screen">
         <rosparam command="load" file="$(arg local_map_creator_settings)"/>
     </node>
-    <node pkg="second_challenge_toshiki" type="local_path_planner" name="local_path_planner" output="screen">
+    <node pkg="second_challenge_toshiki" type="local_path_planner_node" name="local_path_planner" output="screen">
         <rosparam command="load" file="$(arg local_path_planner_settings)"/>
     </node>
+    <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_settings)" output="screen"/>
     <node pkg="rosbag" type="play" name="play" args="$(env HOME)/bag_folder/localizer.bag --clock"/>
 </launch>

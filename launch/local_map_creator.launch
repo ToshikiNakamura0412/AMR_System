@@ -7,10 +7,10 @@
 
     <!-- node launch -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_settings)"/>
-    <node pkg="second_challenge_toshiki" type="obstacle_detector" name="obstacle_detector" output="screen">
+    <node pkg="second_challenge_toshiki" type="obstacle_detector_node" name="obstacle_detector" output="screen">
         <rosparam command="load" file="$(arg obstacle_detector_settings)"/>
     </node>
-    <node pkg="second_challenge_toshiki" type="local_map_creator" name="local_map_creator" output="screen">
+    <node pkg="second_challenge_toshiki" type="local_map_creator_node" name="local_map_creator" output="screen">
         <rosparam command="load" file="$(arg local_map_creator_settings)"/>
     </node>
     <node pkg="rosbag" type="play" name="play" args="$(env HOME)/bag_folder/obstacle_detector.bag"/>

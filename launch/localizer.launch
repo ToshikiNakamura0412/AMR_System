@@ -11,7 +11,7 @@
     <!-- node launch -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_settings)"/>
     <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_settings)" output="screen"/>
-    <node pkg="second_challenge_toshiki" type="localizer" name="localizer" output="screen">
+    <node pkg="second_challenge_toshiki" type="localizer_node" name="localizer" output="screen">
         <rosparam command="load" file="$(arg localizer_settings)"/>
     </node>
     <node pkg="rosbag" type="play" name="play" args="$(env HOME)/bag_folder/localizer.bag"/>
