@@ -61,10 +61,10 @@ private:
     std::default_random_engine engine_;
 };
 
-class AMCL
+class EMCL
 {
 public:
-    AMCL(); // デフォルトコンストラクタ
+    EMCL(); // デフォルトコンストラクタ
     void process();
 
 private:

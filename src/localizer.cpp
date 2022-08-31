@@ -4,11 +4,11 @@ emcl: mcl with expansion resetting
 
 #include "localizer/localizer.h"
 
-// ----- AMCL -----
+// ----- EMCL -----
 // コンストラクタ
-AMCL::AMCL():private_nh_("~"), engine_(seed_gen_())
+EMCL::EMCL():private_nh_("~"), engine_(seed_gen_())
 {
-    // パラメータの取得(AMCL)
+    // パラメータの取得(EMCL)
     private_nh_.getParam("hz", hz_);
     private_nh_.getParam("particle_num", particle_num_);
     private_nh_.getParam("move_dist_th", move_dist_th_);
@@ -42,9 +42,9 @@ AMCL::AMCL():private_nh_("~"), engine_(seed_gen_())
     odom_model_ = OdomModel(ff_, fr_, rf_, rr_);
 
     // Subscriber
-    sub_map_   = nh_.subscribe("/map", 1, &AMCL::map_callback, this);
-    sub_odom_  = nh_.subscribe("/roomba/odometry", 1, &AMCL::odom_callback, this);
-    sub_laser_ = nh_.subscribe("/scan", 1, &AMCL::laser_callback, this);
+    sub_map_   = nh_.subscribe("/map", 1, &EMCL::map_callback, this);
+    sub_odom_  = nh_.subscribe("/roomba/odometry", 1, &EMCL::odom_callback, this);
+    sub_laser_ = nh_.subscribe("/scan", 1, &EMCL::laser_callback, this);
 
     // Publisher
     pub_estimated_pose_ = nh_.advertise<geometry_msgs::PoseStamped>("/estimated_pose2", 1);
@@ -52,7 +52,7 @@ AMCL::AMCL():private_nh_("~"), engine_(seed_gen_())
 }
 
 // mapのコールバック関数
-void AMCL::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
+void EMCL::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 {
     map_      = *msg;
     flag_map_ = true;
@@ -60,7 +60,7 @@ void AMCL::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 }
 
 // odometryのコールバック関数
-void AMCL::odom_callback(const nav_msgs::Odometry::ConstPtr& msg)
+void EMCL::odom_callback(const nav_msgs::Odometry::ConstPtr& msg)
 {
     prev_odom_ = last_odom_;
     last_odom_ = *msg;
@@ -76,14 +76,14 @@ void AMCL::odom_callback(const nav_msgs::Odometry::ConstPtr& msg)
 }
 
 // laserのコールバック関数
-void AMCL::laser_callback(const sensor_msgs::LaserScan::ConstPtr& msg)
+void EMCL::laser_callback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
     laser_      = *msg;
     flag_laser_ = true;
 }
 
 // 唯一，main文で実行する関数
-void AMCL::process()
+void EMCL::process()
 {
     ros::Rate loop_rate(hz_); // 制御周波数の設定
 
@@ -100,7 +100,7 @@ void AMCL::process()
 }
 
 // パーティクルの初期化
-void AMCL::initialize()
+void EMCL::initialize()
 {
     Particle particle;
 
@@ -126,21 +126,21 @@ void AMCL::initialize()
 }
 
 // ランダム変数生成関数（正規分布）
-double AMCL::norm_rv(const double mean, const double stddev)
+double EMCL::norm_rv(const double mean, const double stddev)
 {
     std::normal_distribution<> norm_dist(mean, stddev);
     return norm_dist(engine_);
 }
 
 // 重みの初期化
-void AMCL::reset_weight()
+void EMCL::reset_weight()
 {
     for(auto& p : particles_)
         p.weight = 1.0/particles_.size();
 }
 
 // map座標系とodom座標系の関係を報告
-void AMCL::broadcast_odom_state()
+void EMCL::broadcast_odom_state()
 {
     // TF Broadcasterの実体化
     static tf2_ros::TransformBroadcaster odom_state_broadcaster;
@@ -190,7 +190,7 @@ void AMCL::broadcast_odom_state()
 }
 
 // 適切な角度(-M_PI ~ M_PI)を返す
-double AMCL::normalize_angle(double angle)
+double EMCL::normalize_angle(double angle)
 {
     while(M_PI  < angle) angle -= 2.0*M_PI;
     while(angle < -M_PI) angle += 2.0*M_PI;
@@ -199,7 +199,7 @@ double AMCL::normalize_angle(double angle)
 }
 
 // 自己位置推定
-void AMCL::localize()
+void EMCL::localize()
 {
     motion_update();          // 動作更新
     observation_update();     // 観測更新（位置推定・リサンプリングを含む）
@@ -208,7 +208,7 @@ void AMCL::localize()
 }
 
 // 動作更新
-void AMCL::motion_update()
+void EMCL::motion_update()
 {
     // quaternionからyawを算出
     const double last_yaw = tf2::getYaw(last_odom_.pose.pose.orientation);
@@ -229,7 +229,7 @@ void AMCL::motion_update()
 }
 
 // パーティクルの移動
-void AMCL::move_particle(Particle& p, double length, double direction, double rotation)
+void EMCL::move_particle(Particle& p, double length, double direction, double rotation)
 {
     // 標準偏差を設定
     odom_model_.set_dev(length, rotation);
@@ -246,7 +246,7 @@ void AMCL::move_particle(Particle& p, double length, double direction, double ro
 }
 
 // 観測更新（位置推定・リサンプリングを含む）
-void AMCL::observation_update()
+void EMCL::observation_update()
 {
     // 尤度計算
     for(auto& particle : particles_)
@@ -274,7 +274,7 @@ void AMCL::observation_update()
 }
 
 // 尤度関数
-double AMCL::likelihood(const Particle p)
+double EMCL::likelihood(const Particle p)
 {
     double L = 0.0; // 尤度
 
@@ -294,7 +294,7 @@ double AMCL::likelihood(const Particle p)
 }
 
 // 柱の場合、trueを返す
-bool AMCL::is_ignore_angle(double angle)
+bool EMCL::is_ignore_angle(double angle)
 {
     angle = abs(angle);
 
@@ -307,7 +307,7 @@ bool AMCL::is_ignore_angle(double angle)
 }
 
 // 壁までの距離を算出
-double AMCL::calc_dist_to_wall(double x, double y, const double laser_angle, const double laser_range)
+double EMCL::calc_dist_to_wall(double x, double y, const double laser_angle, const double laser_range)
 {
     const double search_step = map_.info.resolution;
     const double search_limit = laser_range;
@@ -331,7 +331,7 @@ double AMCL::calc_dist_to_wall(double x, double y, const double laser_angle, con
 }
 
 // 座標からグリッドのインデックスを返す
-int AMCL::xy_to_grid_index(const double x, const double y)
+int EMCL::xy_to_grid_index(const double x, const double y)
 {
     const int index_x = int(round((x - map_.info.origin.position.x) / map_.info.resolution));
     const int index_y = int(round((y - map_.info.origin.position.y) / map_.info.resolution));
@@ -340,7 +340,7 @@ int AMCL::xy_to_grid_index(const double x, const double y)
 }
 
 // マップ内の場合、trueを返す
-bool AMCL::in_map(const int grid_index)
+bool EMCL::in_map(const int grid_index)
 {
     if(0 <= grid_index and grid_index < map_.data.size())
         return true;
@@ -349,13 +349,13 @@ bool AMCL::in_map(const int grid_index)
 }
 
 // 確率密度関数（正規分布）
-double AMCL::norm_pdf(const double x, const double mean, const double stddev)
+double EMCL::norm_pdf(const double x, const double mean, const double stddev)
 {
     return 1.0/sqrt(2.0 * M_PI * pow(stddev, 2.0)) * exp(-pow((x - mean), 2.0)/(2.0*pow(stddev, 2.0)));
 }
 
 // 周辺尤度の算出
-double AMCL::calc_marginal_likelihood()
+double EMCL::calc_marginal_likelihood()
 {
     double sum = 0.0;
     for(const auto& p : particles_)
@@ -365,7 +365,7 @@ double AMCL::calc_marginal_likelihood()
 }
 
 // 推定位置の決定
-void AMCL::estimate_pose()
+void EMCL::estimate_pose()
 {
     // mean_pose(); // 平均
     weighted_mean_pose(); // 加重平均
@@ -374,7 +374,7 @@ void AMCL::estimate_pose()
 }
 
 // 推定位置の決定（平均）
-void AMCL::mean_pose()
+void EMCL::mean_pose()
 {
     // 合計値
     Particle pose_sum;
@@ -393,7 +393,7 @@ void AMCL::mean_pose()
 }
 
 // 推定位置の決定（加重平均）
-void AMCL::weighted_mean_pose()
+void EMCL::weighted_mean_pose()
 {
     // 重みの正規化
     normalize_belief();
@@ -419,7 +419,7 @@ void AMCL::weighted_mean_pose()
 }
 
 // 重みの正規化
-void AMCL::normalize_belief()
+void EMCL::normalize_belief()
 {
     // 尤度の合計
     const double weight_sum = calc_marginal_likelihood();
@@ -430,7 +430,7 @@ void AMCL::normalize_belief()
 }
 
 // 推定位置の決定（最大の重みを有するポーズ）
-void AMCL::max_weight_pose()
+void EMCL::max_weight_pose()
 {
     double max_weight = particles_[0].weight;
     particle_ = particles_[0];
@@ -445,7 +445,7 @@ void AMCL::max_weight_pose()
 }
 
 // 推定位置の決定（中央値）
-void AMCL::median_pose()
+void EMCL::median_pose()
 {
     std::vector<double> x_list;
     std::vector<double> y_list;
@@ -464,7 +464,7 @@ void AMCL::median_pose()
 }
 
 // 配列の中央値を返す
-double AMCL::get_median(std::vector<double>& data)
+double EMCL::get_median(std::vector<double>& data)
 {
     sort_data(data);
     if(data.size()%2 == 1)
@@ -474,7 +474,7 @@ double AMCL::get_median(std::vector<double>& data)
 }
 
 // 配列のデータを昇順に並び替える
-void AMCL::sort_data(std::vector<double>& data)
+void EMCL::sort_data(std::vector<double>& data)
 {
     double tmp;
     for(int i=0; i<data.size()-1; i++)
@@ -492,7 +492,7 @@ void AMCL::sort_data(std::vector<double>& data)
 }
 
 // 膨張リセット
-void AMCL::expansion_resetting()
+void EMCL::expansion_resetting()
 {
     // ノイズを加える
     for(auto& p : particles_)
@@ -508,7 +508,7 @@ void AMCL::expansion_resetting()
 }
 
 // リサンプリング（系統サンプリング）
-void AMCL::resampling()
+void EMCL::resampling()
 {
     // パーティクルの重みを積み上げたリストを作成
     std::vector<double> accum;
@@ -547,7 +547,7 @@ void AMCL::resampling()
 }
 
 // 推定位置のパブリッシュ
-void AMCL::publish_estimated_pose()
+void EMCL::publish_estimated_pose()
 {
     estimated_pose_.pose.position.x = particle_.x;
     estimated_pose_.pose.position.y = particle_.y;
@@ -561,7 +561,7 @@ void AMCL::publish_estimated_pose()
 }
 
 // パーティクルクラウドのパブリッシュ
-void AMCL::publish_particles()
+void EMCL::publish_particles()
 {
     if(is_visible_)
     {
