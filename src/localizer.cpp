@@ -15,11 +15,13 @@ EMCL::EMCL():private_nh_("~"), engine_(seed_gen_())
     private_nh_.getParam("init_x", init_x_);
     private_nh_.getParam("init_y", init_y_);
     private_nh_.getParam("init_yaw", init_yaw_);
-    private_nh_.getParam("init_pos_dev", init_pos_dev_);
+    private_nh_.getParam("init_x_dev", init_x_dev_);
+    private_nh_.getParam("init_y_dev", init_y_dev_);
     private_nh_.getParam("init_yaw_dev", init_yaw_dev_);
     private_nh_.getParam("alpha_th", alpha_th_);
     private_nh_.getParam("reset_count_limit", reset_count_limit_);
-    private_nh_.getParam("expansion_pos_dev", expansion_pos_dev_);
+    private_nh_.getParam("expansion_x_dev", expansion_x_dev_);
+    private_nh_.getParam("expansion_y_dev", expansion_y_dev_);
     private_nh_.getParam("expansion_yaw_dev", expansion_yaw_dev_);
     private_nh_.getParam("flag_init_noise", flag_init_noise_);
     private_nh_.getParam("is_visible", is_visible_);
@@ -108,8 +110,8 @@ void EMCL::initialize()
     {
         if(flag_init_noise_) // 初期位置近傍にパーティクルを配置
         {
-            particle.x   = norm_rv(init_x_,   init_pos_dev_);
-            particle.y   = norm_rv(init_y_,   init_pos_dev_);
+            particle.x   = norm_rv(init_x_,   init_x_dev_);
+            particle.y   = norm_rv(init_y_,   init_y_dev_);
             particle.yaw = norm_rv(init_yaw_, init_yaw_dev_);
             particle.yaw = normalize_angle(particle.yaw);
         }
@@ -497,8 +499,8 @@ void EMCL::expansion_resetting()
     // ノイズを加える
     for(auto& p : particles_)
     {
-        p.x   = norm_rv(p.x,   expansion_pos_dev_);
-        p.y   = norm_rv(p.y,   expansion_pos_dev_);
+        p.x   = norm_rv(p.x,   expansion_x_dev_);
+        p.y   = norm_rv(p.y,   expansion_y_dev_);
         p.yaw = norm_rv(p.yaw, expansion_yaw_dev_);
         p.yaw = normalize_angle(p.yaw);
     }
