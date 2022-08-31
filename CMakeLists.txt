@@ -41,12 +41,8 @@ add_library(local_map_creator   src/local_map_creator.cpp)
 add_library(local_path_planner  src/local_path_planner.cpp)
 add_library(obstacle_expander   src/obstacle_expander.cpp)
 add_library(obstacle_detector   src/obstacle_detector.cpp)
-# add_library(localizer           src/localizer.cpp)
 add_library(emcl                src/emcl.cpp)
 add_library(odom_model          src/odom_model.cpp)
-
-## Add cmake target dependencies of the library
-# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 add_executable(global_path_planner_node src/global_path_planner_node.cpp)
@@ -73,5 +69,4 @@ target_link_libraries(local_map_creator_node   local_map_creator   ${catkin_LIBR
 target_link_libraries(local_path_planner_node  local_path_planner  ${catkin_LIBRARIES})
 target_link_libraries(obstacle_expander_node   obstacle_expander   ${catkin_LIBRARIES})
 target_link_libraries(obstacle_detector_node   obstacle_detector   ${catkin_LIBRARIES})
-# target_link_libraries(localizer_node           localizer           ${catkin_LIBRARIES})
 target_link_libraries(localizer_node           emcl odom_model     ${catkin_LIBRARIES})
