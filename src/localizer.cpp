@@ -1,3 +1,7 @@
+/*
+emcl: mcl with expansion resetting
+*/
+
 #include "localizer/localizer.h"
 
 // ----- AMCL -----
@@ -14,7 +18,7 @@ AMCL::AMCL():private_nh_("~"), engine_(seed_gen_())
     private_nh_.getParam("init_pos_dev", init_pos_dev_);
     private_nh_.getParam("init_yaw_dev", init_yaw_dev_);
     private_nh_.getParam("sensor_noise_ratio", sensor_noise_ratio_);
-    private_nh_.getParam("reset_threshold", reset_threshold_);
+    private_nh_.getParam("alpha_th", alpha_th_);
     private_nh_.getParam("reset_count_limit", reset_count_limit_);
     private_nh_.getParam("expansion_pos_dev", expansion_pos_dev_);
     private_nh_.getParam("expansion_yaw_dev", expansion_yaw_dev_);
@@ -239,26 +243,24 @@ void AMCL::observation_update()
     for(auto& particle : particles_)
         particle.weight *= likelihood(particle);
 
-    // 周辺尤度を算出
-    const double marginal_likelihood = calc_marginal_likelihood();
-    std::cout << "Marginal Likelihood = " << marginal_likelihood << std::endl;
+    // パーティクル1つのレーザ1本における平均尤度を算出
+    const double alpha = calc_marginal_likelihood() / ((laser_.ranges.size()/laser_step_) * particles_.size());
+    std::cout << "alpha = " << alpha << std::endl;
+    std::cout << "Reset Count = " << reset_counter << std::endl;
 
-    if(marginal_likelihood < reset_threshold_ and reset_counter < reset_count_limit_) // 周辺尤度が小さ過ぎる場合
-    // if(marginal_likelihood < reset_threshold_) // 周辺尤度が小さ過ぎる場合
+    if(alpha < alpha_th_ and reset_counter < reset_count_limit_) // 尤度が小さ過ぎる場合
     {
-        std::cout << "Reset Count = " << reset_counter << std::endl;
-        reset_counter++;
-        median_pose();         // 推定位置の決定（中央値）
         std::cout << "[expansion_resetting]" << std::endl;
+        median_pose();         // 推定位置の決定（中央値）
         expansion_resetting(); // 膨張リセット
+        reset_counter++;
     }
     else
     {
-        std::cout << "Reset Count = " << reset_counter << std::endl;
-        reset_counter = 0;
-        estimate_pose(); // 推定位置の決定
         std::cout << "[resampling]" << std::endl;
+        estimate_pose(); // 推定位置の決定
         resampling();    // リサンプリング
+        reset_counter = 0;
     }
 }
 
@@ -316,7 +318,7 @@ double AMCL::calc_dist_to_wall(double x, double y, const double laser_angle, con
             return dist;
     }
 
-    return search_limit * 1.3;
+    return search_limit * sensor_noise_ratio_ * 5.0;
 }
 
 // 座標からグリッドのインデックスを返す

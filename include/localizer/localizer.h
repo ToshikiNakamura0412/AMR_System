@@ -1,3 +1,7 @@
+/*
+emcl: mcl with expansion resetting
+*/
+
 #ifndef LOCALIZER_H
 #define LOCALIZER_H
 
@@ -118,7 +122,7 @@ private:
     double    init_pos_dev_;       // 初期位置の標準偏差 [m]
     double    init_yaw_dev_;       // 初期姿勢の標準偏差 [rad]
     double    sensor_noise_ratio_; // 距離に対するセンサノイズ比 [-]
-    double    reset_threshold_;    // リセットに関する周辺尤度の閾値 [-]
+    double    alpha_th_;           // リセットに関する平均尤度の閾値 [-]
     double    expansion_pos_dev_;  // 膨張リセットの位置の標準偏差 [m]
     double    expansion_yaw_dev_;  // 膨張リセットの姿勢の標準偏差 [rad]
     OdomModel odom_model_;         // odometryのモデル
