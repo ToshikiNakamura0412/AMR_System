@@ -1,7 +1,12 @@
 # ===== クラスAMCL =====
-hz: 10            # ループ周期 [Hz]
-particle_num: 420 # パーティクルの個数 [-]
-move_dist_th: 0.1 # ロボットの移動開始判断用（スタートからの距離の閾値）[m]
+# フラグ
+flag_init_noise: true # 初期位置にノイズを加えるか
+is_visible: true      # パーティクルクラウドを表示（パブリッシュ）するか
+
+# 基本設定
+hz: 10              # ループ周期 [Hz]
+particle_num: 420   # パーティクルの個数 [-]
+move_dist_th: 0.025 # ロボットの移動開始判断用（スタートからの距離の閾値）[m]
 
 # 初期ポーズ関連
 init_x: 0.0        # 初期位置 [m]
@@ -11,14 +16,10 @@ init_pos_dev: 0.65 # 初期位置の標準偏差 [m]
 init_yaw_dev: 0.5  # 初期姿勢の標準偏差 [rad]
 
 # リセット関連
-alpha_th: 45.0          # リセットに関する平均尤度の閾値 [-]
+alpha_th: 0.0017        # リセットに関する平均尤度の閾値 [-]
 reset_count_limit: 5    # 連続リセットの回数の上限 [-]
 expansion_pos_dev: 0.05 # 膨張リセットの位置の標準偏差 [m]
 expansion_yaw_dev: 0.01 # 膨張リセットの姿勢の標準偏差 [rad]
-
-# フラグ
-flag_init_noise: true # 初期位置にノイズを加えるか
-is_visible: true      # パーティクルクラウドをパブリッシュするか
 
 # センサ関連
 laser_step: 10           # 何本ずつレーザを見るか(全1080本)[-]
