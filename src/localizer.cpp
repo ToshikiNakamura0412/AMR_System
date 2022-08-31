@@ -50,8 +50,8 @@ EMCL::EMCL():private_nh_("~"), engine_(seed_gen_())
     sub_laser_ = nh_.subscribe("/scan", 1, &EMCL::laser_callback, this);
 
     // Publisher
-    pub_estimated_pose_ = nh_.advertise<geometry_msgs::PoseStamped>("/estimated_pose2", 1);
-    pub_particle_cloud_ = nh_.advertise<geometry_msgs::PoseArray>("/particle_cloud2", 1);
+    pub_estimated_pose_ = nh_.advertise<geometry_msgs::PoseStamped>("/estimated_pose", 1);
+    pub_particle_cloud_ = nh_.advertise<geometry_msgs::PoseArray>("/particle_cloud", 1);
 }
 
 // mapのコールバック関数

@@ -14,10 +14,10 @@ LocalGoalCreator::LocalGoalCreator():private_nh_("~")
 
     // Subscriber
     sub_estimated_pose_ = nh_.subscribe("/estimated_pose", 1, &LocalGoalCreator::estimated_pose_callback, this);
-    sub_global_path_    = nh_.subscribe("/global_path2", 1, &LocalGoalCreator::global_path_callback, this);
+    sub_global_path_    = nh_.subscribe("/global_path", 1, &LocalGoalCreator::global_path_callback, this);
 
     // Publisher
-    pub_local_goal_ = nh_.advertise<geometry_msgs::PointStamped>("/local_goal2", 1);
+    pub_local_goal_ = nh_.advertise<geometry_msgs::PointStamped>("/local_goal", 1);
 }
 
 // estimated_poseのコールバック関数

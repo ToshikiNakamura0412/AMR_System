@@ -24,7 +24,7 @@ AStarPlanner::AStarPlanner():private_nh_("~")
     sub_map_ = nh_.subscribe("/map/updated_map", 1, &AStarPlanner::map_callback, this);
 
     // Publisher
-    pub_global_path_  = nh_.advertise<nav_msgs::Path>("/global_path2", 1);
+    pub_global_path_  = nh_.advertise<nav_msgs::Path>("/global_path", 1);
     pub_current_path_ = nh_.advertise<nav_msgs::Path>("/current_path", 1);
     pub_node_point_   = nh_.advertise<geometry_msgs::PointStamped>("/current_node", 1);
 }

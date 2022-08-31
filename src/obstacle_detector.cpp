@@ -15,7 +15,7 @@ ObstacleDetector::ObstacleDetector():private_nh_("~")
     sub_laser_ = nh_.subscribe("/scan", 1, &ObstacleDetector::laser_callback, this);
 
     // Publisher
-    pub_obs_poses_ = nh_.advertise<geometry_msgs::PoseArray>("/local_map2/obstacle", 1);
+    pub_obs_poses_ = nh_.advertise<geometry_msgs::PoseArray>("/local_map/obstacle", 1);
 }
 
 // laserのコールバック関数

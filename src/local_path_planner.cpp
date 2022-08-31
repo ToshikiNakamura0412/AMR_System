@@ -46,9 +46,9 @@ DWAPlanner::DWAPlanner():private_nh_("~")
     sub_obs_poses_  = nh_.subscribe("/local_map/obstacle", 1, &DWAPlanner::obs_poses_callback, this);
 
     // Publisher
-    pub_cmd_speed_    = nh_.advertise<roomba_500driver_meiji::RoombaCtrl>("/roomba2/control", 1);
-    pub_predict_path_ = nh_.advertise<nav_msgs::Path>("/predict_local_paths2", 1);
-    pub_optimal_path_ = nh_.advertise<nav_msgs::Path>("/optimal_local_path2", 1);
+    pub_cmd_speed_    = nh_.advertise<roomba_500driver_meiji::RoombaCtrl>("/roomba/control", 1);
+    pub_predict_path_ = nh_.advertise<nav_msgs::Path>("/predict_local_paths", 1);
+    pub_optimal_path_ = nh_.advertise<nav_msgs::Path>("/optimal_local_path", 1);
 }
 
 // local_goalのコールバック関数

@@ -13,10 +13,10 @@ LocalMapCreator::LocalMapCreator():private_nh_("~")
     private_nh_.getParam("map_reso", map_reso_);
 
     // Subscriber
-    sub_obs_poses_ = nh_.subscribe("/local_map2/obstacle", 1, &LocalMapCreator::obs_poses_callback, this);
+    sub_obs_poses_ = nh_.subscribe("/local_map/obstacle", 1, &LocalMapCreator::obs_poses_callback, this);
 
     // Publisher
-    pub_local_map_ = nh_.advertise<nav_msgs::OccupancyGrid>("/local_map2", 1);
+    pub_local_map_ = nh_.advertise<nav_msgs::OccupancyGrid>("/local_map", 1);
 
     // --- 基本設定 ---
     // header
