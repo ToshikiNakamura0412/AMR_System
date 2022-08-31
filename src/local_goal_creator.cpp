@@ -68,6 +68,7 @@ void LocalGoalCreator::update_goal()
     // ゴール位置を取得し，パブリッシュ
     local_goal_.point.x = global_path_.poses[goal_index_].pose.position.x;
     local_goal_.point.y = global_path_.poses[goal_index_].pose.position.y;
+    local_goal_.header.stamp = ros::Time::now();
     pub_local_goal_.publish(local_goal_);
 }
 

@@ -47,8 +47,8 @@ DWAPlanner::DWAPlanner():private_nh_("~")
 
     // Publisher
     pub_cmd_speed_    = nh_.advertise<roomba_500driver_meiji::RoombaCtrl>("/roomba/control", 1);
-    pub_predict_path_ = nh_.advertise<nav_msgs::Path>("/predict_local_paths", 1);
-    pub_optimal_path_ = nh_.advertise<nav_msgs::Path>("/optimal_local_path", 1);
+    pub_predict_path_ = nh_.advertise<nav_msgs::Path>("/predict_local_paths2", 1);
+    pub_optimal_path_ = nh_.advertise<nav_msgs::Path>("/optimal_local_path2", 1);
 }
 
 // local_goalのコールバック関数
@@ -375,5 +375,4 @@ void DWAPlanner::visualize_traj(const std::vector<State>& traj, const ros::Publi
     }
 
     pub_local_path.publish(local_path);
-    std::cout << "publish!!" << std::endl;
 }

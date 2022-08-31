@@ -5,6 +5,7 @@ ObstacleExpander::ObstacleExpander():private_nh_("~")
 {
     // パラメータの取得
     private_nh_.getParam("hz", hz_);
+    private_nh_.getParam("sleep_time", sleep_time_);
     private_nh_.getParam("target_margin", target_margin_);
 
     // Subscriber
@@ -19,7 +20,7 @@ void ObstacleExpander::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg
 {
     raw_map_  = *msg;
     flag_map_ = true;
-    ros::Duration(1).sleep(); // 他のノードの起動を待つ(特にRviz)
+    ros::Duration(sleep_time_).sleep(); // 他のノードの起動を待つ(特にRviz)
 }
 
 // 唯一，main文で実行する関数

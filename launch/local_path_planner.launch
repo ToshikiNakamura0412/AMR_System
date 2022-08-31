@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
 <launch>
+    <!-- ROS Time setting -->
+    <rosparam param="/use_sim_time">true</rosparam>
+
     <!-- config file path -->
     <arg name="rviz_settings" default="$(find second_challenge_toshiki)/config/rviz/local_path_planner.rviz"/>
     <arg name="map_settings" default="$(find second_challenge_toshiki)/map/map.yaml"/>
@@ -17,7 +20,7 @@
     <!-- node launch -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_settings)"/>
     <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_settings)" output="screen"/>
-    <node pkg="second_challenge_toshiki" type="localizer" name="localizer" output="screen">
+    <node pkg="second_challenge_toshiki" type="localizer" name="localizer">
         <rosparam command="load" file="$(arg localizer_settings)"/>
     </node>
     <node pkg="second_challenge_toshiki" type="local_goal_creator" name="local_goal_creator" output="screen">
@@ -38,5 +41,5 @@
     <node pkg="second_challenge_toshiki" type="local_path_planner" name="local_path_planner" output="screen">
         <rosparam command="load" file="$(arg local_path_planner_settings)"/>
     </node>
-    <node pkg="rosbag" type="play" name="play" args="$(env HOME)/bag_folder/localizer.bag"/>
+    <node pkg="rosbag" type="play" name="play" args="$(env HOME)/bag_folder/localizer.bag --clock"/>
 </launch>

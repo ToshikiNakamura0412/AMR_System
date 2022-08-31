@@ -36,6 +36,7 @@ private:
 
     // ----- 変数 -----
     int    hz_;            // ループ周波数 [Hz]
+    double sleep_time_;    // 待機時間（他のノードの起動を待つ）[s]
     double target_margin_; // 車両マージン [m]
 
     // 占有グリッド周辺のインデックス格納用
