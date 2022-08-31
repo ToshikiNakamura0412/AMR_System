@@ -71,8 +71,7 @@ void EMCL::odom_callback(const nav_msgs::Odometry::ConstPtr& msg)
     {
         const double dx = prev_odom_.pose.pose.position.x;
         const double dy = prev_odom_.pose.pose.position.y;
-        std::cout << "Dist from start = " << hypot(dx, dy) << std::endl;
-        if(move_dist_th_ < hypot(dx, dy)) // 
+        if(move_dist_th_ < hypot(dx, dy)) // 動き出したらフラグを立てる
             flag_odom_ = true;
     }
 }
@@ -256,19 +255,17 @@ void EMCL::observation_update()
 
     // パーティクル1つのレーザ1本における平均尤度を算出
     const double alpha = calc_marginal_likelihood() / ((laser_.ranges.size()/laser_step_) * particles_.size());
-    std::cout << "alpha = " << alpha << std::endl;
-    std::cout << "Reset Count = " << reset_counter << std::endl;
 
     if(alpha < alpha_th_ and reset_counter < reset_count_limit_) // 尤度が小さ過ぎる場合
     {
-        std::cout << "[expansion_resetting]" << std::endl;
+        std::cout << "[resetting] alpha = " << std::fixed << std::setprecision(4) << alpha << std::endl;
         median_pose();         // 推定位置の決定（中央値）
         expansion_resetting(); // 膨張リセット
         reset_counter++;
     }
     else
     {
-        std::cout << "[resampling]" << std::endl;
+        std::cout << "[resampling] alpha = " << std::fixed << std::setprecision(4) << alpha << std::endl;
         estimate_pose(); // 推定位置の決定
         resampling();    // リサンプリング
         reset_counter = 0;
