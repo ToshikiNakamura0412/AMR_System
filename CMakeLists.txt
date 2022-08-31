@@ -36,11 +36,13 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME} src/${PROJECT_NAME}/second_challenge_toshiki.cpp)
+# add_dependencies(global_path_planner src/global_path_planner.cpp)
 
 ## Add cmake target dependencies of the library
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
+# add_executable(global_path_planner src/global_path_planner_node.cpp src/global_path_planner.cpp)
 add_executable(global_path_planner src/global_path_planner_node.cpp src/global_path_planner.cpp)
 add_executable(localizer           src/localizer_node.cpp           src/localizer.cpp)
 add_executable(local_goal_creator  src/local_goal_creator_node.cpp  src/local_goal_creator.cpp)
