@@ -18,6 +18,7 @@ private:
     // ----- 関数 ------
     void laser_callback(const sensor_msgs::LaserScan::ConstPtr& msg); // コールバック関数
     void scan_obstacle(); // 障害物検知
+    bool is_ignore_angle1(double angle); // 柱の除去
     bool is_ignore_angle(double angle); // 柱の除去
 
 

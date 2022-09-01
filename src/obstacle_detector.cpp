@@ -68,7 +68,7 @@ void ObstacleDetector::scan_obstacle()
 }
 
 // 柱の場合、trueを返す
-bool ObstacleDetector::is_ignore_angle(double angle)
+bool ObstacleDetector::is_ignore_angle1(double angle)
 {
     angle = abs(angle);
 
@@ -78,4 +78,24 @@ bool ObstacleDetector::is_ignore_angle(double angle)
         return true;
     else
         return false;
+}
+
+bool ObstacleDetector::is_ignore_angle(double angle)
+{
+    angle = abs(angle);
+    const int size = ignore_angle_range_list_.size();
+
+    for(int i=0; i<size/2; i++)
+    {
+        if(ignore_angle_range_list_[i*2] < angle and angle < ignore_angle_range_list_[i*2 + 1])
+            return true;
+    }
+
+    if(size%2 == 1)
+    {
+        if(ignore_angle_range_list_[size-1] < angle)
+            return true;
+    }
+
+    return false;
 }
