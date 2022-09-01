@@ -1,5 +1,13 @@
 #include "localizer/pose.h"
 
+// デフォルトコンストラクタ
+Pose::Pose()
+{
+    x_   = 0.0;
+    y_   = 0.0;
+    yaw_ = 0.0;
+}
+
 // コンストラクタ
 Pose::Pose(const double x, const double y, const double yaw)
 {
@@ -9,11 +17,23 @@ Pose::Pose(const double x, const double y, const double yaw)
 }
 
 // 代入演算子
-Pose& Pose::operator =(Pose& pose)
+Pose& Pose::operator =(const Pose& pose)
 {
     x_   = pose.x_;
     y_   = pose.y_;
     yaw_ = pose.yaw_;
+
+    return *this;
+}
+
+// 複合代入演算子/=
+Pose& Pose::operator /=(const double a)
+{
+    x_   /= a;
+    y_   /= a;
+    yaw_ /= a;
+
+    return *this;
 }
 
 // setter

@@ -36,10 +36,10 @@ EMCL::EMCL():private_nh_("~"), engine_(seed_gen_())
 
     // --- 基本設定 ---
     // frame idの設定
-    estimated_pose_.header.frame_id = "map";
-    particle_cloud_.header.frame_id = "map";
+    estimated_pose_msg_.header.frame_id = "map";
+    particle_cloud_msg_.header.frame_id = "map";
     // メモリの確保
-    particle_cloud_.poses.reserve(particle_num_);
+    particle_cloud_msg_.poses.reserve(particle_num_);
     // odometryのモデルの初期化
     odom_model_ = OdomModel(ff_, fr_, rf_, rr_);
 
@@ -109,16 +109,19 @@ void EMCL::initialize()
     {
         if(flag_init_noise_) // 初期位置近傍にパーティクルを配置
         {
-            particle.x   = norm_rv(init_x_,   init_x_dev_);
-            particle.y   = norm_rv(init_y_,   init_y_dev_);
-            particle.yaw = norm_rv(init_yaw_, init_yaw_dev_);
-            particle.yaw = normalize_angle(particle.yaw);
+            const double x   = norm_rv(init_x_,   init_x_dev_);
+            const double y   = norm_rv(init_y_,   init_y_dev_);
+            const double yaw = norm_rv(init_yaw_, init_yaw_dev_);
+            particle.pose_.set(x, y, yaw);
+            particle.pose_.normalize_angle();
         }
         else
         {
-            particle.x   = init_x_;
-            particle.y   = init_y_;
-            particle.yaw = normalize_angle(init_yaw_);
+            const double x   = init_x_;
+            const double y   = init_y_;
+            const double yaw = init_yaw_;
+            particle.pose_.set(x, y, yaw);
+            particle.pose_.normalize_angle();
         }
         particles_.push_back(particle);
     }
@@ -137,7 +140,7 @@ double EMCL::norm_rv(const double mean, const double stddev)
 void EMCL::reset_weight()
 {
     for(auto& p : particles_)
-        p.weight = 1.0/particles_.size();
+        p.set_weight(1.0/particles_.size());
 }
 
 // map座標系とodom座標系の関係を報告
@@ -149,9 +152,9 @@ void EMCL::broadcast_odom_state()
         static tf2_ros::TransformBroadcaster odom_state_broadcaster;
 
         // map座標系からみたbase_link座標系の位置と姿勢の取得
-        const double map_to_base_yaw = tf2::getYaw(estimated_pose_.pose.orientation);
-        const double map_to_base_x   = estimated_pose_.pose.position.x;
-        const double map_to_base_y   = estimated_pose_.pose.position.y;
+        const double map_to_base_yaw = estimated_pose_.yaw();
+        const double map_to_base_x   = estimated_pose_.x();
+        const double map_to_base_y   = estimated_pose_.y();
 
         // odom座標系からみたbase_link座標系の位置と姿勢の取得
         const double odom_to_base_yaw = tf2::getYaw(last_odom_.pose.pose.orientation);
@@ -227,34 +230,20 @@ void EMCL::motion_update()
     const double length    = hypot(dx, dy);
     const double direction = normalize_angle(atan2(dy, dx) - prev_yaw);
 
-    // 全パーティルクの移動
-    for(auto& particle : particles_)
-        move_particle(particle, length, direction, dyaw);
-}
-
-// パーティクルの移動
-void EMCL::move_particle(Particle& p, double length, double direction, double rotation)
-{
     // 標準偏差を設定
-    odom_model_.set_dev(length, rotation);
+    odom_model_.set_dev(length, dyaw);
 
-    // ノイズを加える
-    length    += odom_model_.get_fw_noise();
-    direction += odom_model_.get_rot_noise();
-    rotation  += odom_model_.get_rot_noise();
-
-    // 移動
-    p.x   += length * cos(normalize_angle(direction + p.yaw));
-    p.y   += length * sin(normalize_angle(direction + p.yaw));
-    p.yaw  = normalize_angle(p.yaw + rotation);
+    // 全パーティルクの移動
+    for(auto& p : particles_)
+        p.pose_.move(length, direction, dyaw, odom_model_.get_fw_noise(), odom_model_.get_rot_noise());
 }
 
 // 観測更新（位置推定・リサンプリングを含む）
 void EMCL::observation_update()
 {
     // 尤度計算
-    for(auto& particle : particles_)
-        particle.weight *= likelihood(particle);
+    for(auto& p : particles_)
+        p.set_weight(p.weight() * p.likelihood(map_, laser_, sensor_noise_ratio_, laser_step_, ignore_angle_range_list_));
 
     // パーティクル1つのレーザ1本における平均尤度を算出
     const double alpha = calc_marginal_likelihood() / ((laser_.ranges.size()/laser_step_) * particles_.size());
@@ -275,93 +264,12 @@ void EMCL::observation_update()
     }
 }
 
-// 尤度関数
-double EMCL::likelihood(const Particle p)
-{
-    double L = 0.0; // 尤度
-
-    // センサ情報からパーティクルの姿勢を評価
-    for(int i=0; i<laser_.ranges.size(); i+=laser_step_)
-    {
-        const double angle = i * laser_.angle_increment + laser_.angle_min; // レーザ値の角度
-
-        if(not is_ignore_angle(angle)) // 柱と被るレーザ値のスキップ
-        {
-            const double range = calc_dist_to_wall(p.x, p.y, normalize_angle(angle + p.yaw), laser_.ranges[i]);
-            L += norm_pdf(range, laser_.ranges[i], laser_.ranges[i] * sensor_noise_ratio_);
-        }
-    }
-
-    return L;
-}
-
-// 柱の場合、trueを返す
-bool EMCL::is_ignore_angle(double angle)
-{
-    angle = abs(angle);
-
-    if(ignore_angle_range_list_[0] < angle and angle < ignore_angle_range_list_[1])
-        return true;
-    else if(ignore_angle_range_list_[2] < angle)
-        return true;
-    else
-        return false;
-}
-
-// 壁までの距離を算出
-double EMCL::calc_dist_to_wall(double x, double y, const double laser_angle, const double laser_range)
-{
-    const double search_step = map_.info.resolution;
-    const double search_limit = laser_range;
-
-    for(double dist=0.0; dist<search_limit; dist+=search_step)
-    {
-        x += search_step * cos(laser_angle);
-        y += search_step * sin(laser_angle);
-
-        const int grid_index = xy_to_grid_index(x, y);
-
-        if(not in_map(grid_index))
-            return search_limit * 2.0;
-        else if(map_.data[grid_index] == -1)
-            return search_limit * 2.0;
-        else if(map_.data[grid_index] == 100)
-            return dist;
-    }
-
-    return search_limit * sensor_noise_ratio_ * 5.0;
-}
-
-// 座標からグリッドのインデックスを返す
-int EMCL::xy_to_grid_index(const double x, const double y)
-{
-    const int index_x = int(round((x - map_.info.origin.position.x) / map_.info.resolution));
-    const int index_y = int(round((y - map_.info.origin.position.y) / map_.info.resolution));
-
-    return index_x + (index_y * map_.info.width);
-}
-
-// マップ内の場合、trueを返す
-bool EMCL::in_map(const int grid_index)
-{
-    if(0 <= grid_index and grid_index < map_.data.size())
-        return true;
-    else
-        return false;
-}
-
-// 確率密度関数（正規分布）
-double EMCL::norm_pdf(const double x, const double mean, const double stddev)
-{
-    return 1.0/sqrt(2.0 * M_PI * pow(stddev, 2.0)) * exp(-pow((x - mean), 2.0)/(2.0*pow(stddev, 2.0)));
-}
-
 // 周辺尤度の算出
 double EMCL::calc_marginal_likelihood()
 {
     double sum = 0.0;
     for(const auto& p : particles_)
-        sum += p.weight;
+        sum += p.weight();
 
     return sum;
 }
@@ -379,19 +287,20 @@ void EMCL::estimate_pose()
 void EMCL::mean_pose()
 {
     // 合計値
-    Particle pose_sum;
+    double x_sum   = 0.0;
+    double y_sum   = 0.0;
+    double yaw_sum = 0.0;
     for(const auto& particle : particles_)
     {
-        pose_sum.x   += particle.x;
-        pose_sum.y   += particle.y;
-        pose_sum.yaw += particle.yaw;
+        x_sum   += particle.pose_.x();
+        y_sum   += particle.pose_.y();
+        yaw_sum += particle.pose_.yaw();
     }
 
     // 平均値
-    particle_.x   = pose_sum.x   / particles_.size();
-    particle_.y   = pose_sum.y   / particles_.size();
-    particle_.yaw = pose_sum.yaw / particles_.size();
-    particle_.yaw = normalize_angle(particle_.yaw);
+    estimated_pose_.set(x_sum, y_sum, yaw_sum);
+    estimated_pose_ /= particles_.size();
+    estimated_pose_.normalize_angle();
 }
 
 // 推定位置の決定（加重平均）
@@ -401,23 +310,23 @@ void EMCL::weighted_mean_pose()
     normalize_belief();
 
     // 平均値
-    Particle mean_pose;
-    double max_weight = particles_[0].weight;
-    mean_pose.yaw = particles_[0].yaw;
+    double x_mean     = 0.0;
+    double y_mean     = 0.0;
+    double yaw_mean   = particles_[0].pose_.yaw();
+    double max_weight = particles_[0].weight();
     for(const auto& particle : particles_)
     {
-        mean_pose.x += particle.x * particle.weight;
-        mean_pose.y += particle.y * particle.weight;
+        x_mean += particle.pose_.x() * particle.weight();
+        y_mean += particle.pose_.y() * particle.weight();
 
-        if(max_weight < particle.weight)
+        if(max_weight < particle.weight())
         {
-            mean_pose.yaw = particle.yaw; // 重みが最大のパーティクルの値を取得
-            max_weight    = particle.weight;
+            yaw_mean   = particle.pose_.yaw(); // 重みが最大のパーティクルの値を取得
+            max_weight = particle.weight();
         }
     }
 
-    // コピー
-    particle_ = mean_pose;
+    estimated_pose_.set(x_mean, y_mean,y_mean);
 }
 
 // 重みの正規化
@@ -428,20 +337,20 @@ void EMCL::normalize_belief()
 
     // 正規化
     for(auto& p : particles_)
-        p.weight /= weight_sum;
+        p.set_weight(p.weight() / weight_sum);
 }
 
 // 推定位置の決定（最大の重みを有するポーズ）
 void EMCL::max_weight_pose()
 {
-    double max_weight = particles_[0].weight;
-    particle_ = particles_[0];
+    double max_weight = particles_[0].weight();
+    estimated_pose_ = particles_[0].pose_;
     for(const auto& p : particles_)
     {
-        if(max_weight < p.weight)
+        if(max_weight < p.weight())
         {
-            max_weight = p.weight;
-            particle_  = p;
+            max_weight      = p.weight();
+            estimated_pose_ = p.pose_;
         }
     }
 }
@@ -455,42 +364,25 @@ void EMCL::median_pose()
 
     for(const auto& p : particles_)
     {
-        x_list.push_back(p.x);
-        y_list.push_back(p.y);
-        yaw_list.push_back(p.yaw);
+        x_list.push_back(p.pose_.x());
+        y_list.push_back(p.pose_.y());
+        yaw_list.push_back(p.pose_.yaw());
     }
 
-    particle_.x   = get_median(x_list);
-    particle_.y   = get_median(y_list);
-    particle_.yaw = get_median(yaw_list);
+    const double x_median   = get_median(x_list);
+    const double y_median   = get_median(y_list);
+    const double yaw_median = get_median(yaw_list);
+    estimated_pose_.set(x_median, y_median, yaw_median);
 }
 
 // 配列の中央値を返す
 double EMCL::get_median(std::vector<double>& data)
 {
-    sort_data(data);
+    sort(begin(data), end(data));
     if(data.size()%2 == 1)
         return data[(data.size()-1) / 2];
     else
         return (data[data.size()/2 - 1] + data[data.size()/2]) / 2.0;
-}
-
-// 配列のデータを昇順に並び替える
-void EMCL::sort_data(std::vector<double>& data)
-{
-    double tmp;
-    for(int i=0; i<data.size()-1; i++)
-    {
-        for(int j=i+1; j<data.size(); j++)
-        {
-            if(data[i] > data[j])
-            {
-                tmp     = data[i];
-                data[i] = data[j];
-                data[j] = tmp;
-            }
-        }
-    }
 }
 
 // 膨張リセット
@@ -499,10 +391,11 @@ void EMCL::expansion_resetting()
     // ノイズを加える
     for(auto& p : particles_)
     {
-        p.x   = norm_rv(p.x,   expansion_x_dev_);
-        p.y   = norm_rv(p.y,   expansion_y_dev_);
-        p.yaw = norm_rv(p.yaw, expansion_yaw_dev_);
-        p.yaw = normalize_angle(p.yaw);
+        const double x   = norm_rv(p.pose_.x(),   expansion_x_dev_);
+        const double y   = norm_rv(p.pose_.y(),   expansion_y_dev_);
+        const double yaw = norm_rv(p.pose_.yaw(), expansion_yaw_dev_);
+        p.pose_.set(x, y, yaw);
+        p.pose_.normalize_angle();
     }
 
     // 重みを初期化
@@ -514,14 +407,14 @@ void EMCL::resampling()
 {
     // パーティクルの重みを積み上げたリストを作成
     std::vector<double> accum;
-    accum.push_back(particles_[0].weight);
+    accum.push_back(particles_[0].weight());
     for(int i=1; i<particles_.size(); i++)
-        accum.push_back(accum.back() + particles_[i].weight);
+        accum.push_back(accum.back() + particles_[i].weight());
 
     // サンプリングのスタート位置とステップを設定
     const std::vector<Particle> old(particles_);
-    const double start = (double)rand()/(RAND_MAX * particles_.size()); // 0 ~ 1/N
-    const double step = accum.back() / particles_.size();
+    const double step  = accum.back() / particles_.size();
+    const double start = (double)rand()/RAND_MAX * step; // 0 ~ W/N (W: sum of weight)
 
     // サンプリングするパーティクルのインデックスを保持
     std::vector<int> chosen_indexes;
@@ -551,15 +444,15 @@ void EMCL::resampling()
 // 推定位置のパブリッシュ
 void EMCL::publish_estimated_pose()
 {
-    estimated_pose_.pose.position.x = particle_.x;
-    estimated_pose_.pose.position.y = particle_.y;
+    estimated_pose_msg_.pose.position.x = estimated_pose_.x();
+    estimated_pose_msg_.pose.position.y = estimated_pose_.y();
 
     // yawからquaternionを作成
     tf2::Quaternion q;
-    q.setRPY(0, 0, particle_.yaw);
-    tf2::convert(q, estimated_pose_.pose.orientation);
+    q.setRPY(0, 0, estimated_pose_.yaw());
+    tf2::convert(q, estimated_pose_msg_.pose.orientation);
 
-    pub_estimated_pose_.publish(estimated_pose_);
+    pub_estimated_pose_.publish(estimated_pose_msg_);
 }
 
 // パーティクルクラウドのパブリッシュ
@@ -567,23 +460,23 @@ void EMCL::publish_particles()
 {
     if(is_visible_)
     {
-        particle_cloud_.poses.clear();
+        particle_cloud_msg_.poses.clear();
         /* --- パーティクルの数が変わる場合，ここでresize() --- */
         geometry_msgs::Pose pose;
 
         for(const auto& particle : particles_)
         {
-            pose.position.x = particle.x;
-            pose.position.y = particle.y;
+            pose.position.x = particle.pose_.x();
+            pose.position.y = particle.pose_.y();
 
             // yawからquaternionを作成
             tf2::Quaternion q;
-            q.setRPY(0, 0, particle.yaw);
+            q.setRPY(0, 0, particle.pose_.yaw());
             tf2::convert(q, pose.orientation);
 
-            particle_cloud_.poses.push_back(pose);
+            particle_cloud_msg_.poses.push_back(pose);
         }
 
-        pub_particle_cloud_.publish(particle_cloud_);
+        pub_particle_cloud_.publish(particle_cloud_msg_);
     }
 }

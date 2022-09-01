@@ -18,19 +18,10 @@ emcl: mcl with expansion resetting
 #include <random>
 
 #include "localizer/odom_model.h"
+#include "localizer/particle.h"
+#include "localizer/pose.h"
 
 
-// ===== 構造体 =====
-struct Particle
-{
-    double x      = 0.0; // [m]
-    double y      = 0.0; // [m]
-    double yaw    = 0.0; // [rad]
-    double weight = 0.0; // [-]
-};
-
-
-// ===== クラス =====
 class EMCL
 {
 public:
@@ -44,20 +35,10 @@ private:
     void odom_callback(const nav_msgs::Odometry::ConstPtr& msg);
     void laser_callback(const sensor_msgs::LaserScan::ConstPtr& msg);
 
-    // 正規分布
-    double norm_rv(const double mean, const double stddev);                  // ランダム変数生成関数
-    double norm_pdf(const double x, const double mean, const double stddev); // 確率密度関数
-
     // その他の関数
-    void   move_particle(Particle& p, double length, double direction, double rotation); // パーティクルの移動
-    void   sort_data(std::vector<double>& data);             // 配列のデータを昇順に並び替える
-    bool   is_ignore_angle(double angle);                    // 柱か判断
-    bool   in_map(const int grid_index);                     // マップ内か判断
-    int    xy_to_grid_index(const double x, const double y); // 座標からグリッドのインデックスを返す
-    double normalize_angle(double angle);                    // 適切な角度(-M_PI ~ M_PI)を返す
-    double likelihood(const Particle p);                     // 尤度関数
     double get_median(std::vector<double>& data);            // 配列の中央値を返す
-    double calc_dist_to_wall(double x, double y, const double laser_angle, const double laser_range); // 壁までの距離を算出
+    double norm_rv(const double mean, const double stddev);  // ランダム変数生成関数（正規分布）
+    double normalize_angle(double angle);                    // 適切な角度(-M_PI ~ M_PI)を返す
 
 
     // ----- 関数（引数なし）------
@@ -98,7 +79,7 @@ private:
     double    expansion_y_dev_;    // 膨張リセットの位置yの標準偏差 [m]
     double    expansion_yaw_dev_;  // 膨張リセットの姿勢の標準偏差 [rad]
     double    sensor_noise_ratio_; // 距離に対するセンサノイズ比 [-]
-    Particle  particle_;           // 推定位置格納用
+    Pose      estimated_pose_;     // 推定位置
     OdomModel odom_model_;         // odometryのモデル
 
     // リスト
@@ -141,12 +122,12 @@ private:
     ros::Publisher pub_particle_cloud_;
 
     // 各種オブジェクト
-    nav_msgs::OccupancyGrid    map_;            // map_serverから受け取るマップ
-    nav_msgs::Odometry         last_odom_;      // 最新のodometry
-    nav_msgs::Odometry         prev_odom_;      // 1制御周期前のodometry
-    sensor_msgs::LaserScan     laser_;          // レーザ値
-    geometry_msgs::PoseStamped estimated_pose_; // 推定位置
-    geometry_msgs::PoseArray   particle_cloud_; // パーティクルクラウド（パブリッシュ用）
+    nav_msgs::OccupancyGrid    map_;                // map_serverから受け取るマップ
+    nav_msgs::Odometry         last_odom_;          // 最新のodometry
+    nav_msgs::Odometry         prev_odom_;          // 1制御周期前のodometry
+    sensor_msgs::LaserScan     laser_;              // レーザ値
+    geometry_msgs::PoseStamped estimated_pose_msg_; // 推定位置
+    geometry_msgs::PoseArray   particle_cloud_msg_; // パーティクルクラウド（パブリッシュ用）
 };
 
 #endif

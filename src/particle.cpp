@@ -7,7 +7,7 @@ Particle::Particle() : pose_(0.0, 0.0, 0.0)
 }
 
 // コンストラクタ
-Particle::Particle(const double x, const double y, const double yaw, const double weight) : pose_(x, y, z)
+Particle::Particle(const double x, const double y, const double yaw, const double weight) : pose_(x, y, yaw)
 {
     weight_ = weight;
 }
@@ -40,7 +40,7 @@ double Particle::likelihood(const nav_msgs::OccupancyGrid& map, const sensor_msg
 
         if(not is_ignore_angle(angle, ignore_angle_range_list)) // 柱と被るレーザ値のスキップ
         {
-            const double range = calc_dist_to_wall(pose.x_, pose.y_, angle+pose.yaw_, map, laser.ranges[i], sensor_noise_ratio);
+            const double range = calc_dist_to_wall(pose_.x(), pose_.y(), angle+pose_.yaw(), map, laser.ranges[i], sensor_noise_ratio);
             L += norm_pdf(range, laser.ranges[i], laser.ranges[i] * sensor_noise_ratio);
         }
     }
