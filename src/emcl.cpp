@@ -290,11 +290,11 @@ void EMCL::mean_pose()
     double x_sum   = 0.0;
     double y_sum   = 0.0;
     double yaw_sum = 0.0;
-    for(const auto& particle : particles_)
+    for(const auto& p : particles_)
     {
-        x_sum   += particle.pose_.x();
-        y_sum   += particle.pose_.y();
-        yaw_sum += particle.pose_.yaw();
+        x_sum   += p.pose_.x();
+        y_sum   += p.pose_.y();
+        yaw_sum += p.pose_.yaw();
     }
 
     // 平均値
@@ -314,19 +314,19 @@ void EMCL::weighted_mean_pose()
     double y_mean     = 0.0;
     double yaw_mean   = particles_[0].pose_.yaw();
     double max_weight = particles_[0].weight();
-    for(const auto& particle : particles_)
+    for(const auto& p : particles_)
     {
-        x_mean += particle.pose_.x() * particle.weight();
-        y_mean += particle.pose_.y() * particle.weight();
+        x_mean += p.pose_.x() * p.weight();
+        y_mean += p.pose_.y() * p.weight();
 
-        if(max_weight < particle.weight())
+        if(max_weight < p.weight())
         {
-            yaw_mean   = particle.pose_.yaw(); // 重みが最大のパーティクルの値を取得
-            max_weight = particle.weight();
+            yaw_mean   = p.pose_.yaw(); // 重みが最大のパーティクルの値を取得
+            max_weight = p.weight();
         }
     }
 
-    estimated_pose_.set(x_mean, y_mean,y_mean);
+    estimated_pose_.set(x_mean, y_mean, yaw_mean);
 }
 
 // 重みの正規化
