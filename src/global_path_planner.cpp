@@ -383,20 +383,24 @@ std::tuple<int, int> AStarPlanner::search_node(const Node target_node)
 // [デバッグ用] ノードをRvizに表示
 void  AStarPlanner::show_node_point(const Node node)
 {
-    if(not is_visible_) return;
-    current_node_.point.x = node.index_x * map_.info.resolution + map_.info.origin.position.x;
-    current_node_.point.y = node.index_y * map_.info.resolution + map_.info.origin.position.y;
-    pub_node_point_.publish(current_node_);
-    ros::Duration(sleep_time_).sleep();
+    if(is_visible_)
+    {
+        current_node_.point.x = node.index_x * map_.info.resolution + map_.info.origin.position.x;
+        current_node_.point.y = node.index_y * map_.info.resolution + map_.info.origin.position.y;
+        pub_node_point_.publish(current_node_);
+        ros::Duration(sleep_time_).sleep();
+    }
 }
 
 // [デバッグ用] パスをRvizに表示
 void  AStarPlanner::show_path(nav_msgs::Path& current_path)
 {
-    if(not is_visible_) return;
-    current_path.header.frame_id = "map";
-    pub_current_path_.publish(current_path);
-    ros::Duration(sleep_time_).sleep();
+    if(is_visible_)
+    {
+        current_path.header.frame_id = "map";
+        pub_current_path_.publish(current_path);
+        ros::Duration(sleep_time_).sleep();
+    }
 }
 
 // 実行時間を表示（スタート時間beginを予め設定する）
