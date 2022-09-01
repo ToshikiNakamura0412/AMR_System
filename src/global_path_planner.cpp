@@ -10,6 +10,7 @@ AStarPlanner::AStarPlanner():private_nh_("~")
     // パラメータの取得
     private_nh_.getParam("hz", hz_);
     private_nh_.getParam("is_visible", is_visible_);
+    private_nh_.getParam("sleep_time", sleep_time_);
     private_nh_.getParam("way_points_x", way_points_x_);
     private_nh_.getParam("way_points_y", way_points_y_);
 
@@ -82,7 +83,7 @@ void AStarPlanner::planning()
 
             // Openリスト内で最もコストの小さいノードを現在のノードに指定
             Node current_node = select_current_node();
-            show_node_point(current_node, 0.001);
+            show_node_point(current_node);
 
             // 経路の探索
             if(is_goal(current_node)) // ゴールに到達した場合
@@ -191,7 +192,7 @@ void AStarPlanner::create_path(Node current_node)
             if(is_parent(i, current_node))
             {
                 current_node = closed_set_[i];
-                show_node_point(current_node, 0.001);
+                show_node_point(current_node);
                 partial_path.poses.push_back(calc_pose(current_node));
                 break;
             }
@@ -204,7 +205,7 @@ void AStarPlanner::create_path(Node current_node)
     }
 
     reverse(partial_path.poses.begin(), partial_path.poses.end());
-    show_path(partial_path, 0.05);
+    show_path(partial_path);
     global_path_.poses.insert(global_path_.poses.end(), partial_path.poses.begin(), partial_path.poses.end());
 }
 
@@ -380,22 +381,22 @@ std::tuple<int, int> AStarPlanner::search_node(const Node target_node)
 }
 
 // [デバッグ用] ノードをRvizに表示
-void  AStarPlanner::show_node_point(const Node node, const double sleep_time)
+void  AStarPlanner::show_node_point(const Node node)
 {
     if(not is_visible_) return;
     current_node_.point.x = node.index_x * map_.info.resolution + map_.info.origin.position.x;
     current_node_.point.y = node.index_y * map_.info.resolution + map_.info.origin.position.y;
     pub_node_point_.publish(current_node_);
-    ros::Duration(sleep_time).sleep();
+    ros::Duration(sleep_time_).sleep();
 }
 
 // [デバッグ用] パスをRvizに表示
-void  AStarPlanner::show_path(nav_msgs::Path& current_path, const double sleep_time)
+void  AStarPlanner::show_path(nav_msgs::Path& current_path)
 {
     if(not is_visible_) return;
     current_path.header.frame_id = "map";
     pub_current_path_.publish(current_path);
-    ros::Duration(sleep_time).sleep();
+    ros::Duration(sleep_time_).sleep();
 }
 
 // 実行時間を表示（スタート時間beginを予め設定する）
