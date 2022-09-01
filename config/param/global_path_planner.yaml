@@ -3,8 +3,7 @@ hz: 10
 
 # デバッグ用
 is_visible: false # 可視化フラグ(パス・ノード)
-sleep_time: 0.05  # 次のpublishまでの時間 [s]
-
+sleep_time: 0.005 # 次のpublishまでの時間 [s]
 
 # 経由点 [m]
 way_points_x: [0.0, 10.6, 11.4, 11.4, 10.6, -20.7, -22.0, -22.0, -21.0, 0.0]
