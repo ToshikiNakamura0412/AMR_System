@@ -43,6 +43,8 @@ add_library(obstacle_expander   src/obstacle_expander.cpp)
 add_library(obstacle_detector   src/obstacle_detector.cpp)
 add_library(emcl                src/emcl.cpp)
 add_library(odom_model          src/odom_model.cpp)
+add_library(particle            src/particle.cpp)
+add_library(pose                src/pose.cpp)
 
 ## Declare a C++ executable
 add_executable(global_path_planner_node src/global_path_planner_node.cpp)
@@ -69,4 +71,4 @@ target_link_libraries(local_map_creator_node   local_map_creator   ${catkin_LIBR
 target_link_libraries(local_path_planner_node  local_path_planner  ${catkin_LIBRARIES})
 target_link_libraries(obstacle_expander_node   obstacle_expander   ${catkin_LIBRARIES})
 target_link_libraries(obstacle_detector_node   obstacle_detector   ${catkin_LIBRARIES})
-target_link_libraries(localizer_node           emcl odom_model     ${catkin_LIBRARIES})
+target_link_libraries(localizer_node emcl odom_model particle pose ${catkin_LIBRARIES})
