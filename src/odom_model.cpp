@@ -10,6 +10,19 @@ OdomModel::OdomModel(const double ff, const double fr, const double rf, const do
     rot_var_per_rot_ = pow(rr ,2.0);
 }
 
+// 代入演算子
+OdomModel& OdomModel::operator =(const OdomModel& model)
+{
+    fw_var_per_fw_   = model.fw_var_per_fw_;
+    fw_var_per_rot_  = model.fw_var_per_rot_;
+    rot_var_per_fw_  = model.rot_var_per_fw_;
+    rot_var_per_rot_ = model.rot_var_per_rot_;
+    fw_dev_  = model.fw_dev_;
+    rot_dev_ = model.rot_dev_;
+
+    return *this;
+}
+
 // 並進，回転に関する標準偏差の設定
 void OdomModel::set_dev(const double length, const double angle)
 {
@@ -27,17 +40,4 @@ double OdomModel::get_fw_noise()
 double OdomModel::get_rot_noise()
 {
     return std_norm_dist_(engine_) * rot_dev_;
-}
-
-// 代入演算子
-OdomModel& OdomModel::operator =(const OdomModel& t)
-{
-    fw_var_per_fw_   = t.fw_var_per_fw_;
-    fw_var_per_rot_  = t.fw_var_per_rot_;
-    rot_var_per_fw_  = t.rot_var_per_fw_;
-    rot_var_per_rot_ = t.rot_var_per_rot_;
-    fw_dev_  = t.fw_dev_;
-    rot_dev_ = t.rot_dev_;
-
-    return *this;
 }
