@@ -27,7 +27,6 @@ void ObstacleExpander::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg
 void ObstacleExpander::process()
 {
     ros::Rate loop_rate(hz_); // 制御周波数の設定
-    int time_flag = 0;
 
     while(ros::ok())
     {
