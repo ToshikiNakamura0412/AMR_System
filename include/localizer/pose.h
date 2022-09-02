@@ -20,10 +20,10 @@ public:
 
     // ノイズを含む移動
     void move(double length, double direction, double rotation, const double fw_noise, const double rot_noise);
-    
+
     // 適切な角度(-M_PI ~ M_PI)に変更
     void normalize_angle();
-    
+
 private:
 
     double x_;   // [m]

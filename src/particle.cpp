@@ -29,7 +29,7 @@ void Particle::set_weight(const double weight)
 
 // 尤度関数
 double Particle::likelihood(const nav_msgs::OccupancyGrid& map, const sensor_msgs::LaserScan& laser,
-    const double sensor_noise_ratio, const int laser_step, const std::vector<double>& ignore_angle_range_list)
+        const double sensor_noise_ratio, const int laser_step, const std::vector<double>& ignore_angle_range_list)
 {
     double L = 0.0; // 尤度
 
@@ -40,7 +40,8 @@ double Particle::likelihood(const nav_msgs::OccupancyGrid& map, const sensor_msg
 
         if(not is_ignore_angle(angle, ignore_angle_range_list)) // 柱と被るレーザ値のスキップ
         {
-            const double range = calc_dist_to_wall(pose_.x(), pose_.y(), angle+pose_.yaw(), map, laser.ranges[i], sensor_noise_ratio);
+            const double range = calc_dist_to_wall(pose_.x(), pose_.y(), angle+pose_.yaw(), map,
+                    laser.ranges[i], sensor_noise_ratio);
             L += norm_pdf(range, laser.ranges[i], laser.ranges[i] * sensor_noise_ratio);
         }
     }
@@ -71,7 +72,7 @@ bool Particle::is_ignore_angle(double angle, const std::vector<double>& ignore_a
 
 // 壁までの距離を算出
 double Particle::calc_dist_to_wall(double x, double y, const double laser_angle, const nav_msgs::OccupancyGrid& map,
-    const double laser_range, const double sensor_noise_ratio)
+        const double laser_range, const double sensor_noise_ratio)
 {
     const double search_step = map.info.resolution;
     const double search_limit = laser_range;

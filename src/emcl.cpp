@@ -243,7 +243,10 @@ void EMCL::observation_update()
 {
     // 尤度計算
     for(auto& p : particles_)
-        p.set_weight(p.weight() * p.likelihood(map_, laser_, sensor_noise_ratio_, laser_step_, ignore_angle_range_list_));
+    {
+        const double L = p.likelihood(map_, laser_, sensor_noise_ratio_, laser_step_, ignore_angle_range_list_);
+        p.set_weight(p.weight() * L);
+    }
 
     // パーティクル1つのレーザ1本における平均尤度を算出
     const double alpha = calc_marginal_likelihood() / ((laser_.ranges.size()/laser_step_) * particles_.size());
