@@ -90,10 +90,12 @@ void EMCL::process()
 
     while(ros::ok())
     {
-        if(flag_map_ and flag_odom_ and flag_laser_)
+        // if(flag_map_ and flag_odom_ and flag_laser_)
+        if(flag_map_ and flag_odom_)
         {
             broadcast_odom_state(); // map座標系とodom座標系の関係を報告
-            localize(); // 自己位置推定
+            if(flag_laser_)
+                localize(); // 自己位置推定
         }
         ros::spinOnce();   // コールバック関数の実行
         loop_rate.sleep(); // 周期が終わるまで待つ
