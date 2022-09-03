@@ -93,6 +93,7 @@ private:
 
     // その他のフラグ
     bool flag_move_ = false; // 機体が動いたか判断用
+    // bool flag_move_ = true; // 機体が動いたか判断用
     bool flag_init_noise_;   // 初期位置にノイズを加えるか
     bool flag_broadcast_;    // tf broadcastをするか
     bool is_visible_;        // パーティクルクラウドをパブリッシングするか
@@ -108,7 +109,7 @@ private:
     std::default_random_engine engine_;
 
     // TF Broadcasterの実体化
-    tf2_ros::TransformBroadcaster odom_state_broadcaster_;
+    // tf2_ros::TransformBroadcaster odom_state_broadcaster_;
 
     // ----- その他のオブジェクト -----
     // NodeHandle
