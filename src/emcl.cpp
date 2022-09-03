@@ -92,9 +92,9 @@ void EMCL::process()
     {
         if(flag_map_ and flag_odom_ and flag_laser_)
         {
-            broadcast_odom_state(); // map座標系とodom座標系の関係を報告
-            if(flag_laser_)
-                localize(); // 自己位置推定
+            if(flag_move_)
+                broadcast_odom_state(); // map座標系とodom座標系の関係を報告
+            localize(); // 自己位置推定
         }
         ros::spinOnce();   // コールバック関数の実行
         loop_rate.sleep(); // 周期が終わるまで待つ
@@ -193,6 +193,7 @@ void EMCL::broadcast_odom_state()
         odom_state.transform.rotation.w    = map_to_odom_quat.w();
 
         // tf情報をbroadcast(座標系の設定)
+        // odom_state_broadcaster.sendTransform(odom_state);
         odom_state_broadcaster_.sendTransform(odom_state);
     }
 }
