@@ -66,13 +66,15 @@ void EMCL::odom_callback(const nav_msgs::Odometry::ConstPtr& msg)
 {
     prev_odom_ = last_odom_;
     last_odom_ = *msg;
+    flag_odom_ = true;
 
-    if(not flag_odom_)
+    if(not flag_move_)
     {
         const double dx = prev_odom_.pose.pose.position.x;
         const double dy = prev_odom_.pose.pose.position.y;
         if(move_dist_th_ < hypot(dx, dy)) // 動き出したらフラグを立てる
-            flag_odom_ = true;
+            flag_move_ = true;
+            // flag_odom_ = true;
     }
 }
 
