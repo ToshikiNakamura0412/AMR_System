@@ -1,7 +1,7 @@
 # ===== クラスEMCL =====
 # フラグ
 flag_init_noise: true # 初期位置にノイズを加えるか
-flag_broadcast: false # tf情報を含むbagファイルを使うときはfalse
+flag_broadcast: true  # tf情報を含むbagファイルを使うときはfalse
 is_visible: true      # パーティクルクラウドを表示（パブリッシュ）するか
 
 # 基本設定
