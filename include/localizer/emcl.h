@@ -106,6 +106,8 @@ private:
     std::random_device seed_gen_;
     std::default_random_engine engine_;
 
+    // TF Broadcasterの実体化
+    tf2_ros::TransformBroadcaster odom_state_broadcaster_;
 
     // ----- その他のオブジェクト -----
     // NodeHandle

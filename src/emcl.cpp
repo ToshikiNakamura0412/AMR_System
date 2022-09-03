@@ -90,8 +90,7 @@ void EMCL::process()
 
     while(ros::ok())
     {
-        // if(flag_map_ and flag_odom_ and flag_laser_)
-        if(flag_map_ and flag_odom_)
+        if(flag_map_ and flag_odom_ and flag_laser_)
         {
             broadcast_odom_state(); // map座標系とodom座標系の関係を報告
             if(flag_laser_)
@@ -151,7 +150,7 @@ void EMCL::broadcast_odom_state()
     if(flag_broadcast_)
     {
         // TF Broadcasterの実体化
-        static tf2_ros::TransformBroadcaster odom_state_broadcaster;
+        // static tf2_ros::TransformBroadcaster odom_state_broadcaster;
 
         // map座標系からみたbase_link座標系の位置と姿勢の取得
         const double map_to_base_yaw = estimated_pose_.yaw();
@@ -194,7 +193,7 @@ void EMCL::broadcast_odom_state()
         odom_state.transform.rotation.w    = map_to_odom_quat.w();
 
         // tf情報をbroadcast(座標系の設定)
-        odom_state_broadcaster.sendTransform(odom_state);
+        odom_state_broadcaster_.sendTransform(odom_state);
     }
 }
 
