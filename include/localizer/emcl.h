@@ -93,7 +93,6 @@ private:
 
     // その他のフラグ
     bool flag_move_ = false; // 機体が動いたか判断用
-    // bool flag_move_ = true; // 機体が動いたか判断用
     bool flag_init_noise_;   // 初期位置にノイズを加えるか
     bool flag_broadcast_;    // tf broadcastをするか
     bool is_visible_;        // パーティクルクラウドをパブリッシングするか

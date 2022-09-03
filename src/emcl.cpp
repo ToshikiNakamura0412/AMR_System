@@ -58,7 +58,8 @@ void EMCL::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 {
     map_      = *msg;
     flag_map_ = true;
-    initialize();
+    initialize(); // パーティクルの初期化
+    publish_estimated_pose(); // 推定位置のパブリッシュ（local_goal_creatorノード起動用）
 }
 
 // odometryのコールバック関数
@@ -74,7 +75,6 @@ void EMCL::odom_callback(const nav_msgs::Odometry::ConstPtr& msg)
         const double dy = prev_odom_.pose.pose.position.y;
         if(move_dist_th_ < hypot(dx, dy)) // 動き出したらフラグを立てる
             flag_move_ = true;
-            // flag_odom_ = true;
     }
 }
 
@@ -96,13 +96,7 @@ void EMCL::process()
         {
             broadcast_odom_state(); // map座標系とodom座標系の関係を報告
             if(flag_move_)
-            {
                 localize(); // 自己位置推定
-            }
-            else
-            {
-                publish_estimated_pose(); // 推定位置のパブリッシュ
-            }
         }
         ros::spinOnce();   // コールバック関数の実行
         loop_rate.sleep(); // 周期が終わるまで待つ
