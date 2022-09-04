@@ -1,7 +1,9 @@
+<?xml version="1.0"?>
 <!--
 デバッグ用の出力あり
 
 ===== Param =====
+以下のように設定すること
 - localizer
     flag_broadcast: true
     is_visible: true
@@ -10,8 +12,6 @@
 - local_path_planner
     is_visible: true
 -->
-
-<?xml version="1.0"?>
 <launch>
     <!-- config file path -->
     <arg name="rviz_settings" default="$(find second_challenge_toshiki)/config/rviz/all.rviz"/>
