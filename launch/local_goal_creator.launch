@@ -19,5 +19,5 @@
         <rosparam command="load" file="$(arg global_path_planner_settings)"/>
     </node>
     <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_settings)" output="screen"/>
-    <node pkg="rosbag" type="play" name="play" args="$(env HOME)/bag_folder/local_goal_creator.bag"/>
+    <node pkg="rosbag" type="play" name="play" args="$(env HOME)/bagfiles/local_goal_creator.bag"/>
 </launch>

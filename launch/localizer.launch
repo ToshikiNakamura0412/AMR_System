@@ -14,5 +14,5 @@
     <node pkg="second_challenge_toshiki" type="localizer_node" name="localizer" output="screen">
         <rosparam command="load" file="$(arg localizer_settings)"/>
     </node>
-    <node pkg="rosbag" type="play" name="play" args="$(env HOME)/bag_folder/localizer.bag"/>
+    <node pkg="rosbag" type="play" name="play" args="$(env HOME)/bagfiles/localizer.bag"/>
 </launch>

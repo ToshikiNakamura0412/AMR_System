@@ -9,5 +9,5 @@
     <node pkg="second_challenge_toshiki" type="obstacle_detector_node" name="obstacle_detector" output="screen">
         <rosparam command="load" file="$(arg obstacle_detector_settings)"/>
     </node>
-    <node pkg="rosbag" type="play" name="play" args="$(env HOME)/bag_folder/obstacle_detector.bag"/>
+    <node pkg="rosbag" type="play" name="play" args="$(env HOME)/bagfiles/obstacle_detector.bag"/>
 </launch>
