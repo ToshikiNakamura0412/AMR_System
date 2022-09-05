@@ -6,8 +6,6 @@
 - localizer
     flag_broadcast: true
     is_visible: false
-- global_path_planner
-    is_visible: false
 - local_path_planner
     is_visible: false
 -->
