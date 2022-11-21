@@ -2,7 +2,7 @@
 hz: 10
 
 # デバッグ用
-is_visible: true  # 可視化フラグ(パス・ノード)
+is_visible: false  # 可視化フラグ(パス・ノード)
 sleep_time: 0.005 # 次のpublishまでの時間 [s]
 
 # 経由点 [m]
