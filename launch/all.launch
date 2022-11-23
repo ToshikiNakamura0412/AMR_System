@@ -24,6 +24,15 @@
     <arg name="local_map_creator_settings" default="$(find second_challenge_toshiki)/config/param/local_map_creator.yaml"/>
     <arg name="local_path_planner_settings" default="$(find second_challenge_toshiki)/config/param/local_path_planner.yaml"/>
 
+
+    <!-- launch devices -->
+    <group ns="$(arg roomba)">
+        <include file="$(find multi_robots)/launch/launch_devices.launch">
+            <arg name="roomba" default="$(arg roomba)"/>
+        </include>
+    </group>
+
+    <!-- launch navigation -->
     <group ns="$(arg roomba)">
         <group ns="map">
             <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_settings)" output="screen">
