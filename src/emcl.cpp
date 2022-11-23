@@ -58,8 +58,6 @@ void EMCL::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 {
     map_      = *msg;
     flag_map_ = true;
-    initialize(); // パーティクルの初期化
-    publish_estimated_pose(); // 推定位置のパブリッシュ（local_goal_creatorノード起動用）
 }
 
 // odometryのコールバック関数
@@ -89,6 +87,7 @@ void EMCL::laser_callback(const sensor_msgs::LaserScan::ConstPtr& msg)
 void EMCL::process()
 {
     ros::Rate loop_rate(hz_); // 制御周波数の設定
+    initialize();             // パーティクルの初期化
 
     while(ros::ok())
     {
@@ -96,7 +95,14 @@ void EMCL::process()
         {
             broadcast_odom_state(); // map座標系とodom座標系の関係を報告
             if(flag_move_)
+            {
                 localize(); // 自己位置推定
+            }
+            else
+            {
+                publish_estimated_pose(); // 推定位置のパブリッシュ
+                publish_particles();      // パーティクルクラウドのパブリッシュ
+            }
         }
         ros::spinOnce();   // コールバック関数の実行
         loop_rate.sleep(); // 周期が終わるまで待つ
