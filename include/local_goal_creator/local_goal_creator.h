@@ -32,7 +32,6 @@ private:
     double target_dist_to_goal_; // 現在位置-ゴール間の距離 [m]
 
     // msg受け取りフラグ
-    bool flag_estimated_pose_ = false;
     bool flag_global_path_    = false;
 
 
