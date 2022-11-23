@@ -194,7 +194,8 @@ void DWAPlanner::change_mode()
     if(abs(roomba_.yawrate)>turn_thres_yawrate_ or roomba_.velocity<avoid_thres_vel_)
         mode_log_.push_back(2.0); // 減速モード
     else
-        mode_log_.push_back(1.0);
+        mode_log_.push_back(2.0); // 常に減速モード
+        // mode_log_.push_back(1.0);
 
     if(mode_log_.size() > hz_*mode_log_time_)
         mode_log_.erase(mode_log_.begin());
