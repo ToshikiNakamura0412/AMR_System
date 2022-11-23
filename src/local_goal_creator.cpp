@@ -23,8 +23,7 @@ LocalGoalCreator::LocalGoalCreator():private_nh_("~")
 // estimated_poseのコールバック関数
 void LocalGoalCreator::estimated_pose_callback(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
-    estimated_pose_      = *msg;
-    flag_estimated_pose_ = true;
+    estimated_pose_  = *msg;
 }
 
 // global_pathのコールバック関数
@@ -41,7 +40,7 @@ void LocalGoalCreator::process()
 
     while(ros::ok())
     {
-        if(flag_estimated_pose_ and flag_global_path_)
+        if(flag_global_path_)
             update_goal(); // ゴールの更新
         ros::spinOnce();   // コールバック関数の実行
         loop_rate.sleep(); // 周期が終わるまで待つ
