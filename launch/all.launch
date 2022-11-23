@@ -30,7 +30,15 @@
         <include file="$(find multi_robots)/launch/launch_devices.launch">
             <arg name="roomba" default="$(arg roomba)"/>
         </include>
+        <include file="$(find theta_s_ros)/launch/run_theta_s.launch"/>
     </group>
+    <!-- rviz -->
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_settings)"/>
+    <!-- rosbag -->
+    <include file="$(find second_challenge_toshiki)/launch/bag_record.launch">
+        <arg name="roomba" default="$(arg roomba)"/>
+    </include>
+
 
     <!-- launch navigation -->
     <group ns="$(arg roomba)">
@@ -71,6 +79,8 @@
             <remap from="/map"            to="/$(arg roomba)/map/map"/>
             <remap from="/estimated_pose" to="/$(arg roomba)/estimated_pose"/>
             <remap from="/particle_cloud" to="/$(arg roomba)/particle_cloud"/>
+            <remap from="/roomba/odometry" to="/$(arg roomba)/roomba/odometry"/>
+            <remap from="/scan" to="/$(arg roomba)/scan"/>
             <!-- parameters -->
             <rosparam command="load" file="$(arg localizer_settings)"/>
         </node>
@@ -78,12 +88,14 @@
         <node pkg="second_challenge_toshiki" type="obstacle_detector_node" name="obstacle_detector" output="screen">
             <!-- topic name -->
             <remap from="/local_map/obstacle" to="/$(arg roomba)/local_map/obstacle"/>
+            <remap from="/scan"               to="/$(arg roomba)/scan"/>
             <!-- parameters -->
             <rosparam command="load" file="$(arg obstacle_detector_settings)"/>
         </node>
 
         <node pkg="second_challenge_toshiki" type="local_path_planner_node" name="local_path_planner" output="screen">
             <!-- topic name -->
+            <remap from="/roomba/control"      to="/$(arg roomba)/roomba/control"/>
             <remap from="/local_goal"          to="/$(arg roomba)/local_goal"/>
             <remap from="/local_map/obstacle"  to="/$(arg roomba)/local_map/obstacle"/>
             <remap from="/predict_local_paths" to="/$(arg roomba)/predict_local_paths"/>
@@ -91,25 +103,5 @@
             <!-- parameters -->
             <rosparam command="load" file="$(arg local_path_planner_settings)"/>
         </node>
-
-        <!-- <node pkg="second_challenge_toshiki" type="local_map_creator_node" name="local_map_creator" output="screen"> -->
-        <!--     <remap from="/local_map" to="/$(arg roomba)/local_map"/> -->
-        <!--     <remap from="/local_map/obstacle" to="/$(arg roomba)/local_map/obstacle"/> -->
-        <!--     <rosparam command="load" file="$(arg local_map_creator_settings)"/> -->
-        <!-- </node> -->
     </group>
-
-    <!-- rviz -->
-    <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_settings)"/>
-    <!-- rosbag -->
-    <include file="$(find second_challenge_toshiki)/launch/bag_record.launch">
-        <arg name="roomba" default="$(arg roomba)"/>
-    </include>
-
-    <!-- static tf -->
-    <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_publisher" args="0 0 0 0 0 0 1 /base_link /laser"/> -->
-    <!-- Roomba -->
-    <!-- <node pkg="roomba_500driver_meiji" type="main500" name="roomba_500driver_meiji"/> -->
-    <!-- LiDAR -->
-    <!-- <node pkg="urg_node" type="urg_node" name="urg_node" args="_ip_address:=192.168.1.222"/> -->
 </launch>
