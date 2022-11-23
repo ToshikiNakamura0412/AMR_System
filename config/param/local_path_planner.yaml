@@ -4,6 +4,9 @@ is_visible: false
 # 制御周波数 [Hz]
 hz: 10
 
+# frame_id
+robot_frame: "base_link"
+
 # 速度制限
 max_vel1: 0.45            # [m/s]（平常時）
 max_vel2: 0.3             # [m/s]（減速時）

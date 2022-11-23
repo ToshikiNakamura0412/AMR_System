@@ -11,7 +11,11 @@
     is_visible: true
 -->
 <launch>
+    <!-- roomba number -->
     <arg name="roomba" default="roomba1"/>
+
+    <!-- frame id -->
+    <arg name="robot_frame_id" default="$(arg roomba)/base_link"/>
 
     <!-- config file path -->
     <arg name="rviz_settings" default="$(find second_challenge_toshiki)/config/rviz/multi/$(arg roomba).rviz"/>
@@ -57,51 +61,55 @@
             </node>
         </group>
 
-        <node pkg="second_challenge_toshiki" type="global_path_planner_node" name="global_path_planner" output="screen">
-            <!-- topic name -->
-            <remap from="/map/updated_map" to="/$(arg roomba)/map/updated_map"/>
-            <remap from="/global_path"     to="/$(arg roomba)/global_path"/>
-            <!-- parameters -->
-            <rosparam command="load" file="$(arg global_path_planner_settings)"/>
-        </node>
+        <group ns="nav">
+            <node pkg="second_challenge_toshiki" type="global_path_planner_node" name="global_path_planner" output="screen">
+                <!-- topic name -->
+                <remap from="/map/updated_map" to="/$(arg roomba)/map/updated_map"/>
+                <remap from="/global_path"     to="/$(arg roomba)/global_path"/>
+                <!-- parameters -->
+                <rosparam command="load" file="$(arg global_path_planner_settings)"/>
+            </node>
 
-        <node pkg="second_challenge_toshiki" type="local_goal_creator_node" name="local_goal_creator" output="screen">
-            <!-- topic name -->
-            <remap from="/global_path"    to="/$(arg roomba)/global_path"/>
-            <remap from="/local_goal"     to="/$(arg roomba)/local_goal"/>
-            <remap from="/estimated_pose" to="/$(arg roomba)/estimated_pose"/>
-            <!-- parameters -->
-            <rosparam command="load" file="$(arg local_goal_creator_settings)"/>
-        </node>
+            <node pkg="second_challenge_toshiki" type="local_goal_creator_node" name="local_goal_creator" output="screen">
+                <!-- topic name -->
+                <remap from="/global_path"    to="/$(arg roomba)/global_path"/>
+                <remap from="/local_goal"     to="/$(arg roomba)/local_goal"/>
+                <remap from="/estimated_pose" to="/$(arg roomba)/estimated_pose"/>
+                <!-- parameters -->
+                <rosparam command="load" file="$(arg local_goal_creator_settings)"/>
+            </node>
 
-        <node pkg="second_challenge_toshiki" type="localizer_node" name="localizer" output="screen">
-            <!-- topic name -->
-            <remap from="/map"            to="/$(arg roomba)/map/map"/>
-            <remap from="/estimated_pose" to="/$(arg roomba)/estimated_pose"/>
-            <remap from="/particle_cloud" to="/$(arg roomba)/particle_cloud"/>
-            <remap from="/roomba/odometry" to="/$(arg roomba)/roomba/odometry"/>
-            <remap from="/scan" to="/$(arg roomba)/scan"/>
-            <!-- parameters -->
-            <rosparam command="load" file="$(arg localizer_settings)"/>
-        </node>
+            <node pkg="second_challenge_toshiki" type="localizer_node" name="localizer" output="screen">
+                <!-- topic name -->
+                <remap from="/map"            to="/$(arg roomba)/map/map"/>
+                <remap from="/estimated_pose" to="/$(arg roomba)/estimated_pose"/>
+                <remap from="/particle_cloud" to="/$(arg roomba)/particle_cloud"/>
+                <remap from="/roomba/odometry" to="/$(arg roomba)/roomba/odometry"/>
+                <remap from="/scan" to="/$(arg roomba)/scan"/>
+                <!-- parameters -->
+                <rosparam command="load" file="$(arg localizer_settings)"/>
+            </node>
 
-        <node pkg="second_challenge_toshiki" type="obstacle_detector_node" name="obstacle_detector" output="screen">
-            <!-- topic name -->
-            <remap from="/local_map/obstacle" to="/$(arg roomba)/local_map/obstacle"/>
-            <remap from="/scan"               to="/$(arg roomba)/scan"/>
-            <!-- parameters -->
-            <rosparam command="load" file="$(arg obstacle_detector_settings)"/>
-        </node>
+            <node pkg="second_challenge_toshiki" type="obstacle_detector_node" name="obstacle_detector" output="screen">
+                <!-- topic name -->
+                <remap from="/local_map/obstacle" to="/$(arg roomba)/local_map/obstacle"/>
+                <remap from="/scan"               to="/$(arg roomba)/scan"/>
+                <!-- parameters -->
+                <rosparam command="load" file="$(arg obstacle_detector_settings)"/>
+                <param name="robot_frame" value="$(arg robot_frame_id)"/>
+            </node>
 
-        <node pkg="second_challenge_toshiki" type="local_path_planner_node" name="local_path_planner" output="screen">
-            <!-- topic name -->
-            <remap from="/roomba/control"      to="/$(arg roomba)/roomba/control"/>
-            <remap from="/local_goal"          to="/$(arg roomba)/local_goal"/>
-            <remap from="/local_map/obstacle"  to="/$(arg roomba)/local_map/obstacle"/>
-            <remap from="/predict_local_paths" to="/$(arg roomba)/predict_local_paths"/>
-            <remap from="/optimal_local_path"  to="/$(arg roomba)/optimal_local_path"/>
-            <!-- parameters -->
-            <rosparam command="load" file="$(arg local_path_planner_settings)"/>
-        </node>
+            <node pkg="second_challenge_toshiki" type="local_path_planner_node" name="local_path_planner" output="screen">
+                <!-- topic name -->
+                <remap from="/roomba/control"      to="/$(arg roomba)/roomba/control"/>
+                <remap from="/local_goal"          to="/$(arg roomba)/local_goal"/>
+                <remap from="/local_map/obstacle"  to="/$(arg roomba)/local_map/obstacle"/>
+                <remap from="/predict_local_paths" to="/$(arg roomba)/predict_local_paths"/>
+                <remap from="/optimal_local_path"  to="/$(arg roomba)/optimal_local_path"/>
+                <!-- parameters -->
+                <rosparam command="load" file="$(arg local_path_planner_settings)"/>
+                <param name="robot_frame" value="$(arg robot_frame_id)"/>
+            </node>
+        </group>
     </group>
 </launch>

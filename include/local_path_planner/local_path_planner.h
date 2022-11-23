@@ -101,6 +101,7 @@ private:
     double radius_margin2_;     // 半径の余白 [m]（減速時）
     double goal_tolerance_;     // 目標地点の許容誤差 [m]
     double search_range_;       // 評価関数distで探索する範囲 [m]
+    std::string robot_frame_;   // base_link
 
     // msgの受け取りフラグ
     bool flag_local_goal_ = false;

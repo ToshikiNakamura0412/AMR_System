@@ -14,6 +14,7 @@ DWAPlanner::DWAPlanner():private_nh_("~")
 {
     // パラメータの取得
     private_nh_.getParam("is_visible", is_visible_);
+    private_nh_.getParam("robot_frame", robot_frame_);
     private_nh_.getParam("hz", hz_);
     private_nh_.getParam("max_vel1", max_vel1_);
     private_nh_.getParam("max_vel2", max_vel2_);
@@ -57,7 +58,7 @@ void DWAPlanner::local_goal_callback(const geometry_msgs::PointStamped::ConstPtr
     geometry_msgs::TransformStamped transform;
     try
     {
-        transform = tf_buffer_.lookupTransform("base_link", "map", ros::Time(0));
+        transform = tf_buffer_.lookupTransform(robot_frame_, "map", ros::Time(0));
         flag_local_goal_ = true;
     }
     catch(tf2::TransformException& ex)
@@ -361,11 +362,11 @@ void DWAPlanner::visualize_traj(const std::vector<State>& traj, const ros::Publi
 {
     nav_msgs::Path local_path;
     local_path.header.stamp = now;
-    local_path.header.frame_id = "base_link";
+    local_path.header.frame_id = robot_frame_;
 
     geometry_msgs::PoseStamped pose;
     pose.header.stamp = now;
-    pose.header.frame_id = "base_link";
+    pose.header.frame_id = robot_frame_;
 
     for(const auto& state : traj)
     {
