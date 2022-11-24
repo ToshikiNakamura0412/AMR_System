@@ -24,12 +24,12 @@ max_dyawrate: 1000.0 # [rad/s^2]
 
 # 速度解像度
 vel_reso: 0.05    # [m/s]
-yawrate_reso: 0.1 # [rad/s]
+yawrate_reso: 0.02 # [rad/s]
 
 # 時間 [s]
 dt: 0.1
 predict_time1: 2.0
-predict_time2: 3.0
+predict_time2: 6.0
 
 # 機体サイズ(半径) [m]
 roomba_radius: 0.25

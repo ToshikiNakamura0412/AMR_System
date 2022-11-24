@@ -30,18 +30,18 @@
 
 
     <!-- launch devices -->
-    <!-- <group ns="$(arg roomba)"> -->
-    <!--     <include file="$(find multi_robots)/launch/launch_devices.launch"> -->
-    <!--         <arg name="roomba" default="$(arg roomba)"/> -->
-    <!--     </include> -->
-    <!--     <include file="$(find theta_s_ros)/launch/run_theta_s.launch"/> -->
-    <!-- </group> -->
+    <group ns="$(arg roomba)">
+        <include file="$(find multi_robots)/launch/launch_devices.launch">
+            <arg name="roomba" default="$(arg roomba)"/>
+        </include>
+        <include file="$(find theta_s_ros)/launch/run_theta_s.launch"/>
+    </group>
     <!-- rviz -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_settings)"/>
     <!-- rosbag -->
-    <!-- <include file="$(find second_challenge_toshiki)/launch/bag_record.launch"> -->
-    <!--     <arg name="roomba" default="$(arg roomba)"/> -->
-    <!-- </include> -->
+    <include file="$(find second_challenge_toshiki)/launch/bag_record.launch">
+        <arg name="roomba" default="$(arg roomba)"/>
+    </include>
 
 
     <!-- launch navigation -->
