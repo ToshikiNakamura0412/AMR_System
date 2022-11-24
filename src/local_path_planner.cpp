@@ -153,8 +153,12 @@ std::vector<double> DWAPlanner::calc_final_input()
             //     continue;
 
             const std::vector<State> trajectory = calc_traj(velocity, yawrate); // 予測軌跡の生成
-            const double score = calc_evaluation(trajectory); // 予測軌跡に対する評価値の計算
+            // const double score = calc_evaluation(trajectory); // 予測軌跡に対する評価値の計算
+            double score = calc_evaluation(trajectory); // 予測軌跡に対する評価値の計算
             trajectories.push_back(trajectory);
+
+            if(velocity<vel_reso_*4.0 and abs(yawrate)<1.0)
+                score = -1e6;
 
             // 最大値の更新
             if(max_score < score)
