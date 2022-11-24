@@ -13,7 +13,8 @@ max_vel2: 0.3             # [m/s]（減速時）
 avoid_thres_vel: 0.25     # [m/s]（回避中か判断する閾値）
 min_vel: 0.0              # [m/s]
 max_yawrate1: 1.0         # [rad/s]（平常時）
-max_yawrate2: 0.6         # [rad/s]（減速時）
+# max_yawrate2: 0.6         # [rad/s]（減速時）
+max_yawrate2: 0.55        # [rad/s]（減速時）
 turn_thres_yawrate: 0.25  # [rad/s]（旋回中か判断する閾値）
 mode_log_time: 5.0
 
@@ -28,10 +29,10 @@ yawrate_reso: 0.1 # [rad/s]
 # 時間 [s]
 dt: 0.1
 predict_time1: 2.0
-predict_time2: 2.0
+predict_time2: 3.0
 
 # 機体サイズ(半径) [m]
-roomba_radius: 0.17
+roomba_radius: 0.25
 radius_margin1: 0.1  #（平常時）
 radius_margin2: 0.04 #（減速時）
 
