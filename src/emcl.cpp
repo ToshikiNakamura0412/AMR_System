@@ -113,7 +113,7 @@ void EMCL::process()
 void EMCL::initialize()
 {
     // 推定位置の初期化
-    estimated_pose_.set(inti_x_, inti_y_, init_yaw_);
+    estimated_pose_.set(init_x_, init_y_, init_yaw_);
 
     Particle particle;
 
