@@ -55,7 +55,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: false
       Name: Raw Map
-      Topic: /roomba1/map
+      Topic: /map
       Unreliable: false
       Use Timestamp: false
       Value: false
@@ -65,7 +65,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: true
       Name: Updated Map
-      Topic: /roomba1/map/updated_map
+      Topic: /map/updated_map
       Unreliable: false
       Use Timestamp: false
       Value: true
@@ -90,7 +90,7 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /roomba1/global_path
+      Topic: /global_path
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -101,7 +101,7 @@ Visualization Manager:
       Name: Current Node
       Queue Size: 10
       Radius: 0.20000000298023224
-      Topic: /roomba1/current_node
+      Topic: /current_node
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -125,7 +125,7 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /roomba1/current_path
+      Topic: /current_path
       Unreliable: false
       Value: true
   Enabled: true
