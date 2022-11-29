@@ -3,7 +3,8 @@ Panels:
     Help Height: 168
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
+      Expanded:
+        - /Predict Local Paths1
       Splitter Ratio: 0.5
     Tree Height: 610
   - Class: rviz/Selection
@@ -169,7 +170,7 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Alpha: 1
-      Buffer Length: 20
+      Buffer Length: 40
       Class: rviz/Path
       Color: 66; 142; 207
       Enabled: true
