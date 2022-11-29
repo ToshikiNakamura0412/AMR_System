@@ -7,3 +7,5 @@ robot_frame: "base_link" # frame_id
 # [0] < angle < [1], [2] < angle
 # [num] -> num:index
 ignore_angle_range_list: [rad(1.5*pi/16.0), rad(5.0*pi/16.0), rad(10.0*pi/16.0)]
+# --- はずれ値対策 ---
+ignore_dist: 0.01

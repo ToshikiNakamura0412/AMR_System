@@ -7,6 +7,7 @@ ObstacleDetector::ObstacleDetector():private_nh_("~")
     private_nh_.getParam("hz", hz_);
     private_nh_.getParam("laser_step", laser_step_);
     private_nh_.getParam("robot_frame", robot_frame_);
+    private_nh_.getParam("ignore_dist", ignore_dist_);
     private_nh_.getParam("ignore_angle_range_list", ignore_angle_range_list_);
 
     // frame idの設定
@@ -49,9 +50,19 @@ void ObstacleDetector::scan_obstacle()
     // 障害物検知
     for(int i=0; i<laser_.ranges.size(); i+=laser_step_)
     {
-        // レーザ値の距離と角度の算出
-        const double dist  = laser_.ranges[i];
+        // 角度とレーザ値の距離の算出
         const double angle = i * laser_.angle_increment + laser_.angle_min;
+        double dist  = laser_.ranges[i];
+        // はずれ値対策
+        if(dist <= ignore_dist_)
+        {
+            int search_index = i;
+            while(dist<=ignore_dist_ and search_index<laser_.ranges.size())
+                dist = laser_.ranges[search_index++];
+            search_index = i;
+            while(dist<=ignore_dist_ and 0<=search_index)
+                dist = laser_.ranges[search_index--];
+        }
 
         // 柱と被るレーザ値のスキップ
         if(is_ignore_angle(angle)) continue;
