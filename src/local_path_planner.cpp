@@ -28,6 +28,8 @@ DWAPlanner::DWAPlanner():private_nh_("~")
     private_nh_.getParam("max_dyawrate", max_dyawrate_);
     private_nh_.getParam("vel_reso", vel_reso_);
     private_nh_.getParam("yawrate_reso", yawrate_reso_);
+    private_nh_.getParam("stop_vel_th", stop_vel_th_);
+    private_nh_.getParam("stop_yawrate_th", stop_yawrate_th_);
     private_nh_.getParam("dt", dt_);
     private_nh_.getParam("predict_time1", predict_time1_);
     private_nh_.getParam("predict_time2", predict_time2_);
@@ -157,7 +159,7 @@ std::vector<double> DWAPlanner::calc_final_input()
             double score = calc_evaluation(trajectory); // 予測軌跡に対する評価値の計算
             trajectories.push_back(trajectory);
 
-            if(velocity<0.2 and abs(yawrate)<1.0)
+            if(velocity<stop_vel_th_ and abs(yawrate)<stop_yawrate_th_)
                 score = -1e6;
 
             // 最大値の更新

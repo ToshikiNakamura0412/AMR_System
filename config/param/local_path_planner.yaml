@@ -26,6 +26,10 @@ max_dyawrate: 1000.0 # [rad/s^2]
 vel_reso: 0.05    # [m/s]
 yawrate_reso: 0.02 # [rad/s]
 
+# 停止状態か判断する閾値
+stop_vel_th: 0.2
+stop_yawrate_th: 1.0
+
 # 時間 [s]
 dt: 0.1
 predict_time1: 2.0

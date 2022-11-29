@@ -91,6 +91,8 @@ private:
     double max_dyawrate_;       // 最高旋回加速度 [rad/s^2]
     double vel_reso_;           // 並進速度解像度 [m/s]
     double yawrate_reso_;       // 旋回速度解像度 [rad/s]
+    double stop_vel_th_;        // 停止状態か判断する閾値 [m/s^2]
+    double stop_yawrate_th_;    // 停止状態か判断する閾値 [rad/s]
     double dt_;                 // 微小時間 [s]
     double predict_time_;       // 軌跡予測時間 [s]
     double predict_time1_;      // 軌跡予測時間 [s]
