@@ -21,7 +21,7 @@
     <arg name="map_settings" default="$(find second_challenge_toshiki)/map/map.yaml"/>
     <arg name="localizer_settings" default="$(find second_challenge_toshiki)/config/param/localizer.yaml"/>
     <arg name="obstacle_expander_settings" default="$(find second_challenge_toshiki)/config/param/obstacle_expander.yaml"/>
-    <arg name="global_path_planner_settings" default="$(find second_challenge_toshiki)/config/param/global_path_planner.yaml"/>
+    <arg name="global_path_planner_settings" default="$(find second_challenge_toshiki)/config/param/global_path_planner/$(arg roomba).yaml"/>
     <arg name="local_goal_creator_settings" default="$(find second_challenge_toshiki)/config/param/local_goal_creator.yaml"/>
     <arg name="obstacle_detector_settings" default="$(find second_challenge_toshiki)/config/param/obstacle_detector.yaml"/>
     <arg name="local_map_creator_settings" default="$(find second_challenge_toshiki)/config/param/local_map_creator.yaml"/>
