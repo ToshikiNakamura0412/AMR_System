@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<!--
+デバッグ用の出力あり
+
+===== Param =====
+以下のように設定すること
+- localizer
+    flag_broadcast: true
+    is_visible: true
+- local_path_planner
+    is_visible: true
+-->
+<launch>
+    <!-- roomba number -->
+    <arg name="roomba" default="roomba1"/>
+
+    <!-- frame id -->
+    <arg name="robot_frame_id" default="$(arg roomba)/base_link"/>
+
+    <!-- config file path -->
+    <arg name="map_settings" default="$(find second_challenge_toshiki)/map/map.yaml"/>
+    <arg name="localizer_settings" default="$(find second_challenge_toshiki)/config/param/localizer.yaml"/>
+    <arg name="obstacle_expander_settings" default="$(find second_challenge_toshiki)/config/param/obstacle_expander.yaml"/>
+    <arg name="global_path_planner_settings" default="$(find second_challenge_toshiki)/config/param/global_path_planner.yaml"/>
+    <arg name="local_goal_creator_settings" default="$(find second_challenge_toshiki)/config/param/local_goal_creator.yaml"/>
+    <arg name="obstacle_detector_settings" default="$(find second_challenge_toshiki)/config/param/obstacle_detector.yaml"/>
+    <arg name="local_map_creator_settings" default="$(find second_challenge_toshiki)/config/param/local_map_creator.yaml"/>
+    <arg name="local_path_planner_settings" default="$(find second_challenge_toshiki)/config/param/local_path_planner.yaml"/>
+
+    <!-- launch navigation -->
+    <group ns="$(arg roomba)">
+        <group ns="map">
+            <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_settings)" output="screen">
+                <!-- topic name -->
+                <remap from="/map" to="/$(arg roomba)/map/map"/>
+            </node>
+
+            <node pkg="second_challenge_toshiki" type="obstacle_expander_node" name="obstacle_expander" output="screen">
+                <!-- topic name -->
+                <remap from="/map"             to="/$(arg roomba)/map/map"/>
+                <remap from="/map/updated_map" to="/$(arg roomba)/map/updated_map"/>
+                <!-- parameters -->
+                <rosparam command="load" file="$(arg obstacle_expander_settings)"/>
+            </node>
+        </group>
+
+        <group ns="nav">
+            <node pkg="second_challenge_toshiki" type="global_path_planner_node" name="global_path_planner" output="screen">
+                <!-- topic name -->
+                <remap from="/map/updated_map" to="/$(arg roomba)/map/updated_map"/>
+                <remap from="/global_path"     to="/$(arg roomba)/global_path"/>
+                <!-- parameters -->
+                <rosparam command="load" file="$(arg global_path_planner_settings)"/>
+            </node>
+
+            <node pkg="second_challenge_toshiki" type="local_goal_creator_node" name="local_goal_creator" output="screen">
+                <!-- topic name -->
+                <remap from="/global_path"    to="/$(arg roomba)/global_path"/>
+                <remap from="/local_goal"     to="/$(arg roomba)/local_goal"/>
+                <remap from="/estimated_pose" to="/$(arg roomba)/estimated_pose"/>
+                <!-- parameters -->
+                <rosparam command="load" file="$(arg local_goal_creator_settings)"/>
+            </node>
+
+            <node pkg="second_challenge_toshiki" type="localizer_node" name="localizer" output="screen">
+                <!-- topic name -->
+                <remap from="/map"            to="/$(arg roomba)/map/map"/>
+                <remap from="/estimated_pose" to="/$(arg roomba)/estimated_pose"/>
+                <remap from="/particle_cloud" to="/$(arg roomba)/particle_cloud"/>
+                <remap from="/roomba/odometry" to="/$(arg roomba)/roomba/odometry"/>
+                <remap from="/scan" to="/$(arg roomba)/scan"/>
+                <!-- parameters -->
+                <rosparam command="load" file="$(arg localizer_settings)"/>
+            </node>
+
+            <node pkg="second_challenge_toshiki" type="obstacle_detector_node" name="obstacle_detector" output="screen">
+                <!-- topic name -->
+                <remap from="/local_map/obstacle" to="/$(arg roomba)/local_map/obstacle"/>
+                <remap from="/scan"               to="/$(arg roomba)/scan"/>
+                <!-- parameters -->
+                <rosparam command="load" file="$(arg obstacle_detector_settings)"/>
+                <param name="robot_frame" value="$(arg robot_frame_id)"/>
+            </node>
+
+            <node pkg="second_challenge_toshiki" type="local_path_planner_node" name="local_path_planner" output="screen">
+                <!-- topic name -->
+                <remap from="/roomba/control"      to="/$(arg roomba)/roomba/control"/>
+                <remap from="/local_goal"          to="/$(arg roomba)/local_goal"/>
+                <remap from="/local_map/obstacle"  to="/$(arg roomba)/local_map/obstacle"/>
+                <remap from="/predict_local_paths" to="/$(arg roomba)/predict_local_paths"/>
+                <remap from="/optimal_local_path"  to="/$(arg roomba)/optimal_local_path"/>
+                <!-- parameters -->
+                <rosparam command="load" file="$(arg local_path_planner_settings)"/>
+                <param name="robot_frame" value="$(arg robot_frame_id)"/>
+            </node>
+        </group>
+    </group>
+</launch>

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- roomba number -->
+    <arg name="roomba" default="roomba1"/>
+
+    <!-- launch devices -->
+    <group ns="$(arg roomba)">
+        <include file="$(find multi_robots)/launch/launch_devices.launch">
+            <arg name="roomba" default="$(arg roomba)"/>
+        </include>
+        <include file="$(find theta_s_ros)/launch/run_theta_s.launch"/>
+    </group>
+</launch>
