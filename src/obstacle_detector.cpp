@@ -53,15 +53,16 @@ void ObstacleDetector::scan_obstacle()
         // 角度とレーザ値の距離の算出
         const double angle = i * laser_.angle_increment + laser_.angle_min;
         double dist  = laser_.ranges[i];
+
         // はずれ値対策
-        if(dist <= ignore_dist_)
+        int index_incr = i;
+        int index_decr = i;
+        while(dist <= ignore_dist_)
         {
-            int search_index = i;
-            while(dist<=ignore_dist_ and search_index<laser_.ranges.size())
-                dist = laser_.ranges[search_index++];
-            search_index = i;
-            while(dist<=ignore_dist_ and 0<=search_index)
-                dist = laser_.ranges[search_index--];
+            if(index_incr++ < laser_.ranges.size())
+                dist = laser_.ranges[index_incr];
+            if(dist<=ignore_dist_ and 0<=index_decr--)
+                dist = laser_.ranges[index_decr];
         }
 
         // 柱と被るレーザ値のスキップ

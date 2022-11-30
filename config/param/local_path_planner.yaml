@@ -13,7 +13,6 @@ max_vel2: 0.3             # [m/s]（減速時）
 avoid_thres_vel: 0.25     # [m/s]（回避中か判断する閾値）
 min_vel: 0.0              # [m/s]
 max_yawrate1: 1.0         # [rad/s]（平常時）
-# max_yawrate2: 0.6         # [rad/s]（減速時）
 max_yawrate2: 0.55        # [rad/s]（減速時）
 turn_thres_yawrate: 0.25  # [rad/s]（旋回中か判断する閾値）
 mode_log_time: 5.0
@@ -27,8 +26,8 @@ vel_reso: 0.05    # [m/s]
 yawrate_reso: 0.02 # [rad/s]
 
 # 停止状態か判断する閾値
-stop_vel_th: 0.2
-stop_yawrate_th: 1.0
+stop_vel_th: 0.1
+stop_yawrate_th: 0.3
 
 # 時間 [s]
 dt: 0.1

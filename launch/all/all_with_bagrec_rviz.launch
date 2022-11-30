@@ -15,17 +15,21 @@
     <arg name="roomba" default="roomba1"/>
 
     <!-- launch devices -->
-    <include file="$(find second_challenge_toshiki)/launch/launch_devices.launch">
+    <!-- <include file="$(find second_challenge_toshiki)/launch/launch_devices.launch"> -->
+    <!--     <arg name="roomba" default="$(arg roomba)"/> -->
+    <!-- </include> -->
+
+    <!-- launch navigation -->
+    <include file="$(find second_challenge_toshiki)/launch/all/all.launch">
         <arg name="roomba" default="$(arg roomba)"/>
     </include>
+
+    <!-- rviz -->
+    <arg name="rviz_settings" default="$(find second_challenge_toshiki)/config/rviz/multi/$(arg roomba).rviz"/>
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_settings)"/>
 
     <!-- rosbag -->
     <include file="$(find second_challenge_toshiki)/launch/bag_record.launch">
-        <arg name="roomba" default="$(arg roomba)"/>
-    </include>
-
-    <!-- launch navigation -->
-    <include file="$(find second_challenge_toshiki)/launch/all_no_device.launch">
         <arg name="roomba" default="$(arg roomba)"/>
     </include>
 </launch>

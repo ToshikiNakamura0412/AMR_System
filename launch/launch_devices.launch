@@ -10,4 +10,8 @@
         </include>
         <include file="$(find theta_s_ros)/launch/run_theta_s.launch"/>
     </group>
+
+    <!-- rviz -->
+    <arg name="rviz_settings" default="$(find second_challenge_toshiki)/config/rviz/multi/check_cam/$(arg roomba).rviz"/>
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_settings)"/>
 </launch>
