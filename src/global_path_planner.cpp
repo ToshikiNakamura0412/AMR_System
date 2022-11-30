@@ -9,7 +9,7 @@ AStarPlanner::AStarPlanner():private_nh_("~")
 {
     // パラメータの取得
     private_nh_.getParam("hz", hz_);
-    private_nh_.getParam("is_visible", is_visible_);
+    private_nh_.getParam("flag_slow_test", flag_slow_test_);
     private_nh_.getParam("sleep_time", sleep_time_);
     private_nh_.getParam("way_points_x", way_points_x_);
     private_nh_.getParam("way_points_y", way_points_y_);
@@ -26,7 +26,7 @@ AStarPlanner::AStarPlanner():private_nh_("~")
 
     // Publisher
     pub_global_path_  = nh_.advertise<nav_msgs::Path>("/global_path", 1);
-    if(is_visible_)
+    if(flag_slow_test_)
     {
         pub_current_path_ = nh_.advertise<nav_msgs::Path>("/current_path", 1);
         pub_node_point_   = nh_.advertise<geometry_msgs::PointStamped>("/current_node", 1);
@@ -386,7 +386,7 @@ std::tuple<int, int> AStarPlanner::search_node(const Node target_node)
 // [デバッグ用] ノードをRvizに表示
 void  AStarPlanner::show_node_point(const Node node)
 {
-    if(is_visible_)
+    if(flag_slow_test_)
     {
         current_node_.point.x = node.index_x * map_.info.resolution + map_.info.origin.position.x;
         current_node_.point.y = node.index_y * map_.info.resolution + map_.info.origin.position.y;
@@ -398,7 +398,7 @@ void  AStarPlanner::show_node_point(const Node node)
 // [デバッグ用] パスをRvizに表示
 void  AStarPlanner::show_path(nav_msgs::Path& current_path)
 {
-    if(is_visible_)
+    if(flag_slow_test_)
     {
         current_path.header.frame_id = "map";
         pub_current_path_.publish(current_path);
