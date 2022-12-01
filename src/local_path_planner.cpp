@@ -112,9 +112,14 @@ bool DWAPlanner::can_move()
     const double dist_to_goal = hypot(dx, dy); // 現在位置からゴールまでの距離
 
     if(dist_to_goal > goal_tolerance_)
+    {
         return true;
+    }
     else
-        exit(0); // ノードの終了
+    {
+        roomba_control(0.0, 0.0);
+        exit(0); // ノード終了
+    }
 }
 
 // Roombaの制御入力を行う
