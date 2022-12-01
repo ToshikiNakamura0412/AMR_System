@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- roomba number -->
+    <arg name="roomba" default="roomba1"/>
+
+    <!-- topic name -->
+    <arg name="depth_topic" default="/$(arg roomba)/camera/aligned_depth_to_color/image_raw/compressed"/>
+    <arg name="color_topic" default="/$(arg roomba)/camera/color/image_rect_color/compressed"/>
+    <arg name="theta_topic" default="/$(arg roomba)/theta_s/image_raw/compressed"/>
+
+    <!-- launch node -->
+    <node pkg="second_challenge_toshiki" type="image_hz_checker_node" name="depth_hz" output="screen">
+        <remap from="/topic_name" to="$(arg depth_topic)"/>
+    </node>
+    <node pkg="second_challenge_toshiki" type="image_hz_checker_node" name="color_hz" output="screen">
+        <remap from="/topic_name" to="$(arg color_topic)"/>
+    </node>
+    <node pkg="second_challenge_toshiki" type="image_hz_checker_node" name="theta_hz" output="screen">
+        <remap from="/topic_name" to="$(arg theta_topic)"/>
+    </node>
+</launch>
