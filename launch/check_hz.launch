@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- roomba number -->
+    <arg name="roomba" default="roomba1"/>
+
+    <!-- topic name -->
+    <arg name="depth_topic" default="/$(arg roomba)/camera/aligned_depth_to_color/image_raw/compressed"/>
+    <arg name="image_topic" default="/$(arg roomba)/camera/color/image_rect_color/compressed"/>
+    <arg name="theta_topic" default="/$(arg roomba)/theta_s/image_raw/compressed"/>
+
+    <!-- launch node -->
+    <node pkg="rostopic" type="rostopic" name="depth_hz" args="hz $(arg depth_topic)" output="screen"/>
+    <node pkg="rostopic" type="rostopic" name="image_hz" args="hz $(arg image_topic)" output="screen"/>
+    <node pkg="rostopic" type="rostopic" name="theta_hz" args="hz $(arg theta_topic)" output="screen"/>
+
+    <!-- <group ns="depth"> -->
+    <!--     <node pkg="rostopic" type="rostopic" name="depth_hz" args="hz $(arg depth_topic)" output="screen"/> -->
+    <!-- </group> -->
+    <!-- <group ns="image"> -->
+    <!--     <node pkg="rostopic" type="rostopic" name="image_hz" args="hz $(arg image_topic)" output="screen"/> -->
+    <!-- </group> -->
+    <!-- <group ns="theta"> -->
+    <!--     <node pkg="rostopic" type="rostopic" name="theta_hz" args="hz $(arg theta_topic)" output="screen"/> -->
+    <!-- </group> -->
+</launch>
