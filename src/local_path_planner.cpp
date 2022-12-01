@@ -114,7 +114,7 @@ bool DWAPlanner::can_move()
     if(dist_to_goal > goal_tolerance_)
         return true;
     else
-        return false;
+        exit(0); // ノードの終了
 }
 
 // Roombaの制御入力を行う
