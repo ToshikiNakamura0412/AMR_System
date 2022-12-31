@@ -4,7 +4,8 @@
     <arg name="rviz_settings" default="$(find second_challenge_toshiki)/config/rviz/global_path_planner.rviz"/>
     <arg name="map_settings" default="$(find second_challenge_toshiki)/map/map.yaml"/>
     <arg name="obstacle_expander_settings" default="$(find second_challenge_toshiki)/config/param/obstacle_expander.yaml"/>
-    <arg name="global_path_planner_settings" default="$(find second_challenge_toshiki)/config/param/global_path_planner.yaml"/>
+    <arg name="config_file" default="global_path_planner"/>
+    <arg name="global_path_planner_settings" default="$(find second_challenge_toshiki)/config/param/global_path_planner/$(arg config_file).yaml"/>
 
     <!-- node launch -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_settings)"/>
