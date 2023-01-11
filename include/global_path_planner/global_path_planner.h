@@ -73,6 +73,7 @@ private:
     // ----- 変数 -----
     int    hz_;                        // ループ周波数 [Hz]
     bool   flag_slow_test_;            // 可視化フラグ(パス・ノード)
+    bool   flag_reverse_;              // way pointを逆にするか
     double sleep_time_;                // 次のpublishまでの時間 [s]
     Node start_node_;                  // スタートノード
     Node goal_node_;                   // ゴールノード

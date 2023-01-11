@@ -2,8 +2,9 @@
 hz: 10
 
 # デバッグ用
-is_visible: false  # 可視化フラグ(パス・ノード)
-sleep_time: 0.005 # 次のpublishまでの時間 [s]
+flag_slow_test: false # 可視化フラグ(パス・ノード)
+flag_reverse: false   # way pointを逆にするか
+sleep_time: 0.002     # 次のpublishまでの時間 [s]
 
 # 経由点 [m]
 way_points_x: [-4.5, 10.3, 11.9, 11.9, 11.1, -20.5, -21.5, -21.5, -20.5,  0.0]

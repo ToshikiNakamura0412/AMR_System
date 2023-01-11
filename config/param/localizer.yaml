@@ -2,6 +2,7 @@
 # フラグ
 flag_init_noise: true # 初期位置にノイズを加えるか
 flag_broadcast: true  # tf情報を含むbagファイルを使うときはfalse
+flag_reverse: false   # 初期姿勢を逆にするか
 is_visible: true      # パーティクルクラウドを表示（パブリッシュ）するか
 
 # 基本設定

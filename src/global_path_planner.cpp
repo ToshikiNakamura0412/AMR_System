@@ -10,6 +10,7 @@ AStarPlanner::AStarPlanner():private_nh_("~")
     // パラメータの取得
     private_nh_.getParam("hz", hz_);
     private_nh_.getParam("flag_slow_test", flag_slow_test_);
+    private_nh_.getParam("flag_reverse", flag_reverse_);
     private_nh_.getParam("sleep_time", sleep_time_);
     private_nh_.getParam("way_points_x", way_points_x_);
     private_nh_.getParam("way_points_y", way_points_y_);
@@ -44,7 +45,15 @@ void AStarPlanner::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 // 唯一，main文で実行する関数
 void AStarPlanner::process()
 {
-    ros::Rate loop_rate(hz_); // 制御周波数の設定
+    // 制御周波数の設定
+    ros::Rate loop_rate(hz_);
+
+    // way_pointsの設定
+    if(flag_reverse_)
+    {
+        reverse(way_points_x_.begin(), way_points_x_.end());
+        reverse(way_points_y_.begin(), way_points_y_.end());
+    }
 
     while(ros::ok())
     {

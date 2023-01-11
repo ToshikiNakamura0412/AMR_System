@@ -10,6 +10,7 @@ EMCL::EMCL():private_nh_("~"), engine_(seed_gen_())
     // パラメータの取得(EMCL)
     private_nh_.getParam("flag_init_noise", flag_init_noise_);
     private_nh_.getParam("flag_broadcast", flag_broadcast_);
+    private_nh_.getParam("flag_reverse", flag_reverse_);
     private_nh_.getParam("is_visible", is_visible_);
     private_nh_.getParam("hz", hz_);
     private_nh_.getParam("particle_num", particle_num_);
@@ -112,6 +113,8 @@ void EMCL::process()
 // パーティクル，推定位置の初期化
 void EMCL::initialize()
 {
+    if(flag_reverse_) init_yaw_ = normalize_angle(init_yaw_ + M_PI);
+
     // 推定位置の初期化
     estimated_pose_.set(init_x_, init_y_, init_yaw_);
 

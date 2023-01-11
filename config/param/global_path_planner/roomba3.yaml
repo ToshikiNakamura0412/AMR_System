@@ -1,15 +1,22 @@
 # ループ周期 [Hz]
 hz: 10
-
 # デバッグ用
 flag_slow_test: false # 可視化フラグ(パス・ノード)
-sleep_time: 0.005     # 次のpublishまでの時間 [s]
+flag_reverse: false   # way pointを逆にするか(init_yaw変更不要)
+sleep_time: 0.002     # 次のpublishまでの時間 [s]
 
-# 経由点 [m]
+
+# 経由点,初期位置・姿勢
+# - Plan1
 way_points_x: [-9.0, 10.5, 11.9, 11.9, 11.0, -20.0, -21.5, -21.5, -20.0, 9.0]
 way_points_y: [ 7.1,  7.1,  5.5,  1.0,  0.0,   0.0,   0.7,   5.8,   7.1, 7.1]
-
-# 初期位置・姿勢
-init_x: -6.0  # [m]
+init_x: -9.0  # [m]
 init_y:  7.1  # [m]
 init_yaw: 0.0 # [rad]
+
+# - Plan2
+# way_points_x: [ 0.0, -20.0, -21.5, -21.5, -20.0, 11.0, 11.9, 11.9, 10.5, -19.0]
+# way_points_y: [ 7.1,   7.1,  5.8,   -0.2,   0.0,  0.0,  0.7,  5.5,  7.1,   7.1]
+# init_x: 0.0    # [m]
+# init_y: 7.1    # [m]
+# init_yaw: 3.14 # [rad]

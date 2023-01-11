@@ -87,14 +87,15 @@ private:
     std::vector<double> ignore_angle_range_list_; // 柱に関する角度範囲の配列 [rad]
 
     // msg受け取りフラグ
-    bool flag_map_   = false;
-    bool flag_odom_  = false;
-    bool flag_laser_ = false;
+    bool flag_map_     = false;
+    bool flag_odom_    = false;
+    bool flag_laser_   = false;
 
     // その他のフラグ
     bool flag_move_ = false; // 機体が動いたか判断用
     bool flag_init_noise_;   // 初期位置にノイズを加えるか
     bool flag_broadcast_;    // tf broadcastをするか
+    bool flag_reverse_;      // 初期姿勢を逆にするか
     bool is_visible_;        // パーティクルクラウドをパブリッシングするか
 
     // OdomModel関連
