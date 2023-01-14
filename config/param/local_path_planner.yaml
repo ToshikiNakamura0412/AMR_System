@@ -9,7 +9,8 @@ robot_frame: "base_link"
 
 # 速度制限
 max_vel1: 0.35            # [m/s]（平常時）
-max_vel2: 0.3             # [m/s]（減速時）
+# max_vel2: 0.3             # [m/s]（減速時）
+max_vel2: 0.2             # [m/s]（減速時）
 avoid_thres_vel: 0.25     # [m/s]（回避中か判断する閾値）
 min_vel: 0.0              # [m/s]
 max_yawrate1: 1.0         # [rad/s]（平常時）

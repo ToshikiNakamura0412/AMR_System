@@ -2,14 +2,34 @@
 <launch>
     <!-- roomba number -->
     <arg name="roomba" default="roomba1"/>
+    <arg name="external_manager" default="false" />
+    <arg name="manager" default="devices_manager" />
 
     <!-- launch devices -->
+    <node pkg="joy" type="joy_node" name="joy"/>
+    <node pkg="roomba_teleop_meiji" type="electric_joystick_drive" name="joystick_drive"/>
+    <!-- roomba -->
+    <arg name="roomba_usb_port" default="/dev/roomba" />
+    <node name="roomba_500driver_meiji" pkg="roomba_500driver_meiji" type="main500" >
+        <param name="USB_PORT" value="$(arg roomba_usb_port)" />
+        <param name="ROBOT_FRAME" value="$(arg roomba)/base_link" />
+        <param name="ODOM_FRAME" value="$(arg roomba)/odom" />
+        <remap from="/roomba/control" to="roomba/control" />
+        <remap from="/roomba/states" to="roomba/states" />
+        <remap from="/roomba/odometry" to="roomba/odometry" />
+    </node>
+
+
     <group ns="$(arg roomba)">
-        <node pkg="joy" type="joy_node" name="joy"/>
-        <node pkg="roomba_teleop_meiji" type="electric_joystick_drive" name="joystick_drive"/>
-        <include file="$(find multi_robots)/launch/launch_devices.launch">
-            <arg name="roomba" default="$(arg roomba)"/>
+        <!-- realsense d455 -->
+        <param name="camera/aligned_depth_to_color/image_raw/compressed/format" value="png" />
+        <param name="camera/aligned_depth_to_color/image_raw/compressed/png_level" value="5" />
+        <include file="$(find multi_robots)/launch/rs_rgbd.launch">
+            <arg name="external_manager" value="$(arg external_manager)" />
+            <arg name="manager" value="$(arg manager)" />
+            <arg name="tf_prefix" value="$(arg roomba)/camera" />
+            <arg name="filters" value="disparity,temporal" />
+            <arg name="initial_reset" value="true" />
         </include>
-        <include file="$(find theta_s_ros)/launch/run_theta_s.launch"/>
     </group>
 </launch>
