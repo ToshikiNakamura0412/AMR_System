@@ -13,19 +13,21 @@
 <launch>
     <!-- roomba number -->
     <arg name="roomba" default="roomba1"/>
+    <arg name="plan" default="1"/>
 
     <!-- frame id -->
     <arg name="robot_frame_id" default="$(arg roomba)/base_link"/>
 
     <!-- config file path -->
-    <arg name="map_settings"                 default="$(find second_challenge_toshiki)/map/map.yaml"/>
-    <arg name="localizer_settings"           default="$(find second_challenge_toshiki)/config/param/localizer.yaml"/>
-    <arg name="obstacle_expander_settings"   default="$(find second_challenge_toshiki)/config/param/obstacle_expander.yaml"/>
-    <arg name="global_path_planner_settings" default="$(find second_challenge_toshiki)/config/param/global_path_planner/$(arg roomba).yaml"/>
-    <arg name="local_goal_creator_settings"  default="$(find second_challenge_toshiki)/config/param/local_goal_creator.yaml"/>
-    <arg name="obstacle_detector_settings"   default="$(find second_challenge_toshiki)/config/param/obstacle_detector.yaml"/>
-    <arg name="local_map_creator_settings"   default="$(find second_challenge_toshiki)/config/param/local_map_creator.yaml"/>
-    <arg name="local_path_planner_settings"  default="$(find second_challenge_toshiki)/config/param/local_path_planner.yaml"/>
+    <arg name="map_settings"                        default="$(find second_challenge_toshiki)/map/map.yaml"/>
+    <arg name="localizer_settings"                  default="$(find second_challenge_toshiki)/config/param/localizer.yaml"/>
+    <arg name="obstacle_expander_settings"          default="$(find second_challenge_toshiki)/config/param/obstacle_expander.yaml"/>
+    <arg name="global_path_planner_common_settings" default="$(find second_challenge_toshiki)/config/param/global_path_planner/common.yaml"/>
+    <arg name="global_path_planner_main_settings"   default="$(find second_challenge_toshiki)/config/param/global_path_planner/plan$(arg plan)/$(arg roomba).yaml"/>
+    <arg name="local_goal_creator_settings"         default="$(find second_challenge_toshiki)/config/param/local_goal_creator.yaml"/>
+    <arg name="obstacle_detector_settings"          default="$(find second_challenge_toshiki)/config/param/obstacle_detector.yaml"/>
+    <arg name="local_map_creator_settings"          default="$(find second_challenge_toshiki)/config/param/local_map_creator.yaml"/>
+    <arg name="local_path_planner_settings"         default="$(find second_challenge_toshiki)/config/param/local_path_planner.yaml"/>
 
     <!-- launch navigation -->
     <group ns="$(arg roomba)">
@@ -50,7 +52,8 @@
                 <remap from="/map/updated_map" to="/$(arg roomba)/map/updated_map"/>
                 <remap from="/global_path"     to="/$(arg roomba)/global_path"/>
                 <!-- parameters -->
-                <rosparam command="load" file="$(arg global_path_planner_settings)"/>
+                <rosparam command="load" file="$(arg global_path_planner_common_settings)"/>
+                <rosparam command="load" file="$(arg global_path_planner_main_settings)"/>
             </node>
 
             <node pkg="second_challenge_toshiki" type="local_goal_creator_node" name="local_goal_creator" output="screen">
@@ -71,7 +74,7 @@
                 <remap from="/scan" to="/$(arg roomba)/scan"/>
                 <!-- parameters -->
                 <rosparam command="load" file="$(arg localizer_settings)"/>
-                <rosparam command="load" file="$(arg global_path_planner_settings)"/>
+                <rosparam command="load" file="$(arg global_path_planner_main_settings)"/>
             </node>
 
             <node pkg="second_challenge_toshiki" type="obstacle_detector_node" name="obstacle_detector" output="screen">
