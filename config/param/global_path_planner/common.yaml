@@ -2,7 +2,7 @@
 hz: 10
 
 # デバッグ用
-# flag_slow_test: false # 可視化フラグ(パス・ノード)
-flag_slow_test: true # 可視化フラグ(パス・ノード)
+flag_slow_test: false # 可視化フラグ(パス・ノード)
+# flag_slow_test: true # 可視化フラグ(パス・ノード)
 flag_reverse: false   # way pointを逆にするか
 sleep_time: 0.001     # 次のpublishまでの時間 [s]
