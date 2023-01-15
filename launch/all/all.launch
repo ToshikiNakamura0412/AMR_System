@@ -13,6 +13,7 @@
 <launch>
     <!-- roomba number -->
     <arg name="roomba" default="roomba1"/>
+    <!-- plan number -->
     <arg name="plan" default="1"/>
 
     <!-- frame id -->

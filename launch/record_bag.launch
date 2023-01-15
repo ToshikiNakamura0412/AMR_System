@@ -1,7 +1,11 @@
 <?xml version="1.0"?>
 <launch>
+    <!-- roomba number -->
     <arg name="roomba" default="roomba1"/>
-    <node pkg="rosbag" type="record" name="rosbag_record" args="record -o /home/amsl/bagfiles/nakamura/$(arg roomba).bag
+    <!-- plan number -->
+    <arg name="plan" default="1"/>
+
+    <node pkg="rosbag" type="record" name="rosbag_record" args="record -o /home/amsl/bagfiles/nakamura/$(arg roomba)_plan$(arg plan).bag
         /$(arg roomba)/map/map
         /$(arg roomba)/estimated_pose
         /$(arg roomba)/particle_cloud
