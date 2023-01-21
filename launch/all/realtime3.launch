@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!--
+デバッグ用の出力あり
+
+===== Param =====
+以下のように設定すること
+- localizer
+    flag_broadcast: true
+    is_visible: true
+- local_path_planner
+    is_visible: true
+-->
+<launch>
+    <!-- roomba number -->
+    <arg name="roomba" default="roomba3"/>
+    <!-- plan number -->
+    <arg name="plan" default="2"/>
+
+    <!-- launch node -->
+    <include file="$(find second_challenge_toshiki)/launch/all/all.launch">
+        <arg name="roomba" default="$(arg roomba)"/>
+        <arg name="plan"   default="$(arg plan)"/>
+    </include>
+    <include file="$(find collaborative_vslam)/launch/init_ratio_nuc3.launch"/>
+
+
+    <!-- rosbag -->
+    <include file="$(find second_challenge_toshiki)/launch/record_bag.launch">
+        <arg name="roomba" default="$(arg roomba)"/>
+        <arg name="plan"   default="$(arg plan)"/>
+    </include>
+</launch>
