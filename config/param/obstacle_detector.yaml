@@ -1,6 +1,5 @@
 hz: 10                   # ループ周期 [Hz]
 laser_step: 3            # 何本ずつレーザを見るか(全1080本)
-robot_frame: "base_link" # frame_id
 
 # --- 柱に関する角度範囲の配列 [rad] ---
 # 以下が無視される

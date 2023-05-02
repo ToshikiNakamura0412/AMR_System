@@ -1,5 +1,8 @@
 # パスを可視化するかの設定用
-is_visible: false
+is_visible: true
+
+# 減速モードのみにするか
+is_slow_mode: true
 
 # 制御周波数 [Hz]
 hz: 10

@@ -29,7 +29,10 @@
     <node pkg="roomba_500driver_meiji" type="main500" name="roomba_500driver_meiji"/>
 
     <!-- LiDAR -->
+    <!-- USB -->
     <node pkg="urg_node" type="urg_node" name="urg_node" args="_serial_port:=/dev/ttyACM0"/>
+    <!-- LAN -->
+    <!-- <node pkg="urg_node" type="urg_node" name="urg_node" args="_ip_address:=192.168.1.222"/> -->
 
     <!-- node launch -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_settings)"/>
