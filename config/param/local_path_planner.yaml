@@ -1,5 +1,5 @@
 # [デバッグ用] 手元のPCで起動するか
-is_debug: true
+is_debug: false
 
 # パスを可視化するかの設定用
 is_visible: true
