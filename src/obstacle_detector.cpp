@@ -6,12 +6,11 @@ ObstacleDetector::ObstacleDetector():private_nh_("~")
     // パラメータの取得
     private_nh_.getParam("hz", hz_);
     private_nh_.getParam("laser_step", laser_step_);
-    private_nh_.getParam("robot_frame", robot_frame_);
     private_nh_.getParam("ignore_dist", ignore_dist_);
     private_nh_.getParam("ignore_angle_range_list", ignore_angle_range_list_);
 
     // frame idの設定
-    obs_poses_.header.frame_id = robot_frame_;
+    obs_poses_.header.frame_id = "base_link";
 
     // Subscriber
     sub_laser_ = nh_.subscribe("/scan", 1, &ObstacleDetector::laser_callback, this);
