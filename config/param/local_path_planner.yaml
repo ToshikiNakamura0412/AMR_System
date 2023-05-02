@@ -1,3 +1,6 @@
+# [デバッグ用] 手元のPCで起動するか
+is_debug: true
+
 # パスを可視化するかの設定用
 is_visible: true
 
@@ -28,16 +31,16 @@ yawrate_reso: 0.1 # [rad/s]
 # 時間 [s]
 dt: 0.1
 predict_time1: 4.0
-predict_time2: 3.5
+predict_time2: 3.0
 
 # 機体サイズ(半径) [m]
-roomba_radius: 0.17
+roomba_radius: 0.25
 radius_margin1: 0.1  #（平常時）
-radius_margin2: 0.04 #（減速時）
+radius_margin2: 0.08 #（減速時）
 
 # 重み定数 [-]
 weight_heading1: 0.85 #（平常時）
-weight_heading2: 0.2  #（減速時）
+weight_heading2: 0.7  #（減速時）
 weight_dist1: 1.5     #（平常時）
 weight_dist2: 0.8     #（減速時）
 weight_vel: 0.6
