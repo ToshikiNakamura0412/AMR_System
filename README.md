@@ -17,6 +17,9 @@ If you want to use this repository for a single robot, check out the `master` br
 | local_map_creator | Ray casting update |
 | local_path_planner | DWA: Dynamic Window Approach |
 
+## Dependencies
+- [Roomba](https://github.com/amslabtech/Roomba)
+
 ## Installation
 ```
 cd <YOUR_CATKIN_WS>/src
