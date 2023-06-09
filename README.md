@@ -24,7 +24,7 @@ git clone --depth=1 https://github.com/ToshikiNakamura0412/AMR_System.git
 catkin build amr_system
 ```
 
-# Run
+## Run
 ```
 roslaunch amr_system all.launch
 ```
