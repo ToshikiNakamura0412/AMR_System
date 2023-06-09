@@ -16,3 +16,15 @@ If you want to use this repository for multi-robot, check out the `multi-robots`
 | global_path_planner | A* search algorithm |
 | local_map_creator | Ray casting update |
 | local_path_planner | DWA: Dynamic Window Approach |
+
+## Installation
+```
+cd <YOUR_CATKIN_WS>/src
+git clone --depth=1 https://github.com/ToshikiNakamura0412/AMR_System.git
+catkin build amr_system
+```
+
+# Run
+```
+roslaunch amr_system all.launch
+```
