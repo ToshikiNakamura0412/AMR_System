@@ -13,7 +13,9 @@ speed         : 速度の総称(vel, yawrate)
 DWAPlanner::DWAPlanner():private_nh_("~")
 {
     // パラメータの取得
+    private_nh_.getParam("is_debug", is_debug_);
     private_nh_.getParam("is_visible", is_visible_);
+    private_nh_.getParam("is_slow_mode", is_slow_mode_);
     private_nh_.getParam("hz", hz_);
     private_nh_.getParam("max_vel1", max_vel1_);
     private_nh_.getParam("max_vel2", max_vel2_);
@@ -102,6 +104,7 @@ void DWAPlanner::process()
 // ゴールに着くまでTrueを返す
 bool DWAPlanner::can_move()
 {
+    if(is_debug_) return true;
     if(not (flag_local_goal_ and flag_obs_poses_)) return false; // msg受信済みか
 
     const double dx = local_goal_.point.x;
@@ -191,9 +194,16 @@ std::vector<double> DWAPlanner::calc_final_input()
 void DWAPlanner::change_mode()
 {
     if(abs(roomba_.yawrate)>turn_thres_yawrate_ or roomba_.velocity<avoid_thres_vel_)
+    {
         mode_log_.push_back(2.0); // 減速モード
+    }
     else
-        mode_log_.push_back(1.0);
+    {
+        if(is_slow_mode_)
+            mode_log_.push_back(2.0); // 減速モード
+        else
+            mode_log_.push_back(1.0);
+    }
 
     if(mode_log_.size() > hz_*mode_log_time_)
         mode_log_.erase(mode_log_.begin());

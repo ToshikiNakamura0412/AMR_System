@@ -1,4 +1,4 @@
-# second_challenge_toshiki
+# AMR(Autonomous Mobile Robot) System
 
 ## System
 <p align="center">

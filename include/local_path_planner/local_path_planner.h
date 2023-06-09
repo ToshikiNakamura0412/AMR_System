@@ -74,7 +74,9 @@ private:
 
 
     // ----- 変数 -----
+    bool   is_debug_;           // 手元のPCで起動するか
     bool   is_visible_;         // パスを可視化するかの設定用
+    bool   is_slow_mode_;       // 減速モードのみにするかの設定用
     int    hz_;                 // ループ周波数
     int    mode_;
     double max_vel_;            // 最高並進速度 [m/s]（計算用）

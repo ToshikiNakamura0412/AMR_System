@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>second_challenge_toshiki</name>
+  <name>amr_system</name>
   <version>0.0.0</version>
   <description>
     This package provides a navigation system for autonomous mobile robots.
@@ -9,7 +9,7 @@
   <maintainer email="techfortok120412@icloud.com">Toshiki Nakamura</maintainer>
   <license>TODO</license>
 
-  <url type="website">https://github.com/ToshikiNakamura0412/second_challenge_toshiki</url>
+  <url type="website">https://github.com/ToshikiNakamura0412/amr_system</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
