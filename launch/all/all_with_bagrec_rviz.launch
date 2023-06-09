@@ -17,12 +17,12 @@
     <arg name="plan" default="1"/>
 
     <!-- launch navigation -->
-    <include file="$(find second_challenge_toshiki)/launch/all/all_with_bagrec.launch">
+    <include file="$(find amr_system)/launch/all/all_with_bagrec.launch">
         <arg name="roomba" default="$(arg roomba)"/>
         <arg name="plan"   default="$(arg plan)"/>
     </include>
 
     <!-- rviz -->
-    <arg name="rviz_settings" default="$(find second_challenge_toshiki)/config/rviz/multi/$(arg roomba).rviz"/>
+    <arg name="rviz_settings" default="$(find amr_system)/config/rviz/multi/$(arg roomba).rviz"/>
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(arg rviz_settings)"/>
 </launch>

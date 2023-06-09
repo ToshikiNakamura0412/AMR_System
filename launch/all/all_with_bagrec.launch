@@ -17,13 +17,13 @@
     <arg name="plan" default="1"/>
 
     <!-- launch navigation -->
-    <include file="$(find second_challenge_toshiki)/launch/all/all.launch">
+    <include file="$(find amr_system)/launch/all/all.launch">
         <arg name="roomba" default="$(arg roomba)"/>
         <arg name="plan"   default="$(arg plan)"/>
     </include>
 
     <!-- rosbag -->
-    <include file="$(find second_challenge_toshiki)/launch/record_bag.launch">
+    <include file="$(find amr_system)/launch/record_bag.launch">
         <arg name="roomba" default="$(arg roomba)"/>
         <arg name="plan"   default="$(arg plan)"/>
     </include>

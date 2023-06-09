@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(second_challenge_toshiki)
+project(amr_system)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11 -O2 -g)
@@ -22,7 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
 ###################################
 catkin_package(
  INCLUDE_DIRS include
- LIBRARIES second_challenge_toshiki
+ LIBRARIES amr_system
 #  CATKIN_DEPENDS roscpp std_msgs
 #  DEPENDS system_lib
 )

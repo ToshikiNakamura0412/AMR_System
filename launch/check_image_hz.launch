@@ -9,15 +9,15 @@
     <arg name="theta_topic" default="/$(arg roomba)/theta_s/image_raw/compressed"/>
 
     <!-- launch node -->
-    <node pkg="second_challenge_toshiki" type="image_hz_checker_node" name="depth_hz" output="screen">
+    <node pkg="amr_system" type="image_hz_checker_node" name="depth_hz" output="screen">
         <remap from="/topic_name" to="$(arg depth_topic)"/>
         <param name="is_visible" value="true"/>
     </node>
-    <node pkg="second_challenge_toshiki" type="image_hz_checker_node" name="color_hz" output="screen">
+    <node pkg="amr_system" type="image_hz_checker_node" name="color_hz" output="screen">
         <remap from="/topic_name" to="$(arg color_topic)"/>
         <param name="is_visible" value="true"/>
     </node>
-    <node pkg="second_challenge_toshiki" type="image_hz_checker_node" name="theta_hz" output="screen">
+    <node pkg="amr_system" type="image_hz_checker_node" name="theta_hz" output="screen">
         <remap from="/topic_name" to="$(arg theta_topic)"/>
         <param name="is_visible" value="true"/>
     </node>
