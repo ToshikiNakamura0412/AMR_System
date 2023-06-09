@@ -1,5 +1,9 @@
 # AMR(Autonomous Mobile Robot) System
 
+This branch for multi-robot.
+
+If you want to use this repository for a single robot, check out the `master` branch.
+
 ## System
 <p align="center">
   <img src="https://user-images.githubusercontent.com/82020865/186935476-fbb8fae4-c243-412c-a0be-0c5dd2163d71.png" width="640px"/>
