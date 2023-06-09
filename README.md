@@ -26,5 +26,5 @@ catkin build amr_system
 
 ## Run
 ```
-roslaunch amr_system all.launch
+roslaunch amr_system all_with_rviz.launch
 ```
