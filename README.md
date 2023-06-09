@@ -27,7 +27,7 @@ git clone -b multi_robots --depth=1 https://github.com/ToshikiNakamura0412/AMR_S
 catkin build amr_system
 ```
 
-## Run
+## How to run
 ```
 roslaunch amr_system all_with_rviz.launch
 ```
